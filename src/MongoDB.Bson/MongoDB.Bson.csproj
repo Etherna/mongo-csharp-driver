@@ -30,15 +30,15 @@
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Version)'==''">
-    <Version>0.0.0-local</Version>
-  </PropertyGroup>
-
   <PropertyGroup>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GitVersion.MsBuild" Version="5.8.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" PrivateAssets="All" Version="1.0.0" />
   </ItemGroup>
 
