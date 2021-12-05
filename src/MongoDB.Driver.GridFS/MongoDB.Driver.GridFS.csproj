@@ -19,6 +19,7 @@
     <Copyright>Copyright © 2010-present MongoDB Inc.</Copyright>
     <Description>Official MongoDB supported driver for MongoDB GridFS implementation. See https://docs.mongodb.com/drivers/csharp/ for more details.</Description>
     <Authors>MongoDB Inc.</Authors>
+    <PackageId>Etherna.MongoDB.Driver.GridFS</PackageId>
     <PackageIcon>packageIcon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageDescription>GridFS Component of the Official MongoDB .NET Driver.</PackageDescription>
