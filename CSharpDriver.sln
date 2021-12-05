@@ -5,13 +5,13 @@ VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D2012971-32BB-4C5F-BFC4-30A9994AB152}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoDB.Bson", "src\MongoDB.Bson\MongoDB.Bson.csproj", "{9FCB42A5-3BC6-492B-8EA0-53EF32E9F8CD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Etherna.MongoDB.Bson", "src\MongoDB.Bson\Etherna.MongoDB.Bson.csproj", "{9FCB42A5-3BC6-492B-8EA0-53EF32E9F8CD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoDB.Driver.Core", "src\MongoDB.Driver.Core\MongoDB.Driver.Core.csproj", "{8AEB0131-9029-476A-B0B4-EEF3442C8706}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Etherna.MongoDB.Driver.Core", "src\MongoDB.Driver.Core\Etherna.MongoDB.Driver.Core.csproj", "{8AEB0131-9029-476A-B0B4-EEF3442C8706}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoDB.Driver.GridFS", "src\MongoDB.Driver.GridFS\MongoDB.Driver.GridFS.csproj", "{29FB1FD1-3BE0-4E30-BA8D-7964290CAEBA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Etherna.MongoDB.Driver.GridFS", "src\MongoDB.Driver.GridFS\Etherna.MongoDB.Driver.GridFS.csproj", "{29FB1FD1-3BE0-4E30-BA8D-7964290CAEBA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MongoDB.Driver", "src\MongoDB.Driver\MongoDB.Driver.csproj", "{756980B3-0DCF-42F0-A324-C386B1A3E9F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Etherna.MongoDB.Driver", "src\MongoDB.Driver\Etherna.MongoDB.Driver.csproj", "{756980B3-0DCF-42F0-A324-C386B1A3E9F4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B071AF36-EED4-4CFF-A006-ECDAD0A87F99}"
 	ProjectSection(SolutionItems) = preProject
