@@ -1,1 +1,11 @@
 next-version: 2.14.0
+tag-prefix: '(v|V|eth-v)'
+branches:
+  main:
+    regex: ^master$|^etherna/master$
+  etherna:
+    regex: ^etherna/v
+    mode: ContinuousDeployment
+    tag: eth
+    increment: None
+    source-branches: [ 'main' ]
