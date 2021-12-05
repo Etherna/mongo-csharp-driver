@@ -166,8 +166,8 @@
   <!--targets-->
   <ItemGroup>
     <!--Used for non-sdk projects-->
-    <!--Responsible for build/MongoDB.Driver.Core.targets-->
-    <Content Include="MongoDB.Driver.Core.targets">
+    <!--Responsible for build/Etherna.MongoDB.Driver.Core.targets-->
+    <Content Include="Etherna.MongoDB.Driver.Core.targets">
       <Pack>true</Pack>
       <PackagePath>build</PackagePath>
     </Content>
