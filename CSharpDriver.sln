@@ -22,6 +22,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		MongoDBTest.ruleset = MongoDBTest.ruleset
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{811D4F74-8DB9-4497-9053-5B78BB4013A4}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\myget-unstable-deploy.yml = .github\workflows\myget-unstable-deploy.yml
+		.github\workflows\nuget-stable-deploy.yml = .github\workflows\nuget-stable-deploy.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +59,7 @@ Global
 		{8AEB0131-9029-476A-B0B4-EEF3442C8706} = {D2012971-32BB-4C5F-BFC4-30A9994AB152}
 		{29FB1FD1-3BE0-4E30-BA8D-7964290CAEBA} = {D2012971-32BB-4C5F-BFC4-30A9994AB152}
 		{756980B3-0DCF-42F0-A324-C386B1A3E9F4} = {D2012971-32BB-4C5F-BFC4-30A9994AB152}
+		{811D4F74-8DB9-4497-9053-5B78BB4013A4} = {B071AF36-EED4-4CFF-A006-ECDAD0A87F99}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {24BEC44B-92B0-43AA-9B15-163459D0C098}
