@@ -15,9 +15,9 @@
 
 using System;
 using System.Security;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Authentication.Libgssapi
+namespace Etherna.MongoDB.Driver.Core.Authentication.Libgssapi
 {
     internal sealed class GssapiSecurityCredential : GssapiSafeHandle
     {

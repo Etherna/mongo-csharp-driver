@@ -20,14 +20,14 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Events;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.WireProtocol.Messages;
-using MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 
-namespace MongoDB.Driver.Core.ConnectionPools
+namespace Etherna.MongoDB.Driver.Core.ConnectionPools
 {
     internal sealed partial class ExclusiveConnectionPool
     {

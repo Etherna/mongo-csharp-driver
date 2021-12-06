@@ -16,17 +16,17 @@
 using System;
 using System.Security.Cryptography;
 using System.Text;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
 // Use our vendored version of Rfc2898DeriveBytes for .NET Standard 2.0
 // because this target does not support a version of Rfc2898DeriveBytes that allows to specify the hash algorithm
 #if NETSTANDARD2_0
-using Rfc2898DeriveBytes = MongoDB.Driver.Core.Authentication.Vendored.Rfc2898DeriveBytes;
+using Rfc2898DeriveBytes = Etherna.MongoDB.Driver.Core.Authentication.Vendored.Rfc2898DeriveBytes;
 #else
 using Rfc2898DeriveBytes = System.Security.Cryptography.Rfc2898DeriveBytes;
 #endif
 
-namespace MongoDB.Driver.Core.Authentication
+namespace Etherna.MongoDB.Driver.Core.Authentication
 {
     /// <summary>
     /// A SCRAM-SHA1 SASL authenticator.

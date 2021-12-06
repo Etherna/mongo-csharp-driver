@@ -16,7 +16,7 @@
 
 using System;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents an element name validator that does no validation.

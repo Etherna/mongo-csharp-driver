@@ -14,9 +14,9 @@
 */
 
 using System.Linq.Expressions;
-using MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors
 {
     internal sealed class Transformer : ExpressionVisitor
     {

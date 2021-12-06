@@ -18,7 +18,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace MongoDB.Driver.Core.Authentication.Sspi
+namespace Etherna.MongoDB.Driver.Core.Authentication.Sspi
 {
     /// <summary>
     /// A wrapper around the SspiHandle structure specifically used as a credential handle.

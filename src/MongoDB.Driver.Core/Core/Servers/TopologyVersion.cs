@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Bson;
-using MongoDB.Shared;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     /// <summary>
     /// Represents a topology description.

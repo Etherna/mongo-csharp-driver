@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     internal class ExponentiallyWeightedMovingAverage
     {

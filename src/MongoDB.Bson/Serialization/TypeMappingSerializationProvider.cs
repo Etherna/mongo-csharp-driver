@@ -17,7 +17,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Represents a serialization provider based on a mapping from value types to serializer types.

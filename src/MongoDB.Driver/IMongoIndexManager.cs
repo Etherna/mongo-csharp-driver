@@ -17,10 +17,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// An interface representing methods used to create, delete and modify indexes.

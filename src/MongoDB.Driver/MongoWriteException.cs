@@ -16,9 +16,9 @@
 using System;
 using System.Runtime.Serialization;
 using System.Text;
-using MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Connections;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents a write exception.

@@ -45,7 +45,7 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
 
-namespace MongoDB.Driver.Core.Authentication.Vendored
+namespace Etherna.MongoDB.Driver.Core.Authentication.Vendored
 {
     internal static class CryptographyHelpers
     {

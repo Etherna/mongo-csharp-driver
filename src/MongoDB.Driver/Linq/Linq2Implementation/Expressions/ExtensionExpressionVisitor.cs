@@ -16,7 +16,7 @@
 using System;
 using System.Linq.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Expressions
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions
 {
     internal class ExtensionExpressionVisitor : ExpressionVisitor
     {

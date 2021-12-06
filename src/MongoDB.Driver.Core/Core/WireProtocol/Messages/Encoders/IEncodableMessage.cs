@@ -19,7 +19,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders
 {
     /// <summary>
     /// Represents an encodable message.

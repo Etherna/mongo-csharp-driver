@@ -14,11 +14,11 @@
 */
 
 
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages
 {
     /// <summary>
     /// Represents a Delete message.

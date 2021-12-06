@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders
 {
     /// <summary>
     /// Represents a message encoder selector for ReplyMessages.

@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents the type of a BSON element.

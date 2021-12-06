@@ -15,9 +15,9 @@
 
 using System.Linq;
 using System.Linq.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToPipelineTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToPipelineTranslators
 {
     internal static class ExpressionToPipelineTranslator
     {

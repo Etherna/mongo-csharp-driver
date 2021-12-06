@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents the symbol table of BsonSymbols.

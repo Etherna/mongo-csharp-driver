@@ -17,7 +17,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Default, global implementation of an <see cref="IBsonSerializerRegistry"/>.

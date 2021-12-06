@@ -14,9 +14,9 @@
 */
 
 using System.Collections.Generic;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents options for the GraphLookup method.

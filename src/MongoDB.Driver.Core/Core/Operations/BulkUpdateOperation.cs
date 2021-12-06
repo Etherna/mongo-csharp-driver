@@ -15,10 +15,10 @@
 
 using System;
 using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     internal class BulkUpdateOperation : BulkUnmixedWriteOperationBase<UpdateRequest>
     {

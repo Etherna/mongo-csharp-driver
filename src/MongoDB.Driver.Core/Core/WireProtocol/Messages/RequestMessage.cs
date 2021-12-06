@@ -16,7 +16,7 @@
 using System;
 using System.Threading;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages
 {
     /// <summary>
     /// Represents a base class for request messages.

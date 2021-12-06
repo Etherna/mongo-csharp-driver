@@ -16,7 +16,7 @@
 using System;
 using System.Threading;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     /// <summary>
     /// Thread-safe helper to manage a value.

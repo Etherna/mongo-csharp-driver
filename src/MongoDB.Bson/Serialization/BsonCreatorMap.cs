@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Represents a mapping to a delegate and its arguments.

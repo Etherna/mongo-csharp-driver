@@ -16,9 +16,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Clusters;
 
-namespace MongoDB.Driver.Core.Bindings
+namespace Etherna.MongoDB.Driver.Core.Bindings
 {
     /// <summary>
     /// Represents a read or write binding associated with a session.

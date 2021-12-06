@@ -16,7 +16,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for BsonValues.

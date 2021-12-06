@@ -16,7 +16,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     /// <summary>
     /// Represents an operation (that may or may not be retryable) that can be executed in a retryable read context.

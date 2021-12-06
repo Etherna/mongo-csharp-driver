@@ -19,7 +19,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
 {
     internal sealed class FirstLastNormalizingTransformer : IExpressionTransformer<MemberExpression>
     {

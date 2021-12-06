@@ -17,7 +17,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a Stream backed by an IByteBuffer. Similar to MemoryStream but backed by an IByteBuffer

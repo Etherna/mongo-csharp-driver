@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Bson.Serialization.Options
+namespace Etherna.MongoDB.Bson.Serialization.Options
 {
     /// <summary>
     /// Represents the units a TimeSpan is serialized in.

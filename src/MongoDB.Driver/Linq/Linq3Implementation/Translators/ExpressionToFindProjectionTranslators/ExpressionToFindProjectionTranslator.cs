@@ -15,9 +15,9 @@
 
 using System;
 using System.Linq.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFindProjectionTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFindProjectionTranslators
 {
     internal static class ExpressionToFindProjectionTranslator
     {

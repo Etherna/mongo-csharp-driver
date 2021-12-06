@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Serializers
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers
 {
     internal interface IWrappedEnumerableSerializer
     {

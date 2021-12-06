@@ -17,10 +17,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization.Options;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.Options;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for dictionaries.

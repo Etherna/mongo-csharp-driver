@@ -15,9 +15,9 @@
 
 using System;
 using System.Runtime.InteropServices;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Compression.Zstandard
+namespace Etherna.MongoDB.Driver.Core.Compression.Zstandard
 {
     internal class PinnedBufferWalker : IDisposable
     {

@@ -14,11 +14,11 @@
 */
 
 using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages
 {
     internal abstract class AstStage : AstNode
     {

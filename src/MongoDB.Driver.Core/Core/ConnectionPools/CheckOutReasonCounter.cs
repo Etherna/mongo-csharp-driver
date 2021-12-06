@@ -16,7 +16,7 @@
 using System;
 using System.Threading;
 
-namespace MongoDB.Driver.Core.ConnectionPools
+namespace Etherna.MongoDB.Driver.Core.ConnectionPools
 {
     internal enum CheckOutReason
     {

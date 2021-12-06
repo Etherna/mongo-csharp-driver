@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Clusters;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
     /// Occurs when a cluster has changed.

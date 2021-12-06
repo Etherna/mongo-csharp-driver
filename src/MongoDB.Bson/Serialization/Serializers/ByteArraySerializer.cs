@@ -17,7 +17,7 @@ using System;
 using System.Globalization;
 using System.Text;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for ByteArrays.

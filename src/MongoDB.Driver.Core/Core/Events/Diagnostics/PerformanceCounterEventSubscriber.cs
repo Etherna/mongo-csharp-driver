@@ -19,13 +19,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Events.Diagnostics.PerformanceCounters;
-using MongoDB.Driver.Core.Servers;
-using MongoDB.Driver.Core.WireProtocol.Messages;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Events.Diagnostics.PerformanceCounters;
+using Etherna.MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
 
-namespace MongoDB.Driver.Core.Events.Diagnostics
+namespace Etherna.MongoDB.Driver.Core.Events.Diagnostics
 {
     /// <summary>
     /// Represents an event subscriber that records certain events to Windows performance counters.

@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.GeoJsonObjectModel
+namespace Etherna.MongoDB.Driver.GeoJsonObjectModel
 {
     /// <summary>
     /// A static class containing helper methods to create GeoJson objects.

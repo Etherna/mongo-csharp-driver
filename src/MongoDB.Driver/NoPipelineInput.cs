@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents the void input data type to a pipeline with no input, such as a database aggregation. No actual instances of this type can be created.

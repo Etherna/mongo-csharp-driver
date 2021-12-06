@@ -15,9 +15,9 @@
 
 using System;
 using System.Collections.Generic;
-using MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
 {
     internal static class ReflectionHelper
     {

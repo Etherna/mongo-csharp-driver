@@ -16,11 +16,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.ConnectionPools
+namespace Etherna.MongoDB.Driver.Core.ConnectionPools
 {
     /// <summary>
     /// Represents a connection pool.

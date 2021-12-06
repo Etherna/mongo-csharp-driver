@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver.Core
+namespace Etherna.MongoDB.Driver.Core
 {
     internal static class TargetFramework
     {

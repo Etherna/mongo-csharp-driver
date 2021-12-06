@@ -16,7 +16,7 @@
 using System;
 using System.Linq.Expressions;
 
-namespace MongoDB.Driver.Linq
+namespace Etherna.MongoDB.Driver.Linq
 {
     /// <summary>
     /// Exception that is thrown when using a LINQ expression that is not supported.

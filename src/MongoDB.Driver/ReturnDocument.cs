@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Which version of the document to return when executing a FindAndModify command.

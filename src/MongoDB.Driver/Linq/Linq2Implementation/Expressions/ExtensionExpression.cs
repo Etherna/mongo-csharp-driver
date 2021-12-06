@@ -15,7 +15,7 @@
 
 using System.Linq.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Expressions
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions
 {
     internal abstract class ExtensionExpression : Expression
     {

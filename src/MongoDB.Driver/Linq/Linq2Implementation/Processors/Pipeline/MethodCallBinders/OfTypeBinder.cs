@@ -16,9 +16,9 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.Pipeline.MethodCallBinders
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Pipeline.MethodCallBinders
 {
     internal sealed class OfTypeBinder : IMethodCallBinder<PipelineBindingContext>
     {

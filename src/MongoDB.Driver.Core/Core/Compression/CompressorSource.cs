@@ -17,10 +17,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Compression
+namespace Etherna.MongoDB.Driver.Core.Compression
 {
     /// <summary>
     /// Represents a compressor source.

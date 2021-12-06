@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     // see the tcp_keepalive struct at the following page for documentation of the buffer layout
     // https://msdn.microsoft.com/en-us/library/windows/desktop/dd877220(v=vs.85).aspx

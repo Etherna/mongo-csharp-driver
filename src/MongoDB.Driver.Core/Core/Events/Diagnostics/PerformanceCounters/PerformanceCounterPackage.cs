@@ -20,7 +20,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 
-namespace MongoDB.Driver.Core.Events.Diagnostics.PerformanceCounters
+namespace Etherna.MongoDB.Driver.Core.Events.Diagnostics.PerformanceCounters
 {
     internal sealed class PerformanceCounterPackage : IDisposable
     {

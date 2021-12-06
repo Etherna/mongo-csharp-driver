@@ -17,16 +17,16 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
-using MongoDB.Driver.Core.Authentication;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.ConnectionPools;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Events;
-using MongoDB.Driver.Core.Events.Diagnostics;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Authentication;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.ConnectionPools;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Events.Diagnostics;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Configuration
+namespace Etherna.MongoDB.Driver.Core.Configuration
 {
     /// <summary>
     /// Represents a cluster builder.

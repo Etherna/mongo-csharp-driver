@@ -16,7 +16,7 @@
 using System;
 using System.IO;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents extension methods on BsonStream.

@@ -17,16 +17,16 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.WireProtocol;
-using MongoDB.Driver.Core.WireProtocol.Messages;
-using MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.WireProtocol;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 
-namespace MongoDB.Driver.Core.Bindings
+namespace Etherna.MongoDB.Driver.Core.Bindings
 {
     /// <summary>
     /// Represents a channel (similar to a connection but operates at the level of protocols rather than messages).

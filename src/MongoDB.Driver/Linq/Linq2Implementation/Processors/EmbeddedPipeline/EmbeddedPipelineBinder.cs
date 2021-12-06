@@ -15,12 +15,12 @@
 
 using System;
 using System.Linq.Expressions;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions;
-using MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline.MethodCallBinders;
-using MongoDB.Driver.Support;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline.MethodCallBinders;
+using Etherna.MongoDB.Driver.Support;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline
 {
     internal sealed class EmbeddedPipelineBinder : PipelineBinderBase<EmbeddedPipelineBindingContext>
     {

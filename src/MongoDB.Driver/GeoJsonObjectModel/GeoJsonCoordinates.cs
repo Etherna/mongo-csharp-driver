@@ -16,11 +16,11 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver.GeoJsonObjectModel.Serializers;
-using MongoDB.Shared;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Driver.GeoJsonObjectModel.Serializers;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.GeoJsonObjectModel
+namespace Etherna.MongoDB.Driver.GeoJsonObjectModel
 {
     /// <summary>
     /// Represents a GeoJson position in some coordinate system (see subclasses).

@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Contract for serializers that can get and set Id values.

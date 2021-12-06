@@ -16,9 +16,9 @@
 using System;
 using System.Diagnostics;
 using System.Reflection;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Events.Diagnostics
+namespace Etherna.MongoDB.Driver.Core.Events.Diagnostics
 {
     /// <summary>
     /// An event subscriber that writes to a trace source.

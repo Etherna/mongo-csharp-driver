@@ -15,9 +15,9 @@
 
 using System.Linq;
 using System.Linq.Expressions;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods
 {
     internal static class ExpressionExtensions
     {

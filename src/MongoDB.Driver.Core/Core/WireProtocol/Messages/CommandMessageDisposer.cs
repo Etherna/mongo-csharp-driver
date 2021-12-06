@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages
 {
     internal sealed class CommandMessageDisposer : IDisposable
     {

@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// A serializer registry.

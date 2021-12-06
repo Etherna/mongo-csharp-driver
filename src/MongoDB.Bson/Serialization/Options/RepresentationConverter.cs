@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
 
-namespace MongoDB.Bson.Serialization.Options
+namespace Etherna.MongoDB.Bson.Serialization.Options
 {
     /// <summary>
     /// Represents the external representation of a field or property.

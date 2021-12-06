@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders
 {
     /// <summary>
     /// Represents a message encoder factory.

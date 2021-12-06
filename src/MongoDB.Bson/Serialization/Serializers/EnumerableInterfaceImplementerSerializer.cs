@@ -18,7 +18,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for a class that implements IEnumerable.

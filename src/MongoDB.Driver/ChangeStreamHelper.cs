@@ -13,14 +13,14 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Core.Operations;
-using MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using MongoDB.Driver.Linq;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Core.Operations;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Driver.Linq;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     internal static class ChangeStreamHelper
     {

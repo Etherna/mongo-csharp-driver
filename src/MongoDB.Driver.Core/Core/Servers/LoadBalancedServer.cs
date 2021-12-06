@@ -16,13 +16,13 @@
 using System;
 using System.Net;
 using System.Threading;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.ConnectionPools;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.ConnectionPools;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Events;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     internal class LoadBalancedServer : Server
     {

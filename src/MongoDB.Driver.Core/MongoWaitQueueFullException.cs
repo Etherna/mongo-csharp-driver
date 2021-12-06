@@ -16,9 +16,9 @@
 using System;
 using System.Net;
 using System.Runtime.Serialization;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents a MongoDB connection pool wait queue full exception.

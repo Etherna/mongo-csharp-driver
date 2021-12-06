@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a pool of chunks.

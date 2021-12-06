@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     internal static class ReadPreferenceResolver
     {

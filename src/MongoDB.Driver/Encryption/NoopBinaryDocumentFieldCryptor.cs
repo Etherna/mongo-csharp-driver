@@ -15,9 +15,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.WireProtocol;
+using Etherna.MongoDB.Driver.Core.WireProtocol;
 
-namespace MongoDB.Driver.Encryption
+namespace Etherna.MongoDB.Driver.Encryption
 {
     internal class NoopBinaryDocumentFieldCryptor : IBinaryDocumentFieldDecryptor, IBinaryCommandFieldEncryptor
     {

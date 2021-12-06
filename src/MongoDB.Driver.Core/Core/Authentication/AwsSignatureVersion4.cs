@@ -19,10 +19,10 @@ using System.Linq;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Authentication
+namespace Etherna.MongoDB.Driver.Core.Authentication
 {
     /// <summary>
     /// The AWS signature version 4.

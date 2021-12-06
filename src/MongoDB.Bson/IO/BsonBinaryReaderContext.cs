@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     internal class BsonBinaryReaderContext
     {

@@ -18,7 +18,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.GridFS
+namespace Etherna.MongoDB.Driver.GridFS
 {
     /// <summary>
     /// Represents a Stream used by the application to read data from a GridFS file.

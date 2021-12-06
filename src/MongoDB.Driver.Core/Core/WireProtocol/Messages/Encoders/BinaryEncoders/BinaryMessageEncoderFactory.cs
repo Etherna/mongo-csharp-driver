@@ -14,11 +14,11 @@
 */
 
 using System.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Compression;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Compression;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders
 {
     /// <summary>
     /// Represents a factory for binary message encoders.

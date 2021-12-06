@@ -14,10 +14,10 @@
 */
 
 using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.WireProtocol
+namespace Etherna.MongoDB.Driver.Core.WireProtocol
 {
     /// <summary>
     /// Represents one result batch (returned from either a Query or a GetMore message)

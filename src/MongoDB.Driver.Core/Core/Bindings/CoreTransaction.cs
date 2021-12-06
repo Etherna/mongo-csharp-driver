@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Bindings
+namespace Etherna.MongoDB.Driver.Core.Bindings
 {
     /// <summary>
     /// The state of a transaction.

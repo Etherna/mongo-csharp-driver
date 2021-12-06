@@ -17,9 +17,9 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     internal class ClientDocumentHelper
     {
@@ -73,7 +73,7 @@ namespace MongoDB.Driver.Core.Connections
 
             bool IsLegacyLoaded()
             {
-                return Type.GetType("MongoDB.Driver.MongoServer, MongoDB.Driver.Legacy") != null;
+                return Type.GetType("Etherna.MongoDB.Driver.MongoServer, MongoDB.Driver.Legacy") != null;
             }
         }
 

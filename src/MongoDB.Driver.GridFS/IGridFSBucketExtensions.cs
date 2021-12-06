@@ -13,11 +13,11 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 
-namespace MongoDB.Driver.GridFS
+namespace Etherna.MongoDB.Driver.GridFS
 {
     internal static class IGridFSBucketExtensions
     {

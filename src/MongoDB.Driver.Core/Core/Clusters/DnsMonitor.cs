@@ -18,11 +18,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Events;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Clusters
+namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     internal class DnsMonitor : IDnsMonitor
     {

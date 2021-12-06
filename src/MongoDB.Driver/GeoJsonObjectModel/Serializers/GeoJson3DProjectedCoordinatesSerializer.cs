@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver.GeoJsonObjectModel.Serializers
+namespace Etherna.MongoDB.Driver.GeoJsonObjectModel.Serializers
 {
     /// <summary>
     /// Represents a serializer for a GeoJson3DProjectedCoordinates value.

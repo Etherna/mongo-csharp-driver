@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
 {
     internal sealed class QueryableTranslation
     {

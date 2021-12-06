@@ -14,7 +14,7 @@
 * 
 */
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Option for which expression to generate for certain string operations.

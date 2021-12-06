@@ -15,7 +15,7 @@
 
 using System.IO;
 
-namespace MongoDB.Driver.Core.Compression
+namespace Etherna.MongoDB.Driver.Core.Compression
 {
     /// <summary>
     /// Represents the compressor type.

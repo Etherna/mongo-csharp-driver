@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization.Conventions;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents an abstract base class for struct serializers.

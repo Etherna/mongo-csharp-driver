@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters
 {
     internal abstract class AstFilterOperation : AstNode
     {

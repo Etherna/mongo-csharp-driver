@@ -16,7 +16,7 @@
 using System;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Base class for serialization providers.

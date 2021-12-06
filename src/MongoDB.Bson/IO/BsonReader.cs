@@ -17,10 +17,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a BSON reader for some external format (see subclasses).

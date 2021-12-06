@@ -17,7 +17,7 @@ using System;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for enums.

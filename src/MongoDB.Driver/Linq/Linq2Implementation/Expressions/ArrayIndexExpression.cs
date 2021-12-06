@@ -15,10 +15,10 @@
 
 using System;
 using System.Linq.Expressions;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Expressions
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions
 {
     internal sealed class ArrayIndexExpression : SerializationExpression
     {

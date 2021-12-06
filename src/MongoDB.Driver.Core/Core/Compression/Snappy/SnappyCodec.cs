@@ -29,9 +29,9 @@
 
 using System;
 using System.IO;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Compression.Snappy
+namespace Etherna.MongoDB.Driver.Core.Compression.Snappy
 {
     internal static class SnappyCodec
     {

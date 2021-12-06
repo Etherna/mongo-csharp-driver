@@ -17,9 +17,9 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.GridFS
+namespace Etherna.MongoDB.Driver.GridFS
 {
     /// <summary>
     /// Represents a GridFS system bucket.

@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Bson.Serialization.IdGenerators
+namespace Etherna.MongoDB.Bson.Serialization.IdGenerators
 {
     /// <summary>
     /// Represents an Id generator for ObjectIds represented internally as strings.

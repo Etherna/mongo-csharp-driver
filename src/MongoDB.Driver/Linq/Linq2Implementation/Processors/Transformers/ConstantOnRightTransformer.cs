@@ -15,7 +15,7 @@
 
 using System.Linq.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
 {
     /// <remarks>
     /// MongoDB only supports constants on the RHS for certain expressions, so we'll move them around

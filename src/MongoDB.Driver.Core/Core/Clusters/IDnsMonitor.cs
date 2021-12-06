@@ -17,7 +17,7 @@
 using System;
 using System.Threading;
 
-namespace MongoDB.Driver.Core.Clusters
+namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     internal enum DnsMonitorState
     {

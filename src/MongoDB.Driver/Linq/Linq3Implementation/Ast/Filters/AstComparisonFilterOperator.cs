@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters
 {
     internal enum AstComparisonFilterOperator
     {

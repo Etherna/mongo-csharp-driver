@@ -16,9 +16,9 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Security;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     internal sealed class DecryptedSecureString : IDisposable
     {

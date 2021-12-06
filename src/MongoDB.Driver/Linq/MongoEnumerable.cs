@@ -17,9 +17,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Linq
+namespace Etherna.MongoDB.Driver.Linq
 {
     /// <summary>
     /// Enumerable Extensions for MongoDB.

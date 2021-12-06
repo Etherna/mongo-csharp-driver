@@ -14,12 +14,12 @@
 */
 
 using System;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Serializers
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers
 {
     internal class EnumUnderlyingTypeSerializer<TEnum, TEnumUnderlyingType> : StructSerializerBase<TEnumUnderlyingType> 
         where TEnum : Enum 

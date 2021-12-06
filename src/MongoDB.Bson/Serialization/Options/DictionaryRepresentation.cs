@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.Serialization.Options
+namespace Etherna.MongoDB.Bson.Serialization.Options
 {
     /// <summary>
     /// Represents the representation to use for dictionaries.

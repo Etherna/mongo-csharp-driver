@@ -16,9 +16,9 @@
 using System;
 using System.Dynamic;
 using System.Linq.Expressions;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Base serializer for dynamic types.

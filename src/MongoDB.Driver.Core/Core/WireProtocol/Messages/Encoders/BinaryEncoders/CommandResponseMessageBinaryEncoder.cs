@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders
 {
     /// <summary>
     /// Represents a binary encoder for a CommandResponseMessage.

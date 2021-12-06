@@ -13,11 +13,11 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast
 {
     internal abstract class AstNode
     {

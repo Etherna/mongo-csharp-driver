@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Clusters;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Server connection mode.

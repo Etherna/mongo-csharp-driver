@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders
 {
     internal enum Opcode
     {

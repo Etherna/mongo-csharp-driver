@@ -14,13 +14,13 @@
 */
 
 using System.Net;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.ConnectionPools;
-using MongoDB.Driver.Core.Events;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.ConnectionPools;
+using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     internal class ServerFactory : IClusterableServerFactory
     {

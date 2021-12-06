@@ -14,7 +14,7 @@
 */
 
 using System.Collections.Generic;
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Contract for composite serializers that contain a number of named serializers.

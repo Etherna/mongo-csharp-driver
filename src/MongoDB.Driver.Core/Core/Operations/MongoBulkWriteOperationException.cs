@@ -17,9 +17,9 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
-using MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Connections;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     /// <summary>
     /// Represents a bulk write operation exception.

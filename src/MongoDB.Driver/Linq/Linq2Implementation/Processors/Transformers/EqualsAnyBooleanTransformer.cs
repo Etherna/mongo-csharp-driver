@@ -15,7 +15,7 @@
 
 using System.Linq.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
 {
     internal sealed class EqualsAnyBooleanTransformer : IExpressionTransformer<BinaryExpression>
     {

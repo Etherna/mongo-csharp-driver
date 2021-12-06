@@ -17,9 +17,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// Convention pack for applying attributes.

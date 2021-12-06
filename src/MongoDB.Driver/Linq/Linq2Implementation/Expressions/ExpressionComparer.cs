@@ -20,7 +20,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Expressions
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions
 {
     /// <summary>
     /// Compare two expressions to determine if they are equivalent.

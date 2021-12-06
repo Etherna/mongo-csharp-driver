@@ -20,7 +20,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Core.Async
+namespace Etherna.MongoDB.Driver.Core.Async
 {
     internal class AsyncQueue<T>
     {

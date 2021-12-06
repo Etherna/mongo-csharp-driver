@@ -16,9 +16,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Core.Bindings
+namespace Etherna.MongoDB.Driver.Core.Bindings
 {
     /// <summary>
     /// An object that represents no core session.

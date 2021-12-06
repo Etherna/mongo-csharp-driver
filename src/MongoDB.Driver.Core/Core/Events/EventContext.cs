@@ -15,9 +15,9 @@
 
 using System;
 using System.Threading;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     internal static class EventContext
     {

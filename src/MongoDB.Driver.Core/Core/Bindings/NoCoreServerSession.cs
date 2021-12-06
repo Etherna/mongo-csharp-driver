@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Core.Bindings
+namespace Etherna.MongoDB.Driver.Core.Bindings
 {
     internal class NoCoreServerSession : ICoreServerSession
     {

@@ -15,7 +15,7 @@
 
 using System.Security.Cryptography;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     internal class DefaultRandomByteGenerator : IRandomByteGenerator
     {

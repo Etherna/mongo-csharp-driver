@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     internal static class IReadOnlyDictionaryExtensions
     {

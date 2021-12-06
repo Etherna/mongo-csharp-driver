@@ -15,10 +15,10 @@
 
 using System;
 using System.Collections.Generic;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Clusters.ServerSelectors
+namespace Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors
 {
     /// <summary>
     /// Represents a server selector that wraps a delegate.

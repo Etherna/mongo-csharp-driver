@@ -17,7 +17,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace MongoDB.Shared
+namespace Etherna.MongoDB.Shared
 {
     internal class Hasher
     {

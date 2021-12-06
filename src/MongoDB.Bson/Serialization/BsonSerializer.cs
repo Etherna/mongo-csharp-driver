@@ -22,12 +22,12 @@ using System.Reflection;
 using System.Threading;
 
 // don't add using statement for MongoDB.Bson.Serialization.Serializers to minimize dependencies on DefaultSerializer
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Bson.Serialization.IdGenerators;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
+using Etherna.MongoDB.Bson.Serialization.IdGenerators;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// A static class that represents the BSON serialization functionality.

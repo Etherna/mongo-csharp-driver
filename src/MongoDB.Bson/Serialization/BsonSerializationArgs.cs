@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Represents args common to all serializers.

@@ -16,7 +16,7 @@
 using System;
 using System.Linq;
 
-namespace MongoDB.Bson.Serialization.IdGenerators
+namespace Etherna.MongoDB.Bson.Serialization.IdGenerators
 {
     /// <summary>
     /// Represents an Id generator for Guids stored in BsonBinaryData values.

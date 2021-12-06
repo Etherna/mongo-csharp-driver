@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Configuration;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
     /// Occurs before a cluster is opened.

@@ -20,16 +20,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Options;
-using MongoDB.Driver.Linq;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators;
-using MongoDB.Driver.Linq.Linq2Implementation.Processors;
-using MongoDB.Driver.Support;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Options;
+using Etherna.MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors;
+using Etherna.MongoDB.Driver.Support;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Translators
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Translators
 {
     internal sealed class PredicateTranslator
     {

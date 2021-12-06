@@ -16,7 +16,7 @@
 using System;
 using System.Linq.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
 {
     /// <remarks>
     /// VB creates string index expressions using character comparison whereas C# uses ascii value comparison

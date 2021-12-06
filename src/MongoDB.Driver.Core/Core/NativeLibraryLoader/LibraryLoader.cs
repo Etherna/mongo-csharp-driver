@@ -13,12 +13,12 @@
 * limitations under the License.
 */
 
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 using System;
 using System.Runtime.InteropServices;
 
-namespace MongoDB.Driver.Core.NativeLibraryLoader
+namespace Etherna.MongoDB.Driver.Core.NativeLibraryLoader
 {
     internal class LibraryLoader
     {

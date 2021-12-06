@@ -21,10 +21,10 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     internal class SslStreamFactory : IStreamFactory
     {

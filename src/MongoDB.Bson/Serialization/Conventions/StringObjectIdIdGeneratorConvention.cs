@@ -13,11 +13,11 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization.IdGenerators;
-using MongoDB.Bson.Serialization.Options;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization.IdGenerators;
+using Etherna.MongoDB.Bson.Serialization.Options;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// A convention that sets the id generator for a string member with a BSON representation of ObjectId.

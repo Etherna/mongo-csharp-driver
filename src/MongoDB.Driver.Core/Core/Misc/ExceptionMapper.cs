@@ -15,10 +15,10 @@
 
 using System;
 using System.Linq;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Connections;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     /// <summary>
     /// A mapper from error responses to custom exceptions.

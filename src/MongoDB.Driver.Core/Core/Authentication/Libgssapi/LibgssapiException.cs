@@ -16,7 +16,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MongoDB.Driver.Core.Authentication.Libgssapi
+namespace Etherna.MongoDB.Driver.Core.Authentication.Libgssapi
 {
     /// <summary>
     /// Represents a Libgssapi exception.

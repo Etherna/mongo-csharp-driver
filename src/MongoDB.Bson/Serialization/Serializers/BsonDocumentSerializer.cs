@@ -16,10 +16,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization.IdGenerators;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.IdGenerators;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for BsonDocuments.

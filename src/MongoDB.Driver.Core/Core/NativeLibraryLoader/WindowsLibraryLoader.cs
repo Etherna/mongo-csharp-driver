@@ -15,10 +15,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 using MongoDB.Libmongocrypt;
 
-namespace MongoDB.Driver.Core.NativeLibraryLoader
+namespace Etherna.MongoDB.Driver.Core.NativeLibraryLoader
 {
     internal class WindowsLibraryLoader : INativeLibraryLoader
     {

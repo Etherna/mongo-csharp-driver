@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     internal class DelayedEvaluationWriteConcernSerializer : SealedClassSerializerBase<Func<WriteConcern>>
     {

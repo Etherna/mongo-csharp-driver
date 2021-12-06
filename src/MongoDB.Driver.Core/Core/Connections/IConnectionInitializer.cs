@@ -16,7 +16,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     internal interface IConnectionInitializer
     {

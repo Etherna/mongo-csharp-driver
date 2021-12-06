@@ -17,7 +17,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     internal class CachedEnumerable<T> : IEnumerable<T>
     {

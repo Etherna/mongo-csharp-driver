@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.Clusters
+namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     /// <summary>
     /// Determine whether to use legacy ConnectionMode or DirectConnection.

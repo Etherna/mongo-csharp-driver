@@ -18,7 +18,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
 
     /// <summary>

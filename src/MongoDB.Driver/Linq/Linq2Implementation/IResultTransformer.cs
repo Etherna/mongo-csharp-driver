@@ -16,7 +16,7 @@
 using System;
 using System.Linq.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
 {
     internal interface IResultTransformer
     {

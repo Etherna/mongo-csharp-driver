@@ -15,9 +15,9 @@
 
 using System;
 using System.Net;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.ConnectionPools
+namespace Etherna.MongoDB.Driver.Core.ConnectionPools
 {
     /// <summary>
     /// Handler for connections related exceptions raised in <see cref="IConnectionPool"/>.

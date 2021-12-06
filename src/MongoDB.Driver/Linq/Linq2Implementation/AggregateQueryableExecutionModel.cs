@@ -19,11 +19,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Linq // this class is Linq2 specific but leave the namespace as Linq for backward compatibility because it's public
+namespace Etherna.MongoDB.Driver.Linq // this class is Linq2 specific but leave the namespace as Linq for backward compatibility because it's public
 {
     /// <summary>
     /// A model for a queryable to be executed using the aggregation framework.

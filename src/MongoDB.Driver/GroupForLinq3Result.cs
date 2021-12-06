@@ -15,7 +15,7 @@
 
 using System.Linq;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents the return result from PipelineDefinitionBuilder.GroupForLinq3 method.

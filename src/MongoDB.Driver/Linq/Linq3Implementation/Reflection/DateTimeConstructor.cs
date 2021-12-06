@@ -16,7 +16,7 @@
 using System;
 using System.Reflection;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Reflection
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
 {
     internal static class DateTimeConstructor
     {

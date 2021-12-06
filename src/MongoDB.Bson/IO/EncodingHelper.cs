@@ -16,7 +16,7 @@
 using System;
 using System.Text;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a class that has some helper methods for <see cref="Encoding"/>.

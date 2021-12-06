@@ -18,12 +18,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.Pipeline.MethodCallBinders
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Pipeline.MethodCallBinders
 {
     internal class JoinSerializer<T> : SerializerBase<T>, IBsonDocumentSerializer
     {

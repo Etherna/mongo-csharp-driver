@@ -15,7 +15,7 @@
 
 using System.Net;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     /// <summary>
     /// Represents a server monitor factory.

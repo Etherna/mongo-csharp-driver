@@ -14,9 +14,9 @@
 */
 
 using System.Linq.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.MethodTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.MethodTranslators
 {
     internal static class StartsWithMethodToFilterTranslator
     {

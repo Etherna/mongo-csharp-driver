@@ -19,7 +19,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     internal class SrvRecord
     {

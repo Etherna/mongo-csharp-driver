@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Driver.Core.Operations.ElementNameValidators
+namespace Etherna.MongoDB.Driver.Core.Operations.ElementNameValidators
 {
     /// <summary>
     /// Represents a factory for element name validators based on the update type.

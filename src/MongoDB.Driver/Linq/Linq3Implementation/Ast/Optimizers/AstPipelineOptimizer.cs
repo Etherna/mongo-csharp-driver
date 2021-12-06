@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 {
     internal static class AstPipelineOptimizer
     {

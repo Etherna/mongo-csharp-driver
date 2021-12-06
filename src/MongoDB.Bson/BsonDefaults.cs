@@ -16,8 +16,8 @@
 using System;
 using System.Collections.Generic;
 using System.Dynamic;
-using MongoDB.Bson.Serialization;
-namespace MongoDB.Bson
+using Etherna.MongoDB.Bson.Serialization;
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// A static helper class containing BSON defaults.

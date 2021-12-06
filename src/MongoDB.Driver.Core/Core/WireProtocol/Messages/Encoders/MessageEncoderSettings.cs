@@ -17,7 +17,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders
 {
     /// <summary>
     /// Represents the names of different encoder settings.

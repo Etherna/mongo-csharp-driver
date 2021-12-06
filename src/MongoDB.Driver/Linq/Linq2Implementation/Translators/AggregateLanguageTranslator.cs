@@ -21,13 +21,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using MongoDB.Bson;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators;
-using MongoDB.Driver.Linq.Linq2Implementation.Processors;
-using MongoDB.Driver.Support;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors;
+using Etherna.MongoDB.Driver.Support;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Translators
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Translators
 {
     internal sealed class AggregateLanguageTranslator
     {

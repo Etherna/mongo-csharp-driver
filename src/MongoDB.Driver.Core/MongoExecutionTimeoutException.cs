@@ -15,10 +15,10 @@
 
 using System;
 using System.Runtime.Serialization;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Connections;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents a MongoDB execution timeout exception.

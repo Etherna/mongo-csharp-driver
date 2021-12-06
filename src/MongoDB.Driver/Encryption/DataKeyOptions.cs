@@ -14,9 +14,9 @@
 */
 
 using System.Collections.Generic;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Encryption
+namespace Etherna.MongoDB.Driver.Encryption
 {
     /// <summary>
     /// Options for creating a data key.

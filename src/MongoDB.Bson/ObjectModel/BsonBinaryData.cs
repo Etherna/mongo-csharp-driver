@@ -16,7 +16,7 @@
 using System;
 using System.Linq;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents BSON binary data.

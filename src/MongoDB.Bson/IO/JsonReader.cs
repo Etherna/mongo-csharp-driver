@@ -18,9 +18,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Text.RegularExpressions;
-using MongoDB.Shared;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a BSON reader for a JSON string.

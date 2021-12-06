@@ -29,10 +29,10 @@
 
 using System;
 using System.Runtime.InteropServices;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.NativeLibraryLoader;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.NativeLibraryLoader;
 
-namespace MongoDB.Driver.Core.Compression.Snappy
+namespace Etherna.MongoDB.Driver.Core.Compression.Snappy
 {
     internal static class Snappy32NativeMethods
     {
