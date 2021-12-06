@@ -248,7 +248,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
             Ensure.IsNotNull(toType, nameof(toType));
             var to = toType.FullName switch
             {
-                "MongoDB.Bson.ObjectId" => "objectId",
+                "Etherna.MongoDB.Bson.ObjectId" => "objectId",
                 "System.Boolean" => "bool",
                 "System.DateTime" => "date",
                 "System.Decimal" => "decimal",

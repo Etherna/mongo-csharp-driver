@@ -26,7 +26,7 @@ using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Libmongocrypt;
+using MongoDB.Libmongocrypt;
 
 namespace Etherna.MongoDB.Driver.Encryption
 {

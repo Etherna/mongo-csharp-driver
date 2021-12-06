@@ -73,7 +73,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
 
             bool IsLegacyLoaded()
             {
-                return Type.GetType("MongoDB.Driver.MongoServer, MongoDB.Driver.Legacy") != null;
+                return Type.GetType("Etherna.MongoDB.Driver.MongoServer, MongoDB.Driver.Legacy") != null;
             }
         }
 

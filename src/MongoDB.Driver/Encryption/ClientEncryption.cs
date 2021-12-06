@@ -18,7 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Clusters;
-using Etherna.MongoDB.Libmongocrypt;
+using MongoDB.Libmongocrypt;
 
 namespace Etherna.MongoDB.Driver.Encryption
 {

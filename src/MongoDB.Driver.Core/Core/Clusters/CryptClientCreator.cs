@@ -19,7 +19,7 @@ using System.Linq;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Libmongocrypt;
+using MongoDB.Libmongocrypt;
 
 namespace Etherna.MongoDB.Driver.Core.Clusters
 {

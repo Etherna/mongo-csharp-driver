@@ -22,7 +22,7 @@ using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Servers;
 using Etherna.MongoDB.Driver.Core.WireProtocol;
-using Etherna.MongoDB.Libmongocrypt;
+using MongoDB.Libmongocrypt;
 
 namespace Etherna.MongoDB.Driver.Encryption
 {

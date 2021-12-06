@@ -20,7 +20,7 @@ using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Servers;
-using Etherna.MongoDB.Libmongocrypt;
+using MongoDB.Libmongocrypt;
 
 namespace Etherna.MongoDB.Driver.Core.Clusters
 {
