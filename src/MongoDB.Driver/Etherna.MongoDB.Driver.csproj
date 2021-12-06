@@ -17,16 +17,17 @@
     <Product>MongoDB.Driver</Product>
     <Company>MongoDB Inc.</Company>
     <Copyright>Copyright © 2010-present MongoDB Inc.</Copyright>
-    <Description>Official MongoDB supported driver for MongoDB. See https://docs.mongodb.com/drivers/csharp/ for more details.</Description>
-    <Authors>MongoDB Inc.</Authors>
+    <Description>Fork by Etherna of the official MongoDB supported driver for MongoDB. See https://docs.mongodb.com/drivers/csharp/ for more details.</Description>
+    <Authors>Etherna Sagl</Authors>
     <PackageIcon>packageIcon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageDescription>Official .NET driver for MongoDB.</PackageDescription>
+    <PackageDescription>Fork by Etherna of the official .NET driver for MongoDB.</PackageDescription>
     <PackageProjectUrl>https://docs.mongodb.com/drivers/csharp/</PackageProjectUrl>
     <PackageLicenseFile>License.txt</PackageLicenseFile>
     <PackageTags>mongodb;mongo;nosql</PackageTags>
     <PackageLanguage>en-US</PackageLanguage>
     <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -17,16 +17,17 @@
     <Product>MongoDB.Bson</Product>
     <Company>MongoDB Inc.</Company>
     <Copyright>Copyright © 2010-present MongoDB Inc.</Copyright>
-    <Description>Official MongoDB supported BSON library. See https://docs.mongodb.com/drivers/csharp/ for more details.</Description>
-    <Authors>MongoDB Inc.</Authors>
+    <Description>Fork by Etherna of the official MongoDB supported BSON library. See https://docs.mongodb.com/drivers/csharp/ for more details.</Description>
+    <Authors>Etherna Sagl</Authors>
     <PackageIcon>packageIcon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageDescription>MongoDB's Official Bson Library.</PackageDescription>
+    <PackageDescription>Fork by Etherna of the MongoDB's Official Bson Library.</PackageDescription>
     <PackageProjectUrl>https://docs.mongodb.com/drivers/csharp/</PackageProjectUrl>
     <PackageLicenseFile>License.txt</PackageLicenseFile>
     <PackageTags>mongodb;mongo;nosql;bson</PackageTags>
     <PackageLanguage>en-US</PackageLanguage>
     <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <PropertyGroup>
