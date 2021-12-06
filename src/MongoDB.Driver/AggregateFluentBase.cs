@@ -17,10 +17,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Base class for implementors of <see cref="IAggregateFluent{TResult}" />.

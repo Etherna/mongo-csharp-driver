@@ -16,7 +16,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal static class AsReadOnlyListExtensions
     {

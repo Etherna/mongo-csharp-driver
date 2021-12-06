@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Linq
+namespace Etherna.MongoDB.Driver.Linq
 {
     /// <summary>
     /// Represents the different LINQ providers.

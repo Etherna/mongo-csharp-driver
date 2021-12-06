@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Represents a serializer that has a Representation property.

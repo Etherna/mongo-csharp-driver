@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// Represents a discriminator convention.

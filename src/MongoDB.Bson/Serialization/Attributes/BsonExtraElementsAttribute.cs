@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.Serialization.Attributes
+namespace Etherna.MongoDB.Bson.Serialization.Attributes
 {
     /// <summary>
     /// Indicates that this property or field will be used to hold any extra elements found during deserialization.

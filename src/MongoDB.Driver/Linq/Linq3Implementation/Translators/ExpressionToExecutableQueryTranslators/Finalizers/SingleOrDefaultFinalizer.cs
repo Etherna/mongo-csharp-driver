@@ -16,9 +16,9 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver;
+using Etherna.MongoDB.Driver;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators.Finalizers
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators.Finalizers
 {
     internal class SingleOrDefaultFinalizer<TOutput> : IExecutableQueryFinalizer<TOutput, TOutput>
     {

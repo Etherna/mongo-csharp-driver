@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.Compression
+namespace Etherna.MongoDB.Driver.Core.Compression
 {
     internal static class CompressorTypeMapper
     {

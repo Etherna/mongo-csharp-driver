@@ -16,7 +16,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Linq
+namespace Etherna.MongoDB.Driver.Linq
 {
     /// <summary>
     /// This static class holds methods that can be used to express MongoDB specific operations in LINQ queries.

@@ -15,11 +15,11 @@
 
 using System;
 using System.Linq.Expressions;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors
 {
     internal sealed class AccumulatorBinder : ExtensionExpressionVisitor
     {

@@ -14,9 +14,9 @@
 */
 
 using System.IO;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Compression
+namespace Etherna.MongoDB.Driver.Core.Compression
 {
     internal class NoopCompressor : ICompressor
     {

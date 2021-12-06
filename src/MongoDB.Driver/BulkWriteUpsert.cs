@@ -14,11 +14,11 @@
 */
 
 using System;
-using MongoDB.Bson;
-using MongoDB.Driver.Support;
-using MongoDB.Shared;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Support;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents the information about one Upsert.

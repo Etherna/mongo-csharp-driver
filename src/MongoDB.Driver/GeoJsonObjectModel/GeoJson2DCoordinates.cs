@@ -14,10 +14,10 @@
 */
 
 using System.Collections.ObjectModel;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver.GeoJsonObjectModel.Serializers;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Driver.GeoJsonObjectModel.Serializers;
 
-namespace MongoDB.Driver.GeoJsonObjectModel
+namespace Etherna.MongoDB.Driver.GeoJsonObjectModel
 {
     /// <summary>
     /// Represents a GeoJson 2D position (x, y).

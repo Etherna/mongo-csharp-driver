@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Result type for the aggregate $sortByCount stage.

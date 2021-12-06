@@ -18,10 +18,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Operations;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Operations;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Model for creating an index.

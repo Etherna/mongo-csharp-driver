@@ -17,7 +17,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     internal static class CStringUtf8Encoding
     {

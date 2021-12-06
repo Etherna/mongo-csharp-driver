@@ -13,11 +13,11 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
 using System;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Options for a change stream operation.

@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Linq
+namespace Etherna.MongoDB.Driver.Linq
 {
     /// <summary>
     /// Represents the unit for various DateTime operations.

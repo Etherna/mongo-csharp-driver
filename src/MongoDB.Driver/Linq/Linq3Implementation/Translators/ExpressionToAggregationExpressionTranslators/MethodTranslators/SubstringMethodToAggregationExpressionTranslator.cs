@@ -14,13 +14,13 @@
 */
 
 using System.Linq.Expressions;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Misc;
-using MongoDB.Driver.Linq.Linq3Implementation.Reflection;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators.MethodTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators.MethodTranslators
 {
     internal static class SubstringMethodToAggregationExpressionTranslator
     {

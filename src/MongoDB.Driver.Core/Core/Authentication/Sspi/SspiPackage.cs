@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver.Core.Authentication.Sspi
+namespace Etherna.MongoDB.Driver.Core.Authentication.Sspi
 {
     /// <summary>
     /// This is represented as a string in AcquireCredentialsHandle. This value will have .ToString() called on it.

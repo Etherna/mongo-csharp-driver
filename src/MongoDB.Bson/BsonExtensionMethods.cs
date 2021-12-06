@@ -15,10 +15,10 @@
 
 using System;
 using System.IO;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// A static class containing BSON extension methods.

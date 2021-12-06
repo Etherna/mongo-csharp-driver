@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     /// <summary>
     /// Monitors a server for state changes.

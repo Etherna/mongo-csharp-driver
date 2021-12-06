@@ -19,10 +19,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions;
-using MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors
 {
     internal static class BinderHelper
     {

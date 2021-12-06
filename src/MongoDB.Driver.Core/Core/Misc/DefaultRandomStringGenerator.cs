@@ -16,7 +16,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     internal class DefaultRandomStringGenerator : IRandomStringGenerator
     {

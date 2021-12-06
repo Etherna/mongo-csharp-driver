@@ -17,7 +17,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     internal sealed class HeartbeatDelay : IDisposable
     {

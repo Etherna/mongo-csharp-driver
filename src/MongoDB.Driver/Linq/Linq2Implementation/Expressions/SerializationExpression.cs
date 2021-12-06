@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Expressions
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions
 {
     internal abstract class SerializationExpression : ExtensionExpression, ISerializationExpression
     {

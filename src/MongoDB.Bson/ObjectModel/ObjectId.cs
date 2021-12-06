@@ -19,7 +19,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using System.Threading;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents an ObjectId (see also BsonObjectId).

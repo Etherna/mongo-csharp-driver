@@ -46,9 +46,9 @@ using System;
 using System.Buffers;
 using System.IO;
 using System.IO.Compression;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Compression.Zstandard
+namespace Etherna.MongoDB.Driver.Core.Compression.Zstandard
 {
     internal class ZstandardStream : Stream
     {

@@ -14,7 +14,7 @@
 */
 
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages
 {
     /// <summary>
     /// Represents the type of message.

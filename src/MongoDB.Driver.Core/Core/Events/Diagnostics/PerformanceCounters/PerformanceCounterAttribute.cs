@@ -17,7 +17,7 @@
 using System;
 using System.Diagnostics;
 
-namespace MongoDB.Driver.Core.Events.Diagnostics.PerformanceCounters
+namespace Etherna.MongoDB.Driver.Core.Events.Diagnostics.PerformanceCounters
 {
     [AttributeUsage(AttributeTargets.Property)]
     internal class PerformanceCounterAttribute : Attribute

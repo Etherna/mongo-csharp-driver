@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Clusters.ServerSelectors;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
     /// Occurs when selecting a server fails.

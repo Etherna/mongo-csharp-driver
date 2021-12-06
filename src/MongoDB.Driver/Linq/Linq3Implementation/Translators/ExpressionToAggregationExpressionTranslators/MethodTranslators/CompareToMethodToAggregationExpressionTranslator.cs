@@ -15,10 +15,10 @@
 
 using System.Linq.Expressions;
 using System.Reflection;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators.MethodTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators.MethodTranslators
 {
     internal static class CompareToMethodToAggregationExpressionTranslator
     {

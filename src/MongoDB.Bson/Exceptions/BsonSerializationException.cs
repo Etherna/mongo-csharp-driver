@@ -16,7 +16,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents a BSON serialization exception.

@@ -18,9 +18,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Operations;
+using Etherna.MongoDB.Driver.Core.Operations;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents an operation that will return a cursor when executed.

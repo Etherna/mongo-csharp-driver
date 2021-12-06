@@ -16,10 +16,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// A BsonWriter that appends elements to the end of a document.

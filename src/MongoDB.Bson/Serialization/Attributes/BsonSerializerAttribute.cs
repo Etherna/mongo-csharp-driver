@@ -16,7 +16,7 @@
 using System;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization.Attributes
+namespace Etherna.MongoDB.Bson.Serialization.Attributes
 {
     /// <summary>
     /// Specifies the type of the serializer to use for a class.

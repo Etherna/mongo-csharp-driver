@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson.Serialization.Options;
+using Etherna.MongoDB.Bson.Serialization.Options;
 
-namespace MongoDB.Bson.Serialization.Attributes
+namespace Etherna.MongoDB.Bson.Serialization.Attributes
 {
     /// <summary>
     /// Specifies serialization options for a Dictionary field or property.

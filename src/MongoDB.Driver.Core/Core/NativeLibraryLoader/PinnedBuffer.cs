@@ -16,7 +16,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace MongoDB.Driver.Core.NativeLibraryLoader
+namespace Etherna.MongoDB.Driver.Core.NativeLibraryLoader
 {
     internal class PinnedBuffer : IDisposable
     {

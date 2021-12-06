@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for BsonDecimal128s.

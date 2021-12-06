@@ -17,10 +17,10 @@ using System;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Extension methods for <see cref="IMongoCollection{T}"/>.

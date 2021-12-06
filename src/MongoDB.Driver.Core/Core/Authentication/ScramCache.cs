@@ -16,10 +16,10 @@
 using System;
 using System.Linq;
 using System.Security;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Authentication
+namespace Etherna.MongoDB.Driver.Core.Authentication
 {
     /// <summary>
     /// A cache for Client and Server keys, to be used during authentication.

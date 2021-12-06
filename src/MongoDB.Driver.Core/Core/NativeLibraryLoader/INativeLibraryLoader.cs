@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.NativeLibraryLoader
+namespace Etherna.MongoDB.Driver.Core.NativeLibraryLoader
 {
     internal interface INativeLibraryLoader
     {

@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters
 {
     internal sealed class AstMatchesEverythingFilter : AstFilter
     {

@@ -19,7 +19,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     // adapted from a Microsoft article entitled "Walkthrough: Creating an IQueryable LINQ Provider"
     // https://msdn.microsoft.com/en-us/library/bb546158.aspx

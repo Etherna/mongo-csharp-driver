@@ -15,7 +15,7 @@
 
 using System.Collections.Generic;
 
-namespace MongoDB.Driver.Support
+namespace Etherna.MongoDB.Driver.Support
 {
     internal abstract class IndexMap
     {

@@ -17,12 +17,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Shared;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents a BSON document.

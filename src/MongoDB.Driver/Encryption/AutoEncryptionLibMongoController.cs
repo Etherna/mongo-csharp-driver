@@ -18,13 +18,13 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
-using MongoDB.Driver.Core.WireProtocol;
-using MongoDB.Libmongocrypt;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.WireProtocol;
+using Etherna.MongoDB.Libmongocrypt;
 
-namespace MongoDB.Driver.Encryption
+namespace Etherna.MongoDB.Driver.Encryption
 {
     internal sealed class AutoEncryptionLibMongoCryptController : LibMongoCryptControllerBase, IBinaryDocumentFieldDecryptor, IBinaryCommandFieldEncryptor
     {

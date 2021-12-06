@@ -15,9 +15,9 @@
 
 using System;
 using System.Net;
-using MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Clusters;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
     /// Occurs before a server is added to the cluster.

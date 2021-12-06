@@ -20,9 +20,9 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     /// <summary>
     /// Represents a connection factory.

@@ -15,7 +15,7 @@
 
 using System.Text;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a class that has some helper methods for decoding UTF8 strings.

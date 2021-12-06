@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     /// <summary>
     /// Represents the map-reduce output mode.

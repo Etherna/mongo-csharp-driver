@@ -15,9 +15,9 @@
 
 using System.Linq;
 using System.Linq.Expressions;
-using MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Linq;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
 {
     internal static class ExpressionHelper
     {

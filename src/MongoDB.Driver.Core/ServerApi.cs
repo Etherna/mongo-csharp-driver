@@ -15,10 +15,10 @@
 
 using System;
 using System.Text;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents a server API.

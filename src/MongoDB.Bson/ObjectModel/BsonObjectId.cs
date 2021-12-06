@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents a BSON ObjectId value (see also ObjectId).

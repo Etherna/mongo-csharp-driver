@@ -18,10 +18,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents a collection namespace.

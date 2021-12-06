@@ -17,9 +17,9 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Bindings;
 
-namespace MongoDB.Driver.GridFS
+namespace Etherna.MongoDB.Driver.GridFS
 {
     internal abstract class GridFSDownloadStreamBase<TFileId> : GridFSDownloadStream<TFileId>
     {

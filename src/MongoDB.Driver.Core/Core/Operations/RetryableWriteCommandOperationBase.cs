@@ -18,17 +18,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Core.Bindings;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.WireProtocol;
-using MongoDB.Driver.Core.WireProtocol.Messages;
-using MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.WireProtocol;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     /// <summary>
     /// Represents a base class for a delete, insert or update command operation.

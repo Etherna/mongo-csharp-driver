@@ -15,12 +15,12 @@
 
 using System;
 using System.Net.Sockets;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 using System.Runtime.Serialization;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents a MongoDB connection exception.

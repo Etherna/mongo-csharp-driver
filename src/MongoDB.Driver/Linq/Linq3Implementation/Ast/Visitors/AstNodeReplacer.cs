@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors
 {
     internal sealed class AstNodeReplacer : AstNodeVisitor
     {

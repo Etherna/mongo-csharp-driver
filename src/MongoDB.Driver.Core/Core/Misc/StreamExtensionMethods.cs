@@ -17,9 +17,9 @@ using System;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     internal static class StreamExtensionMethods
     {

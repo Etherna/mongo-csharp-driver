@@ -16,12 +16,12 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Misc;
-using MongoDB.Driver.Linq.Linq3Implementation.Serializers;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
 {
     internal static class ExpressionToAggregationExpressionTranslator
     {

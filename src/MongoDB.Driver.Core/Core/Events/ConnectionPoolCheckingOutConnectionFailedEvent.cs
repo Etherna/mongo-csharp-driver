@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
     /// Occurs when a connection could not be checked out of the pool.

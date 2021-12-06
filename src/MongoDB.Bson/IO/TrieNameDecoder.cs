@@ -15,7 +15,7 @@
 
 using System.Text;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a Trie-based name decoder that also provides a value.

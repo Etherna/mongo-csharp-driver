@@ -18,12 +18,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Libmongocrypt;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Libmongocrypt;
 
-namespace MongoDB.Driver.Encryption
+namespace Etherna.MongoDB.Driver.Encryption
 {
     internal sealed class ExplicitEncryptionLibMongoCryptController : LibMongoCryptControllerBase
     {

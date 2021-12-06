@@ -16,7 +16,7 @@
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal class NameGenerator
     {

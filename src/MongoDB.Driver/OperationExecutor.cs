@@ -15,10 +15,10 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Bindings;
-using MongoDB.Driver.Core.Operations;
+using Etherna.MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Operations;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     internal sealed class OperationExecutor : IOperationExecutor
     {

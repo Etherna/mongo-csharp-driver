@@ -17,12 +17,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Clusters.ServerSelectors;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Configuration
+namespace Etherna.MongoDB.Driver.Core.Configuration
 {
     /// <summary>
     /// Represents settings for a cluster.

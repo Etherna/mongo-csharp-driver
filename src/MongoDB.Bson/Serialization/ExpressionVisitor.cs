@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     // TODO: this class duplicates a similar class in MongoDB.Driver.dll
     // when we move to .NET Framework 4 we can use .NET's version of ExpressionVisitor and eliminate the duplication

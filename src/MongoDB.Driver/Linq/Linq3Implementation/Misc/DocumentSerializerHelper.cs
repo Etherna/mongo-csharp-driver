@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal static class DocumentSerializerHelper
     {

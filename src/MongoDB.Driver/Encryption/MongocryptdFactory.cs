@@ -20,10 +20,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Encryption
+namespace Etherna.MongoDB.Driver.Encryption
 {
     internal static class EncryptionExtraOptionsValidator
     {

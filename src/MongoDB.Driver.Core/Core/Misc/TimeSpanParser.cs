@@ -20,7 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     internal static class TimeSpanParser
     {

@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for nullable values.

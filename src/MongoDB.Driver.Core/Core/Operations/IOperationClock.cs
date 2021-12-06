@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     /// <summary>
     /// An operation clock.

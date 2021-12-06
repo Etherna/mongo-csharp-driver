@@ -16,7 +16,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MongoDB.Driver.GridFS
+namespace Etherna.MongoDB.Driver.GridFS
 {
     /// <summary>
     /// Represents a GridFS exception.

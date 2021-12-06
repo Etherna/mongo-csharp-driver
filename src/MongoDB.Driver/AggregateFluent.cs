@@ -13,15 +13,15 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     internal abstract class AggregateFluent<TInput, TResult> : AggregateFluentBase<TResult>
     {

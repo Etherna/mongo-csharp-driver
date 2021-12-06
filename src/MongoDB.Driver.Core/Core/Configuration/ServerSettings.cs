@@ -16,9 +16,9 @@
 using System;
 using System.Net.Sockets;
 using System.Threading;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Configuration
+namespace Etherna.MongoDB.Driver.Core.Configuration
 {
     /// <summary>
     /// Represents settings for a server.

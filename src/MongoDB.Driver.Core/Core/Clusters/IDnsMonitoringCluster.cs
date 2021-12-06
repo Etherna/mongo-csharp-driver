@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 
-namespace MongoDB.Driver.Core.Clusters
+namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     /// <summary>
     /// An interface implemented by an ICluster that starts a DnsMonitor on a separate thread and handles the resulting calls to ProcessDnsResults.

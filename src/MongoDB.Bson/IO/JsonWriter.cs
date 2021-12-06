@@ -20,7 +20,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a BSON writer to a TextWriter (in JSON format).

@@ -14,10 +14,10 @@
 */
 
 using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// The behavior of $merge is a result document and an existing document in the collection

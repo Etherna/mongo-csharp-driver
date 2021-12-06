@@ -15,7 +15,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace MongoDB.Driver.Core.Authentication.Sspi
+namespace Etherna.MongoDB.Driver.Core.Authentication.Sspi
 {
     /// <summary>
     /// A SecPkgContext_Sizes structure.

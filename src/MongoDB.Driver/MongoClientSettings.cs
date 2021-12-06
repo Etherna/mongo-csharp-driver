@@ -18,15 +18,15 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Encryption;
-using MongoDB.Driver.Linq;
-using MongoDB.Shared;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Encryption;
+using Etherna.MongoDB.Driver.Linq;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// The settings for a MongoDB client.

@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver.Encryption
+namespace Etherna.MongoDB.Driver.Encryption
 {
     /// <summary>
     /// Represents an encryption algorithm.

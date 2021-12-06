@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// A convention that sets whether to ignore default values during serialization.

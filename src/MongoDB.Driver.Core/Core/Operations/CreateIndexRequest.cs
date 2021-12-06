@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     /// <summary>
     /// Represents a create index request.

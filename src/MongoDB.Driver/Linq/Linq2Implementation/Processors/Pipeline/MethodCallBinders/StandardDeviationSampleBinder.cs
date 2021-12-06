@@ -16,12 +16,12 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Linq;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.Pipeline.MethodCallBinders
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Pipeline.MethodCallBinders
 {
     internal sealed class StandardDeviationSampleBinder : SelectingResultOperatorBinderBase
     {

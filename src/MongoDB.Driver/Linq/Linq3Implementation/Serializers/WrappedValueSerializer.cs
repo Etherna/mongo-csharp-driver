@@ -14,12 +14,12 @@
 */
 
 using System;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Serializers
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers
 {
     internal interface IWrappedValueSerializer : IBsonSerializer
     {

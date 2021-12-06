@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders
 {
     [Flags]
     internal enum OpMsgFlags

@@ -16,9 +16,9 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors
 {
     internal interface IBindingContext
     {

@@ -17,11 +17,11 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Runtime.Serialization;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     /// <summary>
     /// Represents a server identifier.

@@ -16,7 +16,7 @@
 using System;
 using System.Threading;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a class that provides reusable buffer per thread.

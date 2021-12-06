@@ -19,10 +19,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators
 {
     internal sealed class AnyResultOperator : ResultOperator, IResultTransformer
     {

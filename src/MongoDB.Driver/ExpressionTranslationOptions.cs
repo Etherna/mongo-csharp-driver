@@ -14,7 +14,7 @@
 * 
 */
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Options for controlling translation from .NET expression trees into MongoDB expressions.

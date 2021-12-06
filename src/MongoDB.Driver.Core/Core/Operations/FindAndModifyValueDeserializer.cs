@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     /// <summary>
     /// Represents a deserializer for find and modify result values.

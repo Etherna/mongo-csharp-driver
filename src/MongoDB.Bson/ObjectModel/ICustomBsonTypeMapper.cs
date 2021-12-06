@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// An interface for custom mappers that map an object to a BsonValue.

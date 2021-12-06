@@ -21,10 +21,10 @@ using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     /// <summary>
     /// Represents the result of a buildInfo command.

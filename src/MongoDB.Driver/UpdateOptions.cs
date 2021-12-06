@@ -14,9 +14,9 @@
 */
 
 using System.Collections.Generic;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Options for updating a single document.

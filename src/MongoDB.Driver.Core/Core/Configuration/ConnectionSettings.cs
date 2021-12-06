@@ -16,11 +16,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Driver.Core.Authentication;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Authentication;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Configuration
+namespace Etherna.MongoDB.Driver.Core.Configuration
 {
     /// <summary>
     /// Represents settings for a connection.

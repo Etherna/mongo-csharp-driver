@@ -18,10 +18,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
 {
     internal static class SerializerHelper
     {

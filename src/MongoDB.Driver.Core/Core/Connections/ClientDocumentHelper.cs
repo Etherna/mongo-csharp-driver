@@ -17,9 +17,9 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     internal class ClientDocumentHelper
     {

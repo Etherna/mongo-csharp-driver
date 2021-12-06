@@ -18,12 +18,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents a BSON document that is deserialized lazily.

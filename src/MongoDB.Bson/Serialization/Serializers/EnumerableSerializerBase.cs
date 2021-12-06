@@ -16,9 +16,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MongoDB.Bson.Serialization.Conventions;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a base serializer for enumerable values.

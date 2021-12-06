@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver.GeoJsonObjectModel
+namespace Etherna.MongoDB.Driver.GeoJsonObjectModel
 {
     /// <summary>
     /// Represents the type of a GeoJson object.

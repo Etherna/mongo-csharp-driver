@@ -16,7 +16,7 @@
 using System;
 using System.ComponentModel;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Prevents the Xamarin managed linker from stripping the target.

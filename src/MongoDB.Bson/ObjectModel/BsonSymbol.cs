@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     // TODO: [Serializable] // must have custom deserialization to do SymbolTable lookup
     /// <summary>

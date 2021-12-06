@@ -15,13 +15,13 @@
 
 using System;
 using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents a DBRef (a convenient way to refer to a document).

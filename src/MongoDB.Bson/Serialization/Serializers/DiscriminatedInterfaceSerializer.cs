@@ -15,9 +15,9 @@
 
 using System;
 using System.Reflection;
-using MongoDB.Bson.Serialization.Conventions;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for Interfaces.

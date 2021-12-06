@@ -21,7 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DnsClient;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     internal class DnsClientWrapper : IDnsResolver
     {

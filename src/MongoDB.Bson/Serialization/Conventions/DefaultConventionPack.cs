@@ -15,7 +15,7 @@
 
 using System.Collections.Generic;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// Convention pack of defaults.

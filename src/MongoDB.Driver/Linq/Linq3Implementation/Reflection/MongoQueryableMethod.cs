@@ -18,9 +18,9 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
-using MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Linq;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Reflection
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
 {
     internal static class MongoQueryableMethod
     {

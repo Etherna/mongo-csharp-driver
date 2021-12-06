@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver.Core.Bindings
+namespace Etherna.MongoDB.Driver.Core.Bindings
 {
     /// <summary>
     /// Represents the current state of a Core transaction.

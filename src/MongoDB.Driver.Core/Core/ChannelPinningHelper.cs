@@ -14,13 +14,13 @@
 */
 
 using System.Threading;
-using MongoDB.Driver.Core.Bindings;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.ConnectionPools;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.ConnectionPools;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core
+namespace Etherna.MongoDB.Driver.Core
 {
     /// <summary>
     /// Connection pinning helper.

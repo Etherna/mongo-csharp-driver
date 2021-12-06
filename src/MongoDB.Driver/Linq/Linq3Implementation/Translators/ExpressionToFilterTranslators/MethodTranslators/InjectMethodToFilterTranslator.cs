@@ -15,14 +15,14 @@
 
 using System.Linq;
 using System.Linq.Expressions;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
-using MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
-using MongoDB.Driver.Linq.Linq3Implementation.Misc;
-using MongoDB.Driver.Linq.Linq3Implementation.Reflection;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.MethodTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.MethodTranslators
 {
     internal static class InjectMethodToFilterTranslator
     {

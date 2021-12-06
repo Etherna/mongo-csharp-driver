@@ -15,13 +15,13 @@
 
 using System.Linq.Expressions;
 using System.Reflection;
-using MongoDB.Bson;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
-using MongoDB.Driver.Linq.Linq3Implementation.Misc;
-using MongoDB.Driver.Linq.Linq3Implementation.Reflection;
-using MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ToFilterFieldTranslators;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ToFilterFieldTranslators;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ExpressionTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ExpressionTranslators
 {
     internal static class MemberExpressionToFilterTranslator
     {

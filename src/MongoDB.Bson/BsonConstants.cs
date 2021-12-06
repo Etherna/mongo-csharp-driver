@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// A static class containing BSON constants.

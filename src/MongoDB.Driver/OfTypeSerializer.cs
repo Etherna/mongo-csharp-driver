@@ -14,10 +14,10 @@
 */
 
 using System;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     internal sealed class OfTypeSerializer<TRootDocument, TDerivedDocument> : SerializerBase<TDerivedDocument>, IBsonDocumentSerializer, IBsonIdProvider
         where TDerivedDocument : TRootDocument

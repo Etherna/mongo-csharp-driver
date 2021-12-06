@@ -16,9 +16,9 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Provides serializers based on an attribute.

@@ -19,11 +19,11 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Events.Diagnostics
+namespace Etherna.MongoDB.Driver.Core.Events.Diagnostics
 {
     internal static class TraceSourceEventHelper
     {

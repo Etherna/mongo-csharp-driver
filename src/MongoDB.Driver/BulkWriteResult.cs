@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents the result of a bulk write operation.

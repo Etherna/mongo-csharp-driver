@@ -16,7 +16,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents a MongoDB internal exception (almost surely the result of a bug).

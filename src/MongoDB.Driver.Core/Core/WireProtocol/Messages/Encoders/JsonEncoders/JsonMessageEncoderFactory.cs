@@ -14,10 +14,10 @@
 */
 
 using System.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders.JsonEncoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.JsonEncoders
 {
     /// <summary>
     /// Represents a factory for JSON message encoders.

@@ -17,10 +17,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Clusters
+namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     /// <summary>
     /// Represents the config of a replica set (as reported by one of the members of the replica set).

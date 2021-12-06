@@ -17,11 +17,11 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Authentication
+namespace Etherna.MongoDB.Driver.Core.Authentication
 {
     /// <summary>
     /// The default authenticator.

@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     /// <summary>
     /// Represents a feature that is not supported by all versions of the server.

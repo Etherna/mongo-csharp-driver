@@ -18,9 +18,9 @@ using System.Linq;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Configuration
+namespace Etherna.MongoDB.Driver.Core.Configuration
 {
     /// <summary>
     /// Represents settings for an SSL stream.

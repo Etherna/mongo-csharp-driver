@@ -18,7 +18,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     // this is a minimal implementation of UInt128 containing only what we need for Decimal128
     internal struct UInt128 : IComparable<UInt128>, IEquatable<UInt128>

@@ -16,7 +16,7 @@
 using System;
 using System.Globalization;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Encodes and decodes scalar values to JSON compatible strings.

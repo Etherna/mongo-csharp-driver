@@ -15,12 +15,12 @@
 
 using System;
 using System.IO;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 using SharpCompress.Compressors;
 using SharpCompress.Compressors.Deflate;
 using SharpCompress.IO;
 
-namespace MongoDB.Driver.Core.Compression
+namespace Etherna.MongoDB.Driver.Core.Compression
 {
     /// <summary>
     /// Compressor according to the zlib algorithm.

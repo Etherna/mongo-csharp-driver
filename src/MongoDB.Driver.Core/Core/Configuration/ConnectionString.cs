@@ -21,13 +21,13 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Compression;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Compression;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Configuration
+namespace Etherna.MongoDB.Driver.Core.Configuration
 {
     /// <summary>
     ///  Represents the scheme used to construct the connection string.

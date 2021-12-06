@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents index option defaults.

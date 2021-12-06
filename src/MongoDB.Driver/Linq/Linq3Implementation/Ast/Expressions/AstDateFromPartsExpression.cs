@@ -13,12 +13,12 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
 using System;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
 {
     internal sealed class AstDateFromPartsExpression : AstExpression
     {

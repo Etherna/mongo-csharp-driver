@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Driver.Core.NativeLibraryLoader;
+using Etherna.MongoDB.Driver.Core.NativeLibraryLoader;
 using System;
 
-namespace MongoDB.Driver.Core.Compression.Snappy
+namespace Etherna.MongoDB.Driver.Core.Compression.Snappy
 {
     internal static class SnappyAdapter
     {

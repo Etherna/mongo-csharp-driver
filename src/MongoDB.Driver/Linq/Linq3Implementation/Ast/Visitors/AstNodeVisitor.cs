@@ -16,11 +16,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors
 {
     internal abstract class AstNodeVisitor
     {

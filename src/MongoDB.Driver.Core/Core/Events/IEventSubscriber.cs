@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
     /// A subscriber to events.

@@ -15,11 +15,11 @@
 
 using System;
 using System.Collections.Generic;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
     /// Occurs after a message has been sent.

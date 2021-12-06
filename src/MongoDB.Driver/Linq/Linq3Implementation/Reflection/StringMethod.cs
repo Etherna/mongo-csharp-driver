@@ -16,9 +16,9 @@
 using System;
 using System.Globalization;
 using System.Reflection;
-using MongoDB.Driver.Linq.Linq3Implementation.Reflection;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal static class StringMethod
     {

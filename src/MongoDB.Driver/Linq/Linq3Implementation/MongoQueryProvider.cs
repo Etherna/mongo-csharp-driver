@@ -18,11 +18,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Linq;
-using MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
 {
     internal abstract class MongoQueryProvider : IMongoQueryProvider
     {

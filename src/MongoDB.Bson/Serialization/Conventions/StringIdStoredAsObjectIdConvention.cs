@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization.IdGenerators;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization.IdGenerators;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// A convention that sets the representation of a string id class member to ObjectId in BSON with a StringObjectIdGenerator.

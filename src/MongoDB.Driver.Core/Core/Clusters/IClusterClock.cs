@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Core.Clusters
+namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     /// <summary>
     /// A cluster clock.

@@ -15,9 +15,9 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Clusters.ServerSelectors
+namespace Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors
 {
     /// <summary>
     /// Represents a server selector that selects writable servers.

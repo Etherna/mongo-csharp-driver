@@ -16,7 +16,7 @@
 using System;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// A convention that looks up an id generator for the id member.

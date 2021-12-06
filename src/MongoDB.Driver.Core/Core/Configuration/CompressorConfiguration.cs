@@ -14,10 +14,10 @@
 */
 
 using System.Collections.Generic;
-using MongoDB.Driver.Core.Compression;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Compression;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Configuration
+namespace Etherna.MongoDB.Driver.Core.Configuration
 {
     /// <summary>
     /// Represents a compressor configuration.

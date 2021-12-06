@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.Serialization.Attributes
+namespace Etherna.MongoDB.Bson.Serialization.Attributes
 {
     /// <summary>
     /// Specifies that the class's IdMember should be null.

@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.Serialization.Attributes
+namespace Etherna.MongoDB.Bson.Serialization.Attributes
 {
     /// <summary>
     /// Specifies the default value for a field or property.

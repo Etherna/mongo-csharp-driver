@@ -16,7 +16,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Core.WireProtocol
+namespace Etherna.MongoDB.Driver.Core.WireProtocol
 {
     /// <summary>
     /// Interface for decrypting fields in a binary document.

@@ -18,7 +18,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// Maps a fully immutable type. This will include anonymous types.

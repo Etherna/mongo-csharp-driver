@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.Authentication.Sspi
+namespace Etherna.MongoDB.Driver.Core.Authentication.Sspi
 {
     /// <summary>
     /// Flags for InitiateSecurityContext.

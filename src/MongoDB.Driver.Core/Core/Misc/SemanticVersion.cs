@@ -16,7 +16,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     /// <summary>
     /// Represents a semantic version number.

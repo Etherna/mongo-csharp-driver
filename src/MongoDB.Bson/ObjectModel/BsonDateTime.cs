@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents a BSON DateTime value.

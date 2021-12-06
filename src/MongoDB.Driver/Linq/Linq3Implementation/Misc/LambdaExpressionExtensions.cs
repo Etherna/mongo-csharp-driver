@@ -14,11 +14,11 @@
 */
 
 using System.Linq.Expressions;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Linq.Linq3Implementation.Translators;
-using MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal static class LambdaExpressionExtensions
     {

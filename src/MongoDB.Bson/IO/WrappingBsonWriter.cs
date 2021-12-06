@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// An abstract base class for an IBsonWriter that wraps another IBsonWriter.

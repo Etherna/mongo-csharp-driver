@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 using System;
 
-namespace MongoDB.Driver.Encryption
+namespace Etherna.MongoDB.Driver.Encryption
 {
     /// <summary>
     /// Encryption options for explicit encryption.

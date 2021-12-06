@@ -17,9 +17,9 @@
 using System;
 using System.Globalization;
 using System.Linq.Expressions;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
 {
     internal class FieldExpressionFlattener : ExtensionExpressionVisitor
     {

@@ -20,14 +20,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Core.Bindings;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Operations;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Operations;
 
-namespace MongoDB.Driver.GridFS
+namespace Etherna.MongoDB.Driver.GridFS
 {
     internal class GridFSSeekableDownloadStream<TFileId> : GridFSDownloadStreamBase<TFileId>
     {

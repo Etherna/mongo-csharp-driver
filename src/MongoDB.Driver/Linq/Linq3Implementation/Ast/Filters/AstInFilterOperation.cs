@@ -15,12 +15,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
-using MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters
 {
     internal sealed class AstInFilterOperation : AstFilterOperation
     {

@@ -14,13 +14,13 @@
 */
 
 using System;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
     /// Occurs when the pool is about to be cleared.

@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     // this interface is public so custom serializers can choose to implement it
     // but typically you would choose to implement this interface explicitly

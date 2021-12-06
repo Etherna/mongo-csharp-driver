@@ -15,11 +15,11 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Operations;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Operations;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// The client interface to MongoDB.

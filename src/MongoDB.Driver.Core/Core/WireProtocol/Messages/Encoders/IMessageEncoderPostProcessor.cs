@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Driver.Core.WireProtocol.Messages.Encoders
+namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders
 {
     /// <summary>
     /// Represents the changes that can be made to a message after it has been encoded.

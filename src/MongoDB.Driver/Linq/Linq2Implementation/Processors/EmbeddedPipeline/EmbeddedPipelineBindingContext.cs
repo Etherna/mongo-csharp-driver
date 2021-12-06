@@ -17,10 +17,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline
 {
     internal sealed class EmbeddedPipelineBindingContext : IBindingContext
     {

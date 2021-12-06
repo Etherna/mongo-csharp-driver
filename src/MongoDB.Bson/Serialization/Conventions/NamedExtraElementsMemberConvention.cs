@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// A convention that finds the extra elements member by name (and that is also of type <see cref="BsonDocument"/> or <see cref="IDictionary{String, Object}"/>).

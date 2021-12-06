@@ -16,7 +16,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MongoDB.Driver.Core.Authentication
+namespace Etherna.MongoDB.Driver.Core.Authentication
 {
     /// <summary>
     /// Thrown from a GSSAPI-related method.

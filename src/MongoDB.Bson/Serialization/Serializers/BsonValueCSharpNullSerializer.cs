@@ -14,9 +14,9 @@
 */
 
 using System.Collections.Generic;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for a BsonValue that can round trip C# null.

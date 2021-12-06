@@ -21,9 +21,9 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Provides serializers for collections.

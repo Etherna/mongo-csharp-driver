@@ -15,9 +15,9 @@
 
 using System;
 using System.Reflection;
-using MongoDB.Bson.Serialization.Options;
+using Etherna.MongoDB.Bson.Serialization.Options;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// A convention that allows you to set the Enum serialization representation

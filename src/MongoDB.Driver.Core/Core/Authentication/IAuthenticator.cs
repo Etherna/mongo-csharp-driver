@@ -15,10 +15,10 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Connections;
 
-namespace MongoDB.Driver.Core.Authentication
+namespace Etherna.MongoDB.Driver.Core.Authentication
 {
     /// <summary>
     /// Represents a connection authenticator.

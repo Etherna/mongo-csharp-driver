@@ -17,12 +17,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Support;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Support;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     internal static class FieldValueSerializerHelper
     {

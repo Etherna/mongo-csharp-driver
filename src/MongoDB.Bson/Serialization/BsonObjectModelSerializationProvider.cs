@@ -16,9 +16,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Provides serializers for BsonValue and its derivations.

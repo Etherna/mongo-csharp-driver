@@ -17,10 +17,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Represents a serializer for a class map.

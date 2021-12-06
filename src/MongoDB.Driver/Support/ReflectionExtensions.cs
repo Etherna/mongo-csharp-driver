@@ -17,9 +17,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Support
+namespace Etherna.MongoDB.Driver.Support
 {
     internal static class ReflectionExtensions
     {

@@ -16,11 +16,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Bindings
+namespace Etherna.MongoDB.Driver.Core.Bindings
 {
     /// <summary>
     /// Represents a handle to a channel source.

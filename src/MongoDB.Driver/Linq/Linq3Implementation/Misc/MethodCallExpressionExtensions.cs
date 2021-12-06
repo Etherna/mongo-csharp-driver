@@ -17,7 +17,7 @@ using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal static class MethodCallExpressionExtensions
     {

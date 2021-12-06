@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.IO;
-using MongoDB.Driver.Core.Operations.ElementNameValidators;
-namespace MongoDB.Driver.Core.Operations
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Driver.Core.Operations.ElementNameValidators;
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     /// <summary>
     /// Represents the update type.

@@ -16,7 +16,7 @@
 using System;
 using System.Net;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     internal class ServerMonitorSettings
     {

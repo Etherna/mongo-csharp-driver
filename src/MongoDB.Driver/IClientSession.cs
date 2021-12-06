@@ -16,10 +16,10 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Bindings;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// The interface for a client session.

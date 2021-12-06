@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Translators
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Translators
 {
     internal sealed class ProjectedObject
     {

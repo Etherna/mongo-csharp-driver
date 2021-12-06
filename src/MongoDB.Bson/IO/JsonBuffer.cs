@@ -17,7 +17,7 @@ using System;
 using System.IO;
 using System.Text;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a wrapper around a TextReader to provide some buffering functionality.

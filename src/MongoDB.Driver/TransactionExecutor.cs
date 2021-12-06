@@ -16,11 +16,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Bindings;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Support;
+using Etherna.MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Support;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     internal static class TransactionExecutor
     {

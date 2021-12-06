@@ -16,7 +16,7 @@
 using System;
 using System.Text.RegularExpressions;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents a BSON regular expression value.

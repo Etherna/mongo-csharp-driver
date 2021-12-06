@@ -18,9 +18,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Linq;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors
 {
     internal sealed class PartialEvaluator : ExpressionVisitor
     {

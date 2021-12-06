@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Defines the time series options to use when creating a time series collection. See https://docs.mongodb.com/manual/reference/command/create/ for supported options

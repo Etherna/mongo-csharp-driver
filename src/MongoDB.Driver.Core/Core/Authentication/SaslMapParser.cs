@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace MongoDB.Driver.Core.Authentication
+namespace Etherna.MongoDB.Driver.Core.Authentication
 {
     /// <summary>
     /// Per RFC5802: https://tools.ietf.org/html/rfc5802

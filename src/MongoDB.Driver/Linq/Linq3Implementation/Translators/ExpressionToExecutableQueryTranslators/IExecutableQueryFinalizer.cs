@@ -16,7 +16,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators
 {
     internal interface IExecutableQueryFinalizer<TOutput, TResult>
     {

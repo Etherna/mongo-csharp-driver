@@ -14,13 +14,13 @@
 */
 
 using System.Net;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Connections;
-using MongoDB.Driver.Core.Events;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.ConnectionPools
+namespace Etherna.MongoDB.Driver.Core.ConnectionPools
 {
     internal sealed class ExclusiveConnectionPoolFactory : IConnectionPoolFactory
     {

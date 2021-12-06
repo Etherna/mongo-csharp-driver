@@ -16,10 +16,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Operations;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Operations;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Base class for a write model.

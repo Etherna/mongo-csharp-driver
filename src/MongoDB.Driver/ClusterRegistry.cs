@@ -18,12 +18,12 @@ using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography.X509Certificates;
-using MongoDB.Driver.Core.Authentication;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Authentication;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents a registry of already created clusters.

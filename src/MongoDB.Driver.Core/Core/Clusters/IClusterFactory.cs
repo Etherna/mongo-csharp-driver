@@ -14,7 +14,7 @@
 */
 
 
-namespace MongoDB.Driver.Core.Clusters
+namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     /// <summary>
     /// Represents a cluster factory.

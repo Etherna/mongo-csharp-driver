@@ -46,7 +46,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MongoDB.Driver.Core.Authentication.Vendored
+namespace Etherna.MongoDB.Driver.Core.Authentication.Vendored
 {
     internal class Rfc2898DeriveBytes : DeriveBytes
     {

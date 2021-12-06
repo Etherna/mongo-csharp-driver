@@ -20,15 +20,15 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Bindings;
-using MongoDB.Driver.Core.Clusters.ServerSelectors;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Events;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
-using MongoDB.Libmongocrypt;
+using Etherna.MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Libmongocrypt;
 
-namespace MongoDB.Driver.Core.Clusters
+namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     /// <summary>
     /// Represents a cluster.

@@ -14,13 +14,13 @@
 */
 
 using System.Linq.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages;
-using MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
-using MongoDB.Driver.Linq.Linq3Implementation.Misc;
-using MongoDB.Driver.Linq.Linq3Implementation.Reflection;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToPipelineTranslators
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToPipelineTranslators
 {
     internal static class TakeMethodToPipelineTranslator
     {

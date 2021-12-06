@@ -16,7 +16,7 @@
 using System;
 using System.Text;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents settings for a JsonWriter.

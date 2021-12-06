@@ -16,7 +16,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace MongoDB.Driver.Core.Authentication.Libgssapi
+namespace Etherna.MongoDB.Driver.Core.Authentication.Libgssapi
 {
     [StructLayout(LayoutKind.Sequential)]
     internal class GssOutputBuffer : IDisposable

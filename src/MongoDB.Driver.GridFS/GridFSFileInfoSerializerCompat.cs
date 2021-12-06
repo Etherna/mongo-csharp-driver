@@ -13,11 +13,11 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver.GridFS
+namespace Etherna.MongoDB.Driver.GridFS
 {
     /// <summary>
     /// Represents a serializer for GridFSFileInfo.

@@ -15,7 +15,7 @@
 
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// A convention that finds readable and writeable members and adds them to the class map.

@@ -15,9 +15,9 @@
 
 using System;
 using System.Text;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents the details of a write error.

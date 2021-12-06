@@ -18,12 +18,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Linq;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Methods for building pipeline stages.

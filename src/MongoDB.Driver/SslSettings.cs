@@ -21,10 +21,10 @@ using System.Net.Security;
 using System.Reflection;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents the settings for using SSL.

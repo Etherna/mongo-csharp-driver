@@ -14,11 +14,11 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     /// <summary>
     /// Represents a connection identifier.

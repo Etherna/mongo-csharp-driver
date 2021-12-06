@@ -15,7 +15,7 @@
 
 using System.Collections.Generic;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     internal interface ICreatorSelector
     {

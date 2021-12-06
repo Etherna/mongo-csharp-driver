@@ -18,9 +18,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reflection;
-using MongoDB.Bson.Serialization.Options;
+using Etherna.MongoDB.Bson.Serialization.Options;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for a class that implements <see cref="IDictionary{TKey, TValue}"/>.

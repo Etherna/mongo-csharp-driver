@@ -21,7 +21,7 @@ using System.Security;
 using System.Security.Principal;
 using System.Text;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents an identity in MongoDB.

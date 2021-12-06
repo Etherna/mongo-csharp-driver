@@ -15,9 +15,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Connections;
 
-namespace MongoDB.Driver.Core.WireProtocol
+namespace Etherna.MongoDB.Driver.Core.WireProtocol
 {
     internal interface IWireProtocol
     {

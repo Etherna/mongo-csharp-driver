@@ -15,7 +15,7 @@
 
 using System.Linq.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
 {
     /// <remarks>
     /// VB uses a method for string comparisons, so we'll convert this into a BinaryExpression.

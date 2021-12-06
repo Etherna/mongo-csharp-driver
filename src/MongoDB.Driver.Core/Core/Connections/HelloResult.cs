@@ -17,13 +17,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Compression;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Compression;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     /// <summary>
     /// Represents the result of a hello or legacy hello command.

@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Bindings;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Client session options.

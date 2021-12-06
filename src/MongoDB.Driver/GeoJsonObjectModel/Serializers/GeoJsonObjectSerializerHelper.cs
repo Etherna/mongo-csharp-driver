@@ -16,12 +16,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Driver.GeoJsonObjectModel.Serializers
+namespace Etherna.MongoDB.Driver.GeoJsonObjectModel.Serializers
 {
     /// <summary>
     /// Represents a serializer helper for GeoJsonObjects.

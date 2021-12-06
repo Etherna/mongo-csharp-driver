@@ -16,9 +16,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver.Linq
+namespace Etherna.MongoDB.Driver.Linq
 {
     /// <summary>
     /// An execution model.

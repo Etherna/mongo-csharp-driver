@@ -14,9 +14,9 @@
 */
 
 using System.Net;
-using MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Clusters;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     /// <summary>
     /// Represents a server factory.

@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 using System;
 
-namespace MongoDB.Bson.Serialization.Attributes
+namespace Etherna.MongoDB.Bson.Serialization.Attributes
 {
     /// <summary>
     /// Specifies the Guid representation to use with the GuidSerializer for this member.

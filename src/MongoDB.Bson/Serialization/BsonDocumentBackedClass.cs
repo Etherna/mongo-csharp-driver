@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// A class backed by a BsonDocument.

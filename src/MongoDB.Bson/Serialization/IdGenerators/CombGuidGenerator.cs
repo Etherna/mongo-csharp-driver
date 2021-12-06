@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.Serialization.IdGenerators
+namespace Etherna.MongoDB.Bson.Serialization.IdGenerators
 {
     /// <summary>
     /// Represents an Id generator for Guids using the COMB algorithm.

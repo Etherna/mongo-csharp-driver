@@ -18,14 +18,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Core.Authentication;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.WireProtocol;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Core.Authentication;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.WireProtocol;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     /// <summary>
     /// Represents a connection initializer (opens and authenticates connections).

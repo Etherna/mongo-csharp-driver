@@ -14,9 +14,9 @@
 */
 
 using System.Collections.Generic;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Encryption
+namespace Etherna.MongoDB.Driver.Encryption
 {
     /// <summary>
     /// Client encryption options.

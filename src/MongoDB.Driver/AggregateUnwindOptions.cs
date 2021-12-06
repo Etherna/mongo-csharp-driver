@@ -13,9 +13,9 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Options for the $unwind aggregation stage.

@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors
 {
     internal sealed class ProjectionMapping
     {

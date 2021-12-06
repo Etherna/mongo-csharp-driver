@@ -16,9 +16,9 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Represents the mapping between a field or property and a BSON element.

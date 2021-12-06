@@ -17,7 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// A convention that uses the names of the creator parameters to find the matching members.

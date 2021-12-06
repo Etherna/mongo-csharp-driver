@@ -17,10 +17,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson.Serialization.Conventions;
-using MongoDB.Bson.Serialization.Options;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
+using Etherna.MongoDB.Bson.Serialization.Options;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for Stacks.

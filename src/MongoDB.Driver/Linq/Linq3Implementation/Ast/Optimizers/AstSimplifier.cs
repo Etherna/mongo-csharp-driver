@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 {
     internal class AstSimplifier : AstNodeVisitor
     {

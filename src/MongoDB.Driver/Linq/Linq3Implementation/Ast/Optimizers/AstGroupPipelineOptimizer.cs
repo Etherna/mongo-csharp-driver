@@ -16,13 +16,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 {
     internal class AstGroupPipelineOptimizer
     {

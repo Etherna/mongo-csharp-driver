@@ -15,7 +15,7 @@
 
 using System.Globalization;
 
-namespace MongoDB.Shared
+namespace Etherna.MongoDB.Shared
 {
     internal static class HexUtils
     {

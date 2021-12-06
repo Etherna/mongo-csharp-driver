@@ -19,9 +19,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// A static class that maps between .NET objects and BsonValues.

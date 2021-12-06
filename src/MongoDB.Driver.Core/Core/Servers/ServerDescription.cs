@@ -16,11 +16,11 @@
 using System;
 using System.Net;
 using System.Text;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Servers
+namespace Etherna.MongoDB.Driver.Core.Servers
 {
     /// <summary>
     /// Represents information about a server.

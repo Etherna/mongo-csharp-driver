@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Represents all the contextual information needed by a serializer to serialize a value.

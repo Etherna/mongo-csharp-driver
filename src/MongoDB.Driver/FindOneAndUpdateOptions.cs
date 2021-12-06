@@ -15,10 +15,10 @@
 
 using System;
 using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Options for a findAndModify command to update an object.

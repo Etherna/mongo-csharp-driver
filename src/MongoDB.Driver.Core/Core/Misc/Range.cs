@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Shared;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     /// <summary>
     /// Represents a range between a minimum and a maximum value.

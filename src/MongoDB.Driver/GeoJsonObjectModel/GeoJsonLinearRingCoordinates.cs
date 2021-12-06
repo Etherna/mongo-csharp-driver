@@ -16,10 +16,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver.GeoJsonObjectModel.Serializers;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Driver.GeoJsonObjectModel.Serializers;
 
-namespace MongoDB.Driver.GeoJsonObjectModel
+namespace Etherna.MongoDB.Driver.GeoJsonObjectModel
 {
     /// <summary>
     /// Represents the coordinates of a GeoJson linear ring.

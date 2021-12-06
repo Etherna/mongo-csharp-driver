@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Model for inserting a single document.

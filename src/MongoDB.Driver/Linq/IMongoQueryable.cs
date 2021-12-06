@@ -14,9 +14,9 @@
 */
 
 using System.Linq;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver.Linq
+namespace Etherna.MongoDB.Driver.Linq
 {
     /// <summary>
     /// Provides functionality to evaluate queries against MongoDB.

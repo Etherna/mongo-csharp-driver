@@ -17,7 +17,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Security;
 
-namespace MongoDB.Driver.Core.Authentication.Sspi
+namespace Etherna.MongoDB.Driver.Core.Authentication.Sspi
 {
     /// <summary>
     /// SEC_WINNT_AUTH_IDENTITY

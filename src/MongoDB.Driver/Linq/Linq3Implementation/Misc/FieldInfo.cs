@@ -13,10 +13,10 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal class FieldInfo
     {

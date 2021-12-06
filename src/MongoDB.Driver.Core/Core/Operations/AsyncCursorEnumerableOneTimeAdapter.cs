@@ -17,9 +17,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.Core.Operations
+namespace Etherna.MongoDB.Driver.Core.Operations
 {
     internal class AsyncCursorEnumerableOneTimeAdapter<TDocument> : IEnumerable<TDocument>
     {

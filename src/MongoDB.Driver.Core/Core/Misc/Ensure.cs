@@ -19,7 +19,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace MongoDB.Driver.Core.Misc
+namespace Etherna.MongoDB.Driver.Core.Misc
 {
     /// <summary>
     /// Represents methods that can be used to ensure that parameter values meet expected conditions.

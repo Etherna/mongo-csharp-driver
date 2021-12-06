@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents the representation to use when converting a Guid to a BSON binary value.

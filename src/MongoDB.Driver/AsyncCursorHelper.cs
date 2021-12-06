@@ -18,7 +18,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     internal static class AsyncCursorHelper
     {

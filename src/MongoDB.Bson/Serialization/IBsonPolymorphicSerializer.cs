@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// An interface implemented by a polymorphic serializer.

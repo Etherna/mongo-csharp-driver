@@ -18,7 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace MongoDB.Driver.Support
+namespace Etherna.MongoDB.Driver.Support
 {
     internal static class EndPointExtensions
     {

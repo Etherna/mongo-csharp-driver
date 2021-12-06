@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Bson.IO
+namespace Etherna.MongoDB.Bson.IO
 {
     /// <summary>
     /// Represents a fast converter from integer indexes to UTF8 BSON array element names.

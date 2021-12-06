@@ -15,10 +15,10 @@
 
 using System;
 using System.Linq;
-using MongoDB.Bson.IO;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.Serialization.Conventions
+namespace Etherna.MongoDB.Bson.Serialization.Conventions
 {
     /// <summary>
     /// Represents the standard discriminator conventions (see ScalarDiscriminatorConvention and HierarchicalDiscriminatorConvention).

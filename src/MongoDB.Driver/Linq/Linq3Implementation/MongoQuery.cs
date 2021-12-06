@@ -20,11 +20,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson;
-using MongoDB.Driver.Linq;
-using MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
 {
     internal abstract class MongoQuery<TOutput>
     {

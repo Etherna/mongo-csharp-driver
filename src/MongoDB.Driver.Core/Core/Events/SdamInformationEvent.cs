@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Core.Events
+namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
     /// An informational event used for logging Server Discovery and Monitoring (SDAM) events. 

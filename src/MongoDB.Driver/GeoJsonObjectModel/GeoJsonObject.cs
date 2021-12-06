@@ -13,11 +13,11 @@
 * limitations under the License.
 */
 
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver.GeoJsonObjectModel.Serializers;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization.Attributes;
+using Etherna.MongoDB.Driver.GeoJsonObjectModel.Serializers;
 
-namespace MongoDB.Driver.GeoJsonObjectModel
+namespace Etherna.MongoDB.Driver.GeoJsonObjectModel
 {
     /// <summary>
     /// Represents a GeoJson object (see subclasses).

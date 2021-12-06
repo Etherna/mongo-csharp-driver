@@ -22,17 +22,17 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using MongoDB.Bson.IO;
-using MongoDB.Driver.Core.Compression;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Events;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.Servers;
-using MongoDB.Driver.Core.WireProtocol.Messages;
-using MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Driver.Core.Compression;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncoders;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     /// <summary>
     /// Represents a connection using the binary wire protocol over a binary stream.

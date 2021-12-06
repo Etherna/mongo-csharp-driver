@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal static class TypeExtensions
     {

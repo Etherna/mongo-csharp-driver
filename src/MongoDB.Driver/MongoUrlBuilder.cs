@@ -18,15 +18,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using MongoDB.Bson;
-using MongoDB.Bson.IO;
-using MongoDB.Driver.Core.Clusters;
-using MongoDB.Driver.Core.Compression;
-using MongoDB.Driver.Core.Configuration;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Support;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Compression;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Support;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// Represents URL-style connection strings.

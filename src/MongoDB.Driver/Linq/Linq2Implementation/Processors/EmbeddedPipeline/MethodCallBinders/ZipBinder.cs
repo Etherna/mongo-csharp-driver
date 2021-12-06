@@ -18,11 +18,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
-using MongoDB.Driver.Linq.Linq2Implementation.Expressions;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline.MethodCallBinders
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.EmbeddedPipeline.MethodCallBinders
 {
     internal sealed class ZipBinder : IMethodCallBinder<EmbeddedPipelineBindingContext>
     {

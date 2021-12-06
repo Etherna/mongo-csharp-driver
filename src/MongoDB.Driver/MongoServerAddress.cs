@@ -15,9 +15,9 @@
 
 using System;
 using System.Text.RegularExpressions;
-using MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.IO;
 
-namespace MongoDB.Driver
+namespace Etherna.MongoDB.Driver
 {
     /// <summary>
     /// The address of a MongoDB server.

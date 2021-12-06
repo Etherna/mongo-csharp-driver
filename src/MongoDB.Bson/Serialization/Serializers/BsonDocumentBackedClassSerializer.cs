@@ -15,9 +15,9 @@
 
 using System;
 using System.Collections.Generic;
-using MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// Represents a serializer for TClass (a subclass of BsonDocumentBackedClass).

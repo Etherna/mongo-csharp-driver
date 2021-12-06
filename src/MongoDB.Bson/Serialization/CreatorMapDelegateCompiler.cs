@@ -19,7 +19,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Collections.Generic;
 
-namespace MongoDB.Bson.Serialization
+namespace Etherna.MongoDB.Bson.Serialization
 {
     /// <summary>
     /// A helper class used to create and compile delegates for creator maps.

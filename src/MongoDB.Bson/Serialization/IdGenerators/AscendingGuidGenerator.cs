@@ -21,7 +21,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace MongoDB.Bson.Serialization.IdGenerators
+namespace Etherna.MongoDB.Bson.Serialization.IdGenerators
 {
     /// <summary>
     /// A GUID generator that generates GUIDs in ascending order. To enable 

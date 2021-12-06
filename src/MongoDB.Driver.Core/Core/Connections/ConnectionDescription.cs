@@ -15,12 +15,12 @@
 
 using System;
 using System.Collections.Generic;
-using MongoDB.Bson;
-using MongoDB.Driver.Core.Compression;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Shared;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Compression;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Driver.Core.Connections
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
     /// <summary>
     /// Represents information describing a connection.

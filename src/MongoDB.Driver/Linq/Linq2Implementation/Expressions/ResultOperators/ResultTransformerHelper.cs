@@ -20,7 +20,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators
+namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions.ResultOperators
 {
     internal static class ResultTransformerHelper
     {

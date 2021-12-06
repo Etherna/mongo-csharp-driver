@@ -17,9 +17,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSerializers
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSerializers
 {
     internal class KnownSerializersRegistry
     {

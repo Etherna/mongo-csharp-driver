@@ -15,7 +15,7 @@
 
 using System;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
 {
     internal enum AstRegexOperator
     {

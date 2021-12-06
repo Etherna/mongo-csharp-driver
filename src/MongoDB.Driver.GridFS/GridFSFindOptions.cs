@@ -14,9 +14,9 @@
 */
 
 using System;
-using MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Misc;
 
-namespace MongoDB.Driver.GridFS
+namespace Etherna.MongoDB.Driver.GridFS
 {
     /// <summary>
     /// Represents options for a GridFS Find operation.

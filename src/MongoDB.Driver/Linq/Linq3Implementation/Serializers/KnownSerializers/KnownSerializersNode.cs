@@ -16,11 +16,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Linq.Linq3Implementation.Misc;
-using MongoDB.Driver.Support;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Support;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSerializers
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSerializers
 {
     internal class KnownSerializersNode
     {

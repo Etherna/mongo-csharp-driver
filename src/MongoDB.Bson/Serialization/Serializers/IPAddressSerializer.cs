@@ -17,7 +17,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 
-namespace MongoDB.Bson.Serialization.Serializers
+namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
     /// Represents a serializer for IPAddresses.

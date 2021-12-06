@@ -15,9 +15,9 @@
 
 using System;
 using System.Collections.Generic;
-using MongoDB.Bson;
+using Etherna.MongoDB.Bson;
 
-namespace MongoDB.Driver.Core.ConnectionPools
+namespace Etherna.MongoDB.Driver.Core.ConnectionPools
 {
     internal class ServiceStates
     {

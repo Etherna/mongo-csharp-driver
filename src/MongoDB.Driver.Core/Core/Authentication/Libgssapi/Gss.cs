@@ -16,7 +16,7 @@
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace MongoDB.Driver.Core.Authentication.Libgssapi
+namespace Etherna.MongoDB.Driver.Core.Authentication.Libgssapi
 {
     internal static class Gss
     {

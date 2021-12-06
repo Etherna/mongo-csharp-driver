@@ -45,10 +45,10 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Core.NativeLibraryLoader;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.NativeLibraryLoader;
 
-namespace MongoDB.Driver.Core.Compression.Zstandard
+namespace Etherna.MongoDB.Driver.Core.Compression.Zstandard
 {
     internal class Zstandard64NativeMethods
     {

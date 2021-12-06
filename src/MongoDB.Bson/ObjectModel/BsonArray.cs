@@ -18,9 +18,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MongoDB.Shared;
+using Etherna.MongoDB.Shared;
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     /// <summary>
     /// Represents a BSON array.

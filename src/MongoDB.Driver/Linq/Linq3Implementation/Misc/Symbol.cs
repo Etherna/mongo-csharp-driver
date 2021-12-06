@@ -14,11 +14,11 @@
 */
 
 using System.Linq.Expressions;
-using MongoDB.Bson.Serialization;
-using MongoDB.Driver.Core.Misc;
-using MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 
-namespace MongoDB.Driver.Linq.Linq3Implementation.Misc
+namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal class Symbol
     {

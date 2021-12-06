@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-namespace MongoDB.Bson
+namespace Etherna.MongoDB.Bson
 {
     internal static class TargetFramework
     {
