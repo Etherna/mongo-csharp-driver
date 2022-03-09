@@ -13,9 +13,7 @@
 * limitations under the License.
 */
 
-using System.Collections.Generic;
-using System.Linq;
-using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Bson;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -26,7 +24,9 @@ namespace Etherna.MongoDB.Driver
     {
         // fields
         private bool? _bypassDocumentValidation;
+        private BsonValue _comment;
         private bool _isOrdered;
+        private BsonDocument _let;
 
         // constructors
         /// <summary>
@@ -48,12 +48,30 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the requests are fulfilled in order.
         /// </summary>
         public bool IsOrdered
         {
             get { return _isOrdered; }
             set { _isOrdered = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the let document.
+        /// </summary>
+        public BsonDocument Let
+        {
+            get { return _let; }
+            set { _let = value; }
         }
     }
 }

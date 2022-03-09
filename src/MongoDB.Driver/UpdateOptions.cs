@@ -27,8 +27,10 @@ namespace Etherna.MongoDB.Driver
         private IEnumerable<ArrayFilterDefinition> _arrayFilters;
         private bool? _bypassDocumentValidation;
         private Collation _collation;
+        private BsonValue _comment;
         private BsonValue _hint;
         private bool _isUpsert;
+        private BsonDocument _let;
 
         // properties
         /// <summary>
@@ -62,6 +64,15 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the hint.
         /// </summary>
         public BsonValue Hint
@@ -77,6 +88,15 @@ namespace Etherna.MongoDB.Driver
         {
             get { return _isUpsert; }
             set { _isUpsert = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the let document.
+        /// </summary>
+        public BsonDocument Let
+        {
+            get { return _let; }
+            set { _let = value; }
         }
     }
 }

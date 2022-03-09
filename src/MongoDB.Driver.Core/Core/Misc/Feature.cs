@@ -23,95 +23,98 @@ namespace Etherna.MongoDB.Driver.Core.Misc
     public class Feature
     {
         #region static
-        private static readonly Feature __aggregate = new Feature("Aggregate", new SemanticVersion(2, 2, 0));
-        private static readonly Feature __aggregateAccumulator = new Feature("AggregateAccumulator", new SemanticVersion(4, 3, 4));
-        private static readonly Feature __aggregateAddFields = new Feature("AggregateAddFields", new SemanticVersion(3, 4, 0));
-        private static readonly Feature __aggregateAllowDiskUse = new Feature("AggregateAllowDiskUse", new SemanticVersion(2, 6, 0));
-        private static readonly Feature __aggregateBucketStage = new Feature("AggregateBucketStage", new SemanticVersion(3, 3, 11));
-        private static readonly Feature __aggregateComment = new Feature("AggregateComment", new SemanticVersion(3, 6, 0, "rc0"));
-        private static readonly Feature __aggregateCountStage = new Feature("AggregateCountStage", new SemanticVersion(3, 3, 11));
-        private static readonly Feature __aggregateCursorResult = new Feature("AggregateCursorResult", new SemanticVersion(2, 6, 0));
-        private static readonly Feature __aggregateExplain = new Feature("AggregateExplain", new SemanticVersion(2, 6, 0));
-        private static readonly Feature __aggregateFacetStage = new Feature("AggregateFacetStage", new SemanticVersion(3, 4, 0, "rc0"));
-        private static readonly Feature __aggregateFunction = new Feature("AggregateFunction", new SemanticVersion(4, 3, 4));
-        private static readonly Feature __aggregateGraphLookupStage = new Feature("AggregateGraphLookupStage", new SemanticVersion(3, 4, 0, "rc0"));
-        private static readonly Feature __aggregateHint = new Feature("AggregateHint", new SemanticVersion(3, 6, 0, "rc0"));
-        private static readonly Feature __aggregateOptionsLet = new Feature("AggregateOptionsLet", new SemanticVersion(5, 0, 0, ""));
-        private static readonly Feature __aggregateLet = new Feature("AggregateLet", new SemanticVersion(3, 6, 0));
-        private static readonly Feature __aggregateMerge = new Feature("AggregateMerge", new SemanticVersion(4, 2, 0));
-        private static readonly Feature __aggregateOut = new Feature("AggregateOut", new SemanticVersion(2, 6, 0));
-        private static readonly Feature __aggregateOutToDifferentDatabase = new Feature("AggregateOutToDifferentDatabase", new SemanticVersion(4, 3, 0));
-        private static readonly Feature __aggregateToString = new Feature("AggregateToString", new SemanticVersion(4, 0, 0));
-        private static readonly Feature __aggregateUnionWith = new Feature("AggregateUnionWith", new SemanticVersion(4, 3, 4));
-        private static readonly ArrayFiltersFeature __arrayFilters = new ArrayFiltersFeature("ArrayFilters", new SemanticVersion(3, 5, 11));
-        private static readonly Feature __bypassDocumentValidation = new Feature("BypassDocumentValidation", new SemanticVersion(3, 2, 0));
-        private static readonly Feature __changeStreamStage = new Feature("ChangeStreamStage", new SemanticVersion(3, 5, 11));
-        private static readonly Feature __changeStreamPostBatchResumeToken = new Feature("ChangeStreamPostBatchResumeToken", new SemanticVersion(4, 0, 7));
-        private static readonly Feature __clientSideEncryption = new Feature("ClientSideEncryption", new SemanticVersion(4, 1, 9));
-        private static readonly CollationFeature __collation = new CollationFeature("Collation", new SemanticVersion(3, 3, 11));
-        private static readonly Feature __commandMessage = new Feature("CommandMessage", new SemanticVersion(3, 6, 0));
-        private static readonly CommandsThatWriteAcceptWriteConcernFeature __commandsThatWriteAcceptWriteConcern = new CommandsThatWriteAcceptWriteConcernFeature("CommandsThatWriteAcceptWriteConcern", new SemanticVersion(3, 3, 11));
-        private static readonly Feature __createIndexCommitQuorum = new Feature("CreateIndexCommitQuorum", new SemanticVersion(4, 4, 0, ""));
-        private static readonly Feature __createIndexesCommand = new Feature("CreateIndexesCommand", new SemanticVersion(2, 6, 0));
-        private static readonly Feature __createIndexesUsingInsertOperations = new Feature("CreateIndexesUsingInsertOperations", new SemanticVersion(1, 0, 0), new SemanticVersion(4, 1, 1, ""));
-        private static readonly Feature __currentOpCommand = new Feature("CurrentOpCommand", new SemanticVersion(3, 2, 0));
-        private static readonly Feature __documentValidation = new Feature("DocumentValidation", new SemanticVersion(3, 2, 0));
-        private static readonly Feature __directConnectionSetting = new Feature("DirectConnectionSetting", new SemanticVersion(4, 4, 0));
-        private static readonly Feature __estimatedDocumentCountByCollStats = new Feature("EstimatedDocumentCountByCollStats", new SemanticVersion(4, 9, 0, ""));
-        private static readonly Feature __eval = new Feature("Eval", new SemanticVersion(0, 0, 0), new SemanticVersion(4, 1, 0, ""));
-        private static readonly Feature __explainCommand = new Feature("ExplainCommand", new SemanticVersion(3, 0, 0));
-        private static readonly Feature __failPoints = new Feature("FailPoints", new SemanticVersion(2, 4, 0));
-        private static readonly Feature __failPointsBlockConnection = new Feature("FailPointsBlockConnection", new SemanticVersion(4, 2, 9));
-        private static readonly Feature __failPointsFailCommand = new Feature("FailPointsFailCommand", new SemanticVersion(4, 0, 0));
-        private static readonly Feature __failPointsFailCommandForSharded = new Feature("FailPointsFailCommandForSharded", new SemanticVersion(4, 1, 5));
-        private static readonly FindAllowDiskUseFeature __findAllowDiskUse = new FindAllowDiskUseFeature("FindAllowDiskUse", new SemanticVersion(4, 4, 0, ""));
-        private static readonly Feature __findAndModifyWriteConcern = new Feature("FindAndModifyWriteConcern", new SemanticVersion(3, 2, 0));
-        private static readonly Feature __findCommand = new Feature("FindCommand", new SemanticVersion(3, 2, 0));
-        private static readonly Feature __geoNearCommand = new Feature("GeoNearCommand", new SemanticVersion(1, 0, 0), new SemanticVersion(4, 1, 0, ""));
-        private static readonly Feature __groupCommand = new Feature("GroupCommand", new SemanticVersion(1, 0, 0), new SemanticVersion(4, 1, 1, ""));
-        private static readonly Feature __hedgedReads = new Feature("HedgedReads", new SemanticVersion(4, 3, 1, ""));
-        private static readonly Feature __hiddenIndex = new Feature("HiddenIndex", new SemanticVersion(4, 4, 0));
-        private static readonly HintForDeleteOperationsFeature __hintForDeleteOperations = new HintForDeleteOperationsFeature("HintForDeleteOperations", new SemanticVersion(4, 3, 4));
-        private static readonly HintForFindAndModifyFeature __hintForFindAndModifyFeature = new HintForFindAndModifyFeature("HintForFindAndModify", new SemanticVersion(4, 3, 4));
-        private static readonly HintForUpdateAndReplaceOperationsFeature __hintForUpdateAndReplaceOperations = new HintForUpdateAndReplaceOperationsFeature("HintForUpdateAndReplaceOperations", new SemanticVersion(4, 2, 0));
-        private static readonly Feature __keepConnectionPoolWhenNotPrimaryConnectionException = new Feature("KeepConnectionPoolWhenNotWritablePrimaryConnectionException", new SemanticVersion(4, 1, 10));
-        private static readonly Feature __keepConnectionPoolWhenReplSetStepDown = new Feature("KeepConnectionPoolWhenReplSetStepDown", new SemanticVersion(4, 1, 10));
-        private static readonly Feature __killAllSessions = new Feature("KillAllSessions", new SemanticVersion(3, 6, 0));
-        private static readonly Feature __killCursorsCommand = new Feature("KillCursorsCommand", new SemanticVersion(3, 2, 0));
-        private static readonly Feature __legacyWireProtocol = new Feature("LegacyWireProtocol", new SemanticVersion(0, 0, 0), new SemanticVersion(5, 1, 0, ""));
-        private static readonly Feature __listCollectionsCommand = new Feature("ListCollectionsCommand", new SemanticVersion(3, 0, 0));
-        private static readonly Feature __listDatabasesAuthorizedDatabases = new Feature("ListDatabasesAuthorizedDatabases", new SemanticVersion(4, 0, 5));
-        private static readonly Feature __listDatabasesFilter = new Feature("ListDatabasesFilter", new SemanticVersion(3, 4, 2));
-        private static readonly Feature __listDatabasesNameOnlyOption = new Feature("ListDatabasesNameOnlyOption", new SemanticVersion(3, 4, 3));
-        private static readonly Feature __listIndexesCommand = new Feature("ListIndexesCommand", new SemanticVersion(3, 0, 0));
-        private static readonly Feature __loadBalancedMode = new Feature("LoadBalancedMode", new SemanticVersion(5, 0, 0));
-        private static readonly Feature __indexOptionsDefaults = new Feature("IndexOptionsDefaults", new SemanticVersion(3, 2, 0));
-        private static readonly Feature __maxStaleness = new Feature("MaxStaleness", new SemanticVersion(3, 3, 12));
-        private static readonly Feature __maxTime = new Feature("MaxTime", new SemanticVersion(2, 6, 0));
-        private static readonly Feature __mmapV1StorageEngine = new Feature("MmapV1StorageEngine", new SemanticVersion(0, 0, 0), new SemanticVersion(4, 1, 0, ""));
-        private static readonly Feature __partialIndexes = new Feature("PartialIndexes", new SemanticVersion(3, 2, 0));
-        private static readonly ReadConcernFeature __readConcern = new ReadConcernFeature("ReadConcern", new SemanticVersion(3, 2, 0));
-        private static readonly Feature __retryableReads = new Feature("RetryableReads", new SemanticVersion(3, 6, 0));
-        private static readonly Feature __retryableWrites = new Feature("RetryableWrites", new SemanticVersion(3, 6, 0));
-        private static readonly Feature __scramSha1Authentication = new Feature("ScramSha1Authentication", new SemanticVersion(3, 0, 0));
-        private static readonly Feature __scramSha256Authentication = new Feature("ScramSha256Authentication", new SemanticVersion(4, 0, 0, ""));
-        private static readonly Feature __serverExtractsUsernameFromX509Certificate = new Feature("ServerExtractsUsernameFromX509Certificate", new SemanticVersion(3, 3, 12));
-        private static readonly Feature __serverReturnsResumableChangeStreamErrorLabel = new Feature("ServerReturnsResumableChangeStreamErrorLabel", new SemanticVersion(4, 3, 0));
-        private static readonly Feature __serverReturnsRetryableWriteErrorLabel = new Feature("ServerReturnsRetryableWriteErrorLabel", new SemanticVersion(4, 3, 0));
-        private static readonly Feature __shardedTransactions = new Feature("ShardedTransactions", new SemanticVersion(4, 1, 6));
-        private static readonly Feature __snapshotReads = new Feature("SnapshotReads", new SemanticVersion(5, 0, 0, ""), notSupportedMessage: "Snapshot reads require MongoDB 5.0 or later");
-        private static readonly Feature __speculativeAuthentication = new Feature("SpeculativeAuthentication", new SemanticVersion(4, 4, 0, "rc0"));
-        private static readonly Feature __streamingHello = new Feature("StreamingHello", new SemanticVersion(4, 4, 0, ""));
-        private static readonly Feature __tailableCursor = new Feature("TailableCursor", new SemanticVersion(3, 2, 0));
-        private static readonly Feature __transactions = new Feature("Transactions", new SemanticVersion(4, 0, 0));
-        private static readonly Feature __userManagementCommands = new Feature("UserManagementCommands", new SemanticVersion(2, 6, 0));
-        private static readonly Feature __views = new Feature("Views", new SemanticVersion(3, 3, 11));
-        private static readonly Feature __wildcardIndexes = new Feature("WildcardIndexes", new SemanticVersion(4, 1, 6));
-        private static readonly Feature __writeCommands = new Feature("WriteCommands", new SemanticVersion(2, 6, 0));
+        private static readonly Feature __aggregate = new Feature("Aggregate", WireVersion.Zero);
+        private static readonly Feature __aggregateAccumulator = new Feature("AggregateAccumulator", WireVersion.Server44);
+        private static readonly Feature __aggregateAddFields = new Feature("AggregateAddFields", WireVersion.Server34);
+        private static readonly Feature __aggregateAllowDiskUse = new Feature("AggregateAllowDiskUse", WireVersion.Server26);
+        private static readonly Feature __aggregateBucketStage = new Feature("AggregateBucketStage", WireVersion.Server34);
+        private static readonly Feature __aggregateComment = new Feature("AggregateComment", WireVersion.Server36);
+        private static readonly Feature __aggregateCountStage = new Feature("AggregateCountStage", WireVersion.Server34);
+        private static readonly Feature __aggregateCursorResult = new Feature("AggregateCursorResult", WireVersion.Server26);
+        private static readonly Feature __aggregateExplain = new Feature("AggregateExplain", WireVersion.Server26);
+        private static readonly Feature __aggregateFacetStage = new Feature("AggregateFacetStage", WireVersion.Server34);
+        private static readonly Feature __aggregateFunction = new Feature("AggregateFunction", WireVersion.Server44);
+        private static readonly Feature __aggregateGraphLookupStage = new Feature("AggregateGraphLookupStage", WireVersion.Server34);
+        private static readonly Feature __aggregateHint = new Feature("AggregateHint", WireVersion.Server36);
+        private static readonly Feature __aggregateOptionsLet = new Feature("AggregateOptionsLet", WireVersion.Server50);
+        private static readonly Feature __aggregateLet = new Feature("AggregateLet", WireVersion.Server36);
+        private static readonly Feature __aggregateMerge = new Feature("AggregateMerge", WireVersion.Server42);
+        private static readonly Feature __aggregateOut = new Feature("AggregateOut", WireVersion.Server26);
+        private static readonly Feature __aggregateOutOnSecondary = new Feature("AggregateOutOnSecondary", WireVersion.Server50);
+        private static readonly Feature __aggregateOutToDifferentDatabase = new Feature("AggregateOutToDifferentDatabase", WireVersion.Server44);
+        private static readonly Feature __aggregateToString = new Feature("AggregateToString", WireVersion.Server40);
+        private static readonly Feature __aggregateUnionWith = new Feature("AggregateUnionWith", WireVersion.Server44);
+        private static readonly Feature __arrayFilters = new Feature("ArrayFilters", WireVersion.Server36);
+        private static readonly Feature __bypassDocumentValidation = new Feature("BypassDocumentValidation", WireVersion.Server32);
+        private static readonly Feature __changeStreamStage = new Feature("ChangeStreamStage", WireVersion.Server36);
+        private static readonly Feature __changeStreamPostBatchResumeToken = new Feature("ChangeStreamPostBatchResumeToken", WireVersion.Server40);
+        private static readonly Feature __clientSideEncryption = new Feature("ClientSideEncryption", WireVersion.Server42);
+        private static readonly Feature __collation = new Feature("Collation", WireVersion.Server34);
+        private static readonly Feature __commandMessage = new Feature("CommandMessage", WireVersion.Server36);
+        private static readonly Feature __commandsThatWriteAcceptWriteConcern = new Feature("CommandsThatWriteAcceptWriteConcern", WireVersion.Server34);
+        private static readonly Feature __createIndexCommitQuorum = new Feature("CreateIndexCommitQuorum", WireVersion.Server44);
+        private static readonly Feature __createIndexesCommand = new Feature("CreateIndexesCommand", WireVersion.Server26);
+        private static readonly Feature __createIndexesUsingInsertOperations = new Feature("CreateIndexesUsingInsertOperations", WireVersion.Zero, WireVersion.Server42);
+        private static readonly Feature __currentOpCommand = new Feature("CurrentOpCommand", WireVersion.Server32);
+        private static readonly Feature __documentValidation = new Feature("DocumentValidation", WireVersion.Server32);
+        private static readonly Feature __directConnectionSetting = new Feature("DirectConnectionSetting", WireVersion.Server44);
+        private static readonly Feature __estimatedDocumentCountByCollStats = new Feature("EstimatedDocumentCountByCollStats", WireVersion.Server49);
+        private static readonly Feature __eval = new Feature("Eval", WireVersion.Zero, WireVersion.Server42);
+        private static readonly Feature __explainCommand = new Feature("ExplainCommand", WireVersion.Server30);
+        private static readonly Feature __failPoints = new Feature("FailPoints", WireVersion.Zero);
+        private static readonly Feature __failPointsBlockConnection = new Feature("FailPointsBlockConnection", WireVersion.Server42);
+        private static readonly Feature __failPointsFailCommand = new Feature("FailPointsFailCommand", WireVersion.Server40);
+        private static readonly Feature __failPointsFailCommandForSharded = new Feature("FailPointsFailCommandForSharded", WireVersion.Server42);
+        private static readonly Feature __findAllowDiskUse = new Feature("FindAllowDiskUse", WireVersion.Server44);
+        private static readonly Feature __findAndModifyWriteConcern = new Feature("FindAndModifyWriteConcern", WireVersion.Server32);
+        private static readonly Feature __findCommand = new Feature("FindCommand", WireVersion.Server32);
+        private static readonly Feature __geoNearCommand = new Feature("GeoNearCommand", WireVersion.Zero, WireVersion.Server42);
+        private static readonly Feature __groupCommand = new Feature("GroupCommand", WireVersion.Zero, WireVersion.Server42);
+        private static readonly Feature __hedgedReads = new Feature("HedgedReads", WireVersion.Server44);
+        private static readonly Feature __hiddenIndex = new Feature("HiddenIndex", WireVersion.Server44);
+        private static readonly Feature __hintForDeleteOperations = new Feature("HintForDeleteOperations", WireVersion.Server44);
+        private static readonly HintForFindAndModifyFeature __hintForFindAndModifyFeature = new HintForFindAndModifyFeature("HintForFindAndModify", WireVersion.Server44);
+        private static readonly Feature __hintForUpdateAndReplaceOperations = new Feature("HintForUpdateAndReplaceOperations", WireVersion.Server42);
+        private static readonly Feature __keepConnectionPoolWhenNotPrimaryConnectionException = new Feature("KeepConnectionPoolWhenNotWritablePrimaryConnectionException", WireVersion.Server42);
+        private static readonly Feature __keepConnectionPoolWhenReplSetStepDown = new Feature("KeepConnectionPoolWhenReplSetStepDown", WireVersion.Server42);
+        private static readonly Feature __killAllSessions = new Feature("KillAllSessions", WireVersion.Server36);
+        private static readonly Feature __killCursorsCommand = new Feature("KillCursorsCommand", WireVersion.Server32);
+        private static readonly Feature __legacyWireProtocol = new Feature("LegacyWireProtocol", WireVersion.Zero, WireVersion.Server51);
+        private static readonly Feature __listCollectionsCommand = new Feature("ListCollectionsCommand", WireVersion.Server30);
+        private static readonly Feature __listDatabasesAuthorizedDatabases = new Feature("ListDatabasesAuthorizedDatabases", WireVersion.Server40);
+        private static readonly Feature __listDatabasesFilter = new Feature("ListDatabasesFilter", WireVersion.Server34);
+        private static readonly Feature __listDatabasesNameOnlyOption = new Feature("ListDatabasesNameOnlyOption", WireVersion.Server34);
+        private static readonly Feature __listIndexesCommand = new Feature("ListIndexesCommand", WireVersion.Server30);
+        private static readonly Feature __loadBalancedMode = new Feature("LoadBalancedMode", WireVersion.Server50);
+        private static readonly Feature __indexOptionsDefaults = new Feature("IndexOptionsDefaults", WireVersion.Server32);
+        private static readonly Feature __maxStaleness = new Feature("MaxStaleness", WireVersion.Server34);
+        private static readonly Feature __maxTime = new Feature("MaxTime", WireVersion.Server26);
+        private static readonly Feature __mmapV1StorageEngine = new Feature("MmapV1StorageEngine", WireVersion.Zero, WireVersion.Server42);
+        private static readonly Feature __partialIndexes = new Feature("PartialIndexes", WireVersion.Server32);
+        private static readonly Feature __readConcern = new Feature("ReadConcern", WireVersion.Server32);
+        private static readonly Feature __retryableReads = new Feature("RetryableReads", WireVersion.Server36);
+        private static readonly Feature __retryableWrites = new Feature("RetryableWrites", WireVersion.Server36);
+        private static readonly Feature __scramSha1Authentication = new Feature("ScramSha1Authentication", WireVersion.Server30);
+        private static readonly Feature __scramSha256Authentication = new Feature("ScramSha256Authentication", WireVersion.Server40);
+        private static readonly Feature __serverExtractsUsernameFromX509Certificate = new Feature("ServerExtractsUsernameFromX509Certificate", WireVersion.Server34);
+        private static readonly Feature __serverReturnsResumableChangeStreamErrorLabel = new Feature("ServerReturnsResumableChangeStreamErrorLabel", WireVersion.Server44);
+        private static readonly Feature __serverReturnsRetryableWriteErrorLabel = new Feature("ServerReturnsRetryableWriteErrorLabel", WireVersion.Server44);
+        private static readonly Feature __setWindowFields = new Feature("SetWindowFields", WireVersion.Server50);
+        private static readonly Feature __shardedTransactions = new Feature("ShardedTransactions", WireVersion.Server42);
+        private static readonly Feature __snapshotReads = new Feature("SnapshotReads", WireVersion.Server50, notSupportedMessage: "Snapshot reads require MongoDB 5.0 or later");
+        private static readonly Feature __speculativeAuthentication = new Feature("SpeculativeAuthentication", WireVersion.Server44);
+        private static readonly Feature __streamingHello = new Feature("StreamingHello", WireVersion.Server44);
+        private static readonly Feature __tailableCursor = new Feature("TailableCursor", WireVersion.Server32);
+        private static readonly Feature __transactions = new Feature("Transactions", WireVersion.Server40);
+        private static readonly Feature __userManagementCommands = new Feature("UserManagementCommands", WireVersion.Server26);
+        private static readonly Feature __views = new Feature("Views", WireVersion.Server34);
+        private static readonly Feature __wildcardIndexes = new Feature("WildcardIndexes", WireVersion.Server42);
+        private static readonly Feature __writeCommands = new Feature("WriteCommands", WireVersion.Server26);
 
         /// <summary>
         /// Gets the aggregate feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature Aggregate => __aggregate;
 
         /// <summary>
@@ -122,41 +125,49 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the aggregate AddFields feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateAddFields => __aggregateAddFields;
 
         /// <summary>
         /// Gets the aggregate allow disk use feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateAllowDiskUse => __aggregateAllowDiskUse;
 
         /// <summary>
         /// Gets the aggregate bucket stage feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateBucketStage => __aggregateBucketStage;
 
         /// <summary>
         /// Gets the aggregate comment feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateComment => __aggregateComment;
 
         /// <summary>
         /// Gets the aggregate count stage feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateCountStage => __aggregateCountStage;
 
         /// <summary>
         /// Gets the aggregate cursor result feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateCursorResult => __aggregateCursorResult;
 
         /// <summary>
         /// Gets the aggregate explain feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateExplain => __aggregateExplain;
 
         /// <summary>
         /// Gets the aggregate $facet stage feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateFacetStage => __aggregateFacetStage;
 
         /// <summary>
@@ -167,11 +178,13 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the aggregate $graphLookup stage feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateGraphLookupStage => __aggregateGraphLookupStage;
 
         /// <summary>
         /// Gets the aggregate hint feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateHint => __aggregateHint;
 
         /// <summary>
@@ -182,6 +195,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the aggregate lookup stage let feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateLet => __aggregateLet;
 
         /// <summary>
@@ -192,7 +206,13 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the aggregate out feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature AggregateOut => __aggregateOut;
+
+        /// <summary>
+        /// Gets the aggregate out on secondary feature,
+        /// </summary>
+        public static Feature AggregateOutOnSecondary => __aggregateOutOnSecondary;
 
         /// <summary>
         /// Gets the aggregate out to a different database feature.
@@ -212,16 +232,19 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the arrayFilters feature.
         /// </summary>
-        public static ArrayFiltersFeature ArrayFilters => __arrayFilters;
+        [Obsolete("This property will be removed in a later release.")]
+        public static Feature ArrayFilters => __arrayFilters;
 
         /// <summary>
         /// Gets the bypass document validation feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature BypassDocumentValidation => __bypassDocumentValidation;
 
         /// <summary>
         /// Gets the aggregate $changeStream stage feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature ChangeStreamStage => __changeStreamStage;
 
         /// <summary>
@@ -237,17 +260,20 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the collation feature.
         /// </summary>
-        public static CollationFeature Collation => __collation;
+        [Obsolete("This property will be removed in a later release.")]
+        public static Feature Collation => __collation;
 
         /// <summary>
         /// Gets the command message feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature CommandMessage => __commandMessage;
 
         /// <summary>
         /// Gets the commands that write accept write concern feature.
         /// </summary>
-        public static CommandsThatWriteAcceptWriteConcernFeature CommandsThatWriteAcceptWriteConcern => __commandsThatWriteAcceptWriteConcern;
+        [Obsolete("This property will be removed in a later release.")]
+        public static Feature CommandsThatWriteAcceptWriteConcern => __commandsThatWriteAcceptWriteConcern;
 
         /// <summary>
         /// Gets the create index commit quorum feature.
@@ -257,6 +283,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the create indexes command feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature CreateIndexesCommand => __createIndexesCommand;
 
         /// <summary>
@@ -267,11 +294,13 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the current op command feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature CurrentOpCommand => __currentOpCommand;
 
         /// <summary>
         /// Gets the document validation feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature DocumentValidation => __documentValidation;
 
         /// <summary>
@@ -292,11 +321,13 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the explain command feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature ExplainCommand => __explainCommand;
 
         /// <summary>
         /// Gets the fail points feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature FailPoints => __failPoints;
 
         /// <summary>
@@ -317,16 +348,19 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the find allowDiskUse feature.
         /// </summary>
-        public static FindAllowDiskUseFeature FindAllowDiskUse => __findAllowDiskUse;
+        [Obsolete("This property will be removed in a later release.")]
+        public static Feature FindAllowDiskUse => __findAllowDiskUse;
 
         /// <summary>
         /// Gets the find and modify write concern feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature FindAndModifyWriteConcern => __findAndModifyWriteConcern;
 
         /// <summary>
         /// Gets the find command feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature FindCommand => __findCommand;
 
         /// <summary>
@@ -352,7 +386,8 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the hint for delete operations feature.
         /// </summary>
-        public static HintForDeleteOperationsFeature HintForDeleteOperations => __hintForDeleteOperations;
+        [Obsolete("This property will be removed in a later release.")]
+        public static Feature HintForDeleteOperations => __hintForDeleteOperations;
 
         /// <summary>
         /// Gets the hint for find and modify operations feature.
@@ -362,7 +397,8 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the hint for update and replace operations feature.
         /// </summary>
-        public static HintForUpdateAndReplaceOperationsFeature HintForUpdateAndReplaceOperations => __hintForUpdateAndReplaceOperations;
+        [Obsolete("This property will be removed in a later release.")]
+        public static Feature HintForUpdateAndReplaceOperations => __hintForUpdateAndReplaceOperations;
 
         /// <summary>
         /// Gets the keep connection pool when NotPrimary connection exception feature.
@@ -383,16 +419,19 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Get the killAllSessions feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature KillAllSessions => __killAllSessions;
 
         /// <summary>
         /// Get the killCursors command feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature KillCursorsCommand => __killCursorsCommand;
 
         /// <summary>
         /// Gets the index options defaults feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature IndexOptionsDefaults => __indexOptionsDefaults;
 
         /// <summary>
@@ -408,21 +447,25 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the list databases filter feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature ListDatabasesFilter => __listDatabasesFilter;
 
         /// <summary>
         /// Get the list databases nameOnly feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature ListDatabasesNameOnlyOption => __listDatabasesNameOnlyOption;
 
         /// <summary>
         /// Gets the list collections command feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature ListCollectionsCommand => __listCollectionsCommand;
 
         /// <summary>
         /// Gets the list indexes command feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature ListIndexesCommand => __listIndexesCommand;
 
         /// <summary>
@@ -433,11 +476,13 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the maximum staleness feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature MaxStaleness => __maxStaleness;
 
         /// <summary>
         /// Gets the maximum time feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature MaxTime => __maxTime;
 
         /// <summary>
@@ -448,26 +493,31 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the partial indexes feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature PartialIndexes => __partialIndexes;
 
         /// <summary>
         /// Gets the read concern feature.
         /// </summary>
-        public static ReadConcernFeature ReadConcern => __readConcern;
+        [Obsolete("This property will be removed in a later release.")]
+        public static Feature ReadConcern => __readConcern;
 
         /// <summary>
         /// Gets the retryable reads feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature RetryableReads => __retryableReads;
 
         /// <summary>
         /// Gets the retryable writes feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature RetryableWrites => __retryableWrites;
 
         /// <summary>
         /// Gets the scram sha1 authentication feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature ScramSha1Authentication => __scramSha1Authentication;
 
         /// <summary>
@@ -478,6 +528,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the server extracts username from X509 certificate feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature ServerExtractsUsernameFromX509Certificate => __serverExtractsUsernameFromX509Certificate;
 
         /// <summary>
@@ -489,6 +540,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// Gets the server returns retryable writeError label feature.
         /// </summary>
         public static Feature ServerReturnsRetryableWriteErrorLabel => __serverReturnsRetryableWriteErrorLabel;
+
+        /// <summary>
+        /// Gets the set window fields feature.
+        /// </summary>
+        public static Feature SetWindowFields => __setWindowFields;
 
         /// <summary>
         /// Gets the sharded transactions feature.
@@ -519,6 +575,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the tailable cursor feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature TailableCursor => __tailableCursor;
 
         /// <summary>
@@ -529,11 +586,13 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the user management commands feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature UserManagementCommands => __userManagementCommands;
 
         /// <summary>
         /// Gets the views feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature Views => __views;
 
         /// <summary>
@@ -544,30 +603,30 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// <summary>
         /// Gets the write commands feature.
         /// </summary>
+        [Obsolete("This property will be removed in a later release.")]
         public static Feature WriteCommands => __writeCommands;
         #endregion
 
         private readonly string _name;
-        private readonly SemanticVersion _firstSupportedVersion;
-        private readonly SemanticVersion _supportRemovedVersion;
+        private readonly int _firstSupportedWireVersion;
+        private readonly int? _supportRemovedWireVersion;
         private readonly string _notSupportedMessage;
-
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Feature" /> class.
         /// </summary>
         /// <param name="name">The name of the feature.</param>
-        /// <param name="firstSupportedVersion">The first server version that supports the feature.</param>
-        /// <param name="supportRemovedVersion">The server version that stops support the feature.</param>
+        /// <param name="firstSupportedWireVersion">The first wire version that supports the feature.</param>
+        /// <param name="supportRemovedWireVersion">The wire version that stops support the feature.</param>
         /// <param name="notSupportedMessage">The not supported error message.</param>
         public Feature(string name,
-            SemanticVersion firstSupportedVersion,
-            SemanticVersion supportRemovedVersion = null,
+            int firstSupportedWireVersion,
+            int? supportRemovedWireVersion = null,
             string notSupportedMessage = null)
         {
             _name = name;
-            _firstSupportedVersion = firstSupportedVersion;
-            _supportRemovedVersion = supportRemovedVersion;
+            _firstSupportedWireVersion = Ensure.IsGreaterThanOrEqualToZero(firstSupportedWireVersion, nameof(firstSupportedWireVersion));
+            _supportRemovedWireVersion = Ensure.IsNullOrGreaterThanOrEqualToZero(supportRemovedWireVersion, nameof(supportRemovedWireVersion));
             _notSupportedMessage = notSupportedMessage;
         }
 
@@ -576,74 +635,54 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// </summary>
         public string Name => _name;
 
-        /// <summary>
-        /// Gets the first server version that supports the feature.
-        /// </summary>
-        public SemanticVersion FirstSupportedVersion => _firstSupportedVersion;
+        internal int FirstSupportedWireVersion => _firstSupportedWireVersion;
 
-        /// <summary>
-        /// Gets the last server version that does not support the feature.
-        /// </summary>
-        public SemanticVersion LastNotSupportedVersion => VersionBefore(_firstSupportedVersion);
+        internal int LastNotSupportedWireVersion
+        {
+            get
+            {
+                return _firstSupportedWireVersion > 0 ? _firstSupportedWireVersion - 1 : throw new InvalidOperationException("There is no wire version before 0.");
+            }
+        }
 
         /// <summary>
         /// Gets the error message to be used by the feature support checks.
         /// </summary>
         public string NotSupportedMessage => _notSupportedMessage;
 
-        /// <summary>
-        /// Determines whether a feature is supported by a version of the server.
-        /// </summary>
-        /// <param name="serverVersion">The server version.</param>
-        /// <returns>Whether a feature is supported by a version of the server.</returns>
-        public bool IsSupported(SemanticVersion serverVersion)
+        internal bool IsSupported(int wireVersion)
         {
-            return _supportRemovedVersion != null
-                   ? serverVersion >= _firstSupportedVersion && serverVersion < _supportRemovedVersion
-                   : serverVersion >= _firstSupportedVersion;
+            return _supportRemovedWireVersion.HasValue
+                ? _firstSupportedWireVersion <= wireVersion && _supportRemovedWireVersion > wireVersion
+                : _firstSupportedWireVersion <= wireVersion;
         }
 
-        /// <summary>
-        /// Returns a version of the server where the feature is or is not supported.
-        /// </summary>
-        /// <param name="isSupported">Whether the feature is supported or not.</param>
-        /// <returns>A version of the server where the feature is or is not supported.</returns>
-        public SemanticVersion SupportedOrNotSupportedVersion(bool isSupported)
+        internal void ThrowIfNotSupported(int wireVersion)
         {
-            return isSupported ? _firstSupportedVersion : VersionBefore(_firstSupportedVersion);
-        }
-
-        /// <summary>
-        /// Throws if the feature is not supported by a version of the server.
-        /// </summary>
-        /// <param name="serverVersion">The server version.</param>
-        public void ThrowIfNotSupported(SemanticVersion serverVersion)
-        {
-            if (!IsSupported(serverVersion))
+            if (!IsSupported(wireVersion))
             {
-                var errorMessage = _notSupportedMessage ?? $"Server version {serverVersion} does not support the {_name} feature.";
+                string errorMessage; 
+                if (_notSupportedMessage != null)
+                {
+                    errorMessage = _notSupportedMessage; ;
+                }
+                else
+                {
+                    errorMessage = $"Server version {WireVersion.GetServerVersionForErrorMessage(wireVersion)} does not support the {_name} feature.";
+                }
                 throw new NotSupportedException(errorMessage);
             }
         }
 
-        private SemanticVersion VersionBefore(SemanticVersion version)
+        /// <inheritdoc/>
+        public override string ToString()
         {
-            if (version.Patch > 0)
+            var message = $"{_name} feature added in {_firstSupportedWireVersion} wire protocol";
+            if (_supportRemovedWireVersion != null)
             {
-                return new SemanticVersion(version.Major, version.Minor, version.Patch - 1);
+                message += $" and removed in {_supportRemovedWireVersion} wire protocol";
             }
-            else if (version.Minor > 0)
-            {
-                return new SemanticVersion(version.Major, version.Minor - 1, 99);
-            }
-            else if (version.Major > 0)
-            {
-                return new SemanticVersion(version.Major - 1, 99, 99);
-            }
-            else
-            {
-                throw new ArgumentException("There is no version before 0.0.0.", nameof(version));
-            }
+            return $"{message}.";
         }
     }
 }

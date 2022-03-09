@@ -169,16 +169,16 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc />
         public virtual DeleteResult DeleteMany(FilterDefinition<TDocument> filter, DeleteOptions options, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return DeleteMany(filter, options, requests => BulkWrite(requests, null, cancellationToken));
+            return DeleteMany(filter, options, (requests, bulkWriteOptions) => BulkWrite(requests, bulkWriteOptions, cancellationToken));
         }
 
         /// <inheritdoc />
         public virtual DeleteResult DeleteMany(IClientSessionHandle session, FilterDefinition<TDocument> filter, DeleteOptions options = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return DeleteMany(filter, options, requests => BulkWrite(session, requests, null, cancellationToken));
+            return DeleteMany(filter, options, (requests, bulkWriteOptions) => BulkWrite(session, requests, bulkWriteOptions, cancellationToken));
         }
 
-        private DeleteResult DeleteMany(FilterDefinition<TDocument> filter, DeleteOptions options, Func<IEnumerable<WriteModel<TDocument>>, BulkWriteResult> bulkWriteFunc)
+        private DeleteResult DeleteMany(FilterDefinition<TDocument> filter, DeleteOptions options, Func<IEnumerable<WriteModel<TDocument>>, BulkWriteOptions, BulkWriteResult> bulkWriteFunc)
         {
             Ensure.IsNotNull(filter, nameof(filter));
             options = options ?? new DeleteOptions();
@@ -190,7 +190,12 @@ namespace Etherna.MongoDB.Driver
             };
             try
             {
-                var result = bulkWriteFunc(new[] { model });
+                var bulkWriteOptions = new BulkWriteOptions
+                {
+                    Comment = options.Comment,
+                    Let = options.Let
+                };
+                var result = bulkWriteFunc(new[] { model }, bulkWriteOptions);
                 return DeleteResult.FromCore(result);
             }
             catch (MongoBulkWriteException<TDocument> ex)
@@ -208,16 +213,16 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc />
         public virtual Task<DeleteResult> DeleteManyAsync(FilterDefinition<TDocument> filter, DeleteOptions options, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return DeleteManyAsync(filter, options, requests => BulkWriteAsync(requests, null, cancellationToken));
+            return DeleteManyAsync(filter, options, (requests, bulkWriteOptions) => BulkWriteAsync(requests, bulkWriteOptions, cancellationToken));
         }
 
         /// <inheritdoc />
         public virtual Task<DeleteResult> DeleteManyAsync(IClientSessionHandle session, FilterDefinition<TDocument> filter, DeleteOptions options = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return DeleteManyAsync(filter, options, requests => BulkWriteAsync(session, requests, null, cancellationToken));
+            return DeleteManyAsync(filter, options, (requests, bulkWriteOptions) => BulkWriteAsync(session, requests, bulkWriteOptions, cancellationToken));
         }
 
-        private async Task<DeleteResult> DeleteManyAsync(FilterDefinition<TDocument> filter, DeleteOptions options, Func<IEnumerable<WriteModel<TDocument>>, Task<BulkWriteResult<TDocument>>> bulkWriteFuncAsync)
+        private async Task<DeleteResult> DeleteManyAsync(FilterDefinition<TDocument> filter, DeleteOptions options, Func<IEnumerable<WriteModel<TDocument>>, BulkWriteOptions, Task<BulkWriteResult<TDocument>>> bulkWriteFuncAsync)
         {
             Ensure.IsNotNull(filter, nameof(filter));
             options = options ?? new DeleteOptions();
@@ -229,7 +234,12 @@ namespace Etherna.MongoDB.Driver
             };
             try
             {
-                var result = await bulkWriteFuncAsync(new[] { model }).ConfigureAwait(false);
+                var bulkWriteOptions = new BulkWriteOptions
+                {
+                    Comment = options.Comment,
+                    Let = options.Let
+                };
+                var result = await bulkWriteFuncAsync(new[] { model }, bulkWriteOptions).ConfigureAwait(false);
                 return DeleteResult.FromCore(result);
             }
             catch (MongoBulkWriteException<TDocument> ex)
@@ -247,16 +257,16 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc />
         public virtual DeleteResult DeleteOne(FilterDefinition<TDocument> filter, DeleteOptions options, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return DeleteOne(filter, options, requests => BulkWrite(requests, null, cancellationToken));
+            return DeleteOne(filter, options, (requests, bulkWriteOptions) => BulkWrite(requests, bulkWriteOptions, cancellationToken));
         }
 
         /// <inheritdoc />
         public virtual DeleteResult DeleteOne(IClientSessionHandle session, FilterDefinition<TDocument> filter, DeleteOptions options = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return DeleteOne(filter, options, requests => BulkWrite(session, requests, null, cancellationToken));
+            return DeleteOne(filter, options, (requests, bulkWriteOptions) => BulkWrite(session, requests, bulkWriteOptions, cancellationToken));
         }
 
-        private DeleteResult DeleteOne(FilterDefinition<TDocument> filter, DeleteOptions options, Func<IEnumerable<WriteModel<TDocument>>, BulkWriteResult> bulkWrite)
+        private DeleteResult DeleteOne(FilterDefinition<TDocument> filter, DeleteOptions options, Func<IEnumerable<WriteModel<TDocument>>, BulkWriteOptions, BulkWriteResult> bulkWrite)
         {
             Ensure.IsNotNull(filter, nameof(filter));
             options = options ?? new DeleteOptions();
@@ -268,7 +278,12 @@ namespace Etherna.MongoDB.Driver
             };
             try
             {
-                var result = bulkWrite(new[] { model });
+                var bulkWriteOptions = new BulkWriteOptions
+                {
+                    Comment = options.Comment,
+                    Let = options.Let
+                };
+                var result = bulkWrite(new[] { model }, bulkWriteOptions);
                 return DeleteResult.FromCore(result);
             }
             catch (MongoBulkWriteException<TDocument> ex)
@@ -286,16 +301,16 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc />
         public virtual Task<DeleteResult> DeleteOneAsync(FilterDefinition<TDocument> filter, DeleteOptions options, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return DeleteOneAsync(filter, options, requests => BulkWriteAsync(requests, null, cancellationToken));
+            return DeleteOneAsync(filter, options, (requests, bulkWriteOptions) => BulkWriteAsync(requests, bulkWriteOptions, cancellationToken));
         }
 
         /// <inheritdoc />
         public virtual Task<DeleteResult> DeleteOneAsync(IClientSessionHandle session, FilterDefinition<TDocument> filter, DeleteOptions options = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return DeleteOneAsync(filter, options, requests => BulkWriteAsync(session, requests, null, cancellationToken));
+            return DeleteOneAsync(filter, options, (requests, bulkWriteOptions) => BulkWriteAsync(session, requests, bulkWriteOptions, cancellationToken));
         }
 
-        private async Task<DeleteResult> DeleteOneAsync(FilterDefinition<TDocument> filter, DeleteOptions options, Func<IEnumerable<WriteModel<TDocument>>, Task<BulkWriteResult<TDocument>>> bulkWriteAsync)
+        private async Task<DeleteResult> DeleteOneAsync(FilterDefinition<TDocument> filter, DeleteOptions options, Func<IEnumerable<WriteModel<TDocument>>, BulkWriteOptions, Task<BulkWriteResult<TDocument>>> bulkWriteAsync)
         {
             Ensure.IsNotNull(filter, nameof(filter));
             options = options ?? new DeleteOptions();
@@ -307,7 +322,12 @@ namespace Etherna.MongoDB.Driver
             };
             try
             {
-                var result = await bulkWriteAsync(new[] { model }).ConfigureAwait(false);
+                var bulkWriteOptions = new BulkWriteOptions
+                {
+                    Comment = options.Comment,
+                    Let = options.Let
+                };
+                var result = await bulkWriteAsync(new[] { model }, bulkWriteOptions).ConfigureAwait(false);
                 return DeleteResult.FromCore(result);
             }
             catch (MongoBulkWriteException<TDocument> ex)
@@ -456,7 +476,8 @@ namespace Etherna.MongoDB.Driver
             {
                 var bulkWriteOptions = options == null ? null : new BulkWriteOptions
                 {
-                    BypassDocumentValidation = options.BypassDocumentValidation
+                    BypassDocumentValidation = options.BypassDocumentValidation,
+                    Comment = options.Comment
                 };
                 bulkWrite(new[] { model }, bulkWriteOptions);
             }
@@ -494,7 +515,8 @@ namespace Etherna.MongoDB.Driver
             {
                 var bulkWriteOptions = options == null ? null : new BulkWriteOptions
                 {
-                    BypassDocumentValidation = options.BypassDocumentValidation
+                    BypassDocumentValidation = options.BypassDocumentValidation,
+                    Comment = options.Comment
                 };
                 await bulkWriteAsync(new[] { model }, bulkWriteOptions).ConfigureAwait(false);
             }
@@ -524,6 +546,7 @@ namespace Etherna.MongoDB.Driver
             BulkWriteOptions bulkWriteOptions = options == null ? null : new BulkWriteOptions
             {
                 BypassDocumentValidation = options.BypassDocumentValidation,
+                Comment = options.Comment,
                 IsOrdered = options.IsOrdered
             };
             bulkWrite(models, bulkWriteOptions);
@@ -549,6 +572,7 @@ namespace Etherna.MongoDB.Driver
             var bulkWriteOptions = options == null ? null : new BulkWriteOptions
             {
                 BypassDocumentValidation = options.BypassDocumentValidation,
+                Comment = options.Comment,
                 IsOrdered = options.IsOrdered
             };
             return bulkWriteAsync(models, bulkWriteOptions);
@@ -626,7 +650,9 @@ namespace Etherna.MongoDB.Driver
             {
                 var bulkWriteOptions = new BulkWriteOptions
                 {
-                    BypassDocumentValidation = options.BypassDocumentValidation
+                    BypassDocumentValidation = options.BypassDocumentValidation,
+                    Comment = options.Comment,
+                    Let = options.Let
                 };
                 var result = bulkWrite(new[] { model }, bulkWriteOptions);
                 return ReplaceOneResult.FromCore(result);
@@ -680,7 +706,9 @@ namespace Etherna.MongoDB.Driver
             {
                 var bulkWriteOptions = new BulkWriteOptions
                 {
-                    BypassDocumentValidation = options.BypassDocumentValidation
+                    BypassDocumentValidation = options.BypassDocumentValidation,
+                    Comment = options.Comment,
+                    Let = options.Let
                 };
                 var result = await bulkWriteAsync(new[] { model }, bulkWriteOptions).ConfigureAwait(false);
                 return ReplaceOneResult.FromCore(result);
@@ -721,7 +749,9 @@ namespace Etherna.MongoDB.Driver
             {
                 var bulkWriteOptions = new BulkWriteOptions
                 {
-                    BypassDocumentValidation = options.BypassDocumentValidation
+                    BypassDocumentValidation = options.BypassDocumentValidation,
+                    Comment = options.Comment,
+                    Let = options.Let
                 };
                 var result = bulkWrite(new[] { model }, bulkWriteOptions);
                 return UpdateResult.FromCore(result);
@@ -762,7 +792,9 @@ namespace Etherna.MongoDB.Driver
             {
                 var bulkWriteOptions = new BulkWriteOptions
                 {
-                    BypassDocumentValidation = options.BypassDocumentValidation
+                    BypassDocumentValidation = options.BypassDocumentValidation,
+                    Comment = options.Comment,
+                    Let = options.Let
                 };
                 var result = await bulkWriteAsync(new[] { model }, bulkWriteOptions).ConfigureAwait(false);
                 return UpdateResult.FromCore(result);
@@ -803,7 +835,9 @@ namespace Etherna.MongoDB.Driver
             {
                 var bulkWriteOptions = new BulkWriteOptions
                 {
-                    BypassDocumentValidation = options.BypassDocumentValidation
+                    BypassDocumentValidation = options.BypassDocumentValidation,
+                    Comment = options.Comment,
+                    Let = options.Let
                 };
                 var result = bulkWrite(new[] { model }, bulkWriteOptions);
                 return UpdateResult.FromCore(result);
@@ -844,7 +878,9 @@ namespace Etherna.MongoDB.Driver
             {
                 var bulkWriteOptions = new BulkWriteOptions
                 {
-                    BypassDocumentValidation = options.BypassDocumentValidation
+                    BypassDocumentValidation = options.BypassDocumentValidation,
+                    Comment = options.Comment,
+                    Let = options.Let
                 };
                 var result = await bulkWriteAsync(new[] { model }, bulkWriteOptions).ConfigureAwait(false);
                 return UpdateResult.FromCore(result);

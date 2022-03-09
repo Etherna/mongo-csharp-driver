@@ -211,7 +211,7 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
                             case ClusterConnectionMode.Automatic:
                                 if (serverType == ServerType.Standalone)
                                 {
-                                    return _servers.Count == 1 || Settings.Scheme == ConnectionStringScheme.MongoDBPlusSrv; // Standalone is only valid in MultiServerCluster when using MongoDBPlusSrv scheme
+                                    return _servers.Count == 1 || Settings.Scheme == ConnectionStringScheme.MongoDBPlusSrv; // Standalone is only valid in MultiServerCluster when using Etherna.MongoDBPlusSrv scheme
                                 }
                                 return serverType.IsReplicaSetMember() || serverType == ServerType.ShardRouter;
 

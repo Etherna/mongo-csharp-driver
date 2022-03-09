@@ -22,7 +22,6 @@ using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
-using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
@@ -36,6 +35,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
     public abstract class RetryableWriteCommandOperationBase : IWriteOperation<BsonDocument>, IRetryableWriteOperation<BsonDocument>
     {
         // private fields
+        private BsonValue _comment;
         private readonly DatabaseNamespace _databaseNamespace;
         private bool _isOrdered = true;
         private int? _maxBatchCount;
@@ -58,6 +58,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         }
 
         // public properties
+        /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        /// <value>
+        /// The comment.
+        /// </value>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
+        }
+
         /// <summary>
         /// Gets the database namespace.
         /// </summary>
@@ -200,13 +212,12 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         /// Creates the command.
         /// </summary>
         /// <param name="session">The session.</param>
-        /// <param name="connectionDescription">The connection description.</param>
         /// <param name="attempt">The attempt.</param>
         /// <param name="transactionNumber">The transaction number.</param>
         /// <returns>
         /// A command.
         /// </returns>
-        protected abstract BsonDocument CreateCommand(ICoreSessionHandle session, ConnectionDescription connectionDescription, int attempt, long? transactionNumber);
+        protected abstract BsonDocument CreateCommand(ICoreSessionHandle session, int attempt, long? transactionNumber);
 
         /// <summary>
         /// Creates the command payloads.
@@ -231,7 +242,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         private CommandArgs GetCommandArgs(RetryableWriteContext context, int attempt, long? transactionNumber)
         {
             var args = new CommandArgs();
-            args.Command = CreateCommand(context.Binding.Session, context.Channel.ConnectionDescription, attempt, transactionNumber);
+            args.Command = CreateCommand(context.Binding.Session, attempt, transactionNumber);
             args.CommandPayloads = CreateCommandPayloads(context.Channel, attempt).ToList();
             args.PostWriteAction = GetPostWriteAction(args.CommandPayloads);
             args.ResponseHandling = GetResponseHandling();

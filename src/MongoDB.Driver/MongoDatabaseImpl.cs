@@ -612,6 +612,7 @@ namespace Etherna.MongoDB.Driver
                 Let = options.Let,
                 MaxTime = options.MaxTime,
                 ReadConcern = _settings.ReadConcern,
+                ReadPreference = _settings.ReadPreference,
                 WriteConcern = _settings.WriteConcern
             };
         }
@@ -692,6 +693,8 @@ namespace Etherna.MongoDB.Driver
             var messageEncoderSettings = GetMessageEncoderSettings();
             return new ListCollectionsOperation(_databaseNamespace, messageEncoderSettings)
             {
+                AuthorizedCollections = options?.AuthorizedCollections,
+                Comment = options?.Comment,
                 Filter = options?.Filter?.Render(_settings.SerializerRegistry.GetSerializer<BsonDocument>(), _settings.SerializerRegistry, _linqProvider),
                 NameOnly = true,
                 RetryRequested = _client.Settings.RetryReads
@@ -704,6 +707,7 @@ namespace Etherna.MongoDB.Driver
             return new ListCollectionsOperation(_databaseNamespace, messageEncoderSettings)
             {
                 BatchSize = options?.BatchSize,
+                Comment = options?.Comment,
                 Filter = options?.Filter?.Render(_settings.SerializerRegistry.GetSerializer<BsonDocument>(), _settings.SerializerRegistry, _linqProvider),
                 RetryRequested = _client.Settings.RetryReads
             };

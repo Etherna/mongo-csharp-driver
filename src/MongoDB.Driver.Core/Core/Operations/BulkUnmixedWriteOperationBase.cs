@@ -32,6 +32,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // fields
         private bool? _bypassDocumentValidation;
         private CollectionNamespace _collectionNamespace;
+        private BsonValue _comment;
         private bool _isOrdered = true;
         private int? _maxBatchCount;
         private int? _maxBatchLength;
@@ -69,6 +70,12 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public CollectionNamespace CollectionNamespace
         {
             get { return _collectionNamespace; }
+        }
+
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
         }
 
         public bool IsOrdered
@@ -115,8 +122,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // public methods
         public BulkWriteOperationResult Execute(RetryableWriteContext context, CancellationToken cancellationToken)
         {
-            EnsureCollationIsSupportedIfAnyRequestHasCollation(context, _requests);
-            EnsureHintIsSupportedIfAnyRequestHasHint(context);
+            EnsureHintIsSupportedIfAnyRequestHasHint();
 
             return ExecuteBatches(context, cancellationToken);
         }
@@ -133,8 +139,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
         public Task<BulkWriteOperationResult> ExecuteAsync(RetryableWriteContext context, CancellationToken cancellationToken)
         {
-            EnsureCollationIsSupportedIfAnyRequestHasCollation(context, _requests);
-            EnsureHintIsSupportedIfAnyRequestHasHint(context);
+            EnsureHintIsSupportedIfAnyRequestHasHint();
 
             return ExecuteBatchesAsync(context, cancellationToken);
         }
@@ -151,8 +156,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
         // protected methods
         protected abstract IRetryableWriteOperation<BsonDocument> CreateBatchOperation(Batch batch);
-
-        protected abstract bool RequestHasCollation(TWriteRequest request);
 
         protected abstract bool RequestHasHint(TWriteRequest request);
 
@@ -173,29 +176,13 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 writeConcernException);
         }
 
-        private void EnsureCollationIsSupportedIfAnyRequestHasCollation(RetryableWriteContext context, IEnumerable<TWriteRequest> requests)
+        private void EnsureHintIsSupportedIfAnyRequestHasHint()
         {
-            var serverVersion = context.Channel.ConnectionDescription.ServerVersion;
-            if (!Feature.Collation.IsSupported(serverVersion))
-            {
-                foreach (var request in requests)
-                {
-                    if (RequestHasCollation(request))
-                    {
-                        throw new NotSupportedException($"Server version {serverVersion} does not support collations.");
-                    }
-                }
-            }
-        }
-
-        private void EnsureHintIsSupportedIfAnyRequestHasHint(RetryableWriteContext context)
-        {
-            var serverVersion = context.Channel.ConnectionDescription.ServerVersion;
             foreach (var request in _requests)
             {
-                if (RequestHasHint(request) && !IsHintSupportedForRequestWithHint(request, serverVersion))
+                if (RequestHasHint(request) && !_writeConcern.IsAcknowledged)
                 {
-                    throw new NotSupportedException($"Server version {serverVersion} does not support hints.");
+                    throw new NotSupportedException("Hint is not supported for unacknowledged writes.");
                 }
             }
         }
@@ -254,21 +241,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 batch.Result = await ExecuteBatchAsync(context, batch, cancellationToken).ConfigureAwait(false);
             }
             return helper.CreateFinalResultOrThrow(context.Channel);
-        }
-
-        private bool IsHintSupportedForRequestWithHint(WriteRequest request, SemanticVersion serverVersion)
-        {
-            if (request is DeleteRequest && (Feature.HintForDeleteOperations.DriverMustThrowIfNotSupported(serverVersion) || !_writeConcern.IsAcknowledged))
-            {
-                return false;
-            }
-
-            if (request is UpdateRequest && (Feature.HintForUpdateAndReplaceOperations.DriverMustThrowIfNotSupported(serverVersion) || !_writeConcern.IsAcknowledged))
-            {
-                return false;
-            }
-
-            return true;
         }
 
         // nested types

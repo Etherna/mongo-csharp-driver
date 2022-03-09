@@ -74,6 +74,11 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             }
         }
 
+        public void Wait(CancellationToken cancellationToken)
+        {
+            _taskCompletionSource.Task.Wait(cancellationToken);
+        }
+
         private void TimerCallback(object state)
         {
             _taskCompletionSource.TrySetResult(true);

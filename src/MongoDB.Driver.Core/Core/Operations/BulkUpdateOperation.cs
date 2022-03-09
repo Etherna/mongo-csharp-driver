@@ -13,7 +13,6 @@
 * limitations under the License.
 */
 
-using System;
 using System.Collections.Generic;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
@@ -22,6 +21,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 {
     internal class BulkUpdateOperation : BulkUnmixedWriteOperationBase<UpdateRequest>
     {
+        private BsonDocument _let;
+
         // constructors
         public BulkUpdateOperation(
             CollectionNamespace collectionNamespace,
@@ -31,22 +32,25 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
         }
 
+        public BsonDocument Let
+        {
+            get => _let;
+            set => _let = value;
+        }
+
         // methods
         protected override IRetryableWriteOperation<BsonDocument> CreateBatchOperation(Batch batch)
         {
             return new RetryableUpdateCommandOperation(CollectionNamespace, batch.Requests, MessageEncoderSettings)
             {
                 BypassDocumentValidation = BypassDocumentValidation,
+                Comment = Comment,
                 IsOrdered = IsOrdered,
+                Let = _let,
                 MaxBatchCount = MaxBatchCount,
                 RetryRequested = RetryRequested,
                 WriteConcern = WriteConcern
             };
-        }
-
-        protected override bool RequestHasCollation(UpdateRequest request)
-        {
-            return request.Collation != null;
         }
 
         protected override bool RequestHasHint(UpdateRequest request)

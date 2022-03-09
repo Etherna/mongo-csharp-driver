@@ -25,8 +25,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
 {
     /// <summary>
     /// The default authenticator.
-    /// If saslSupportedMechs is not present in the hello or legacy hello results for mechanism negotiation
-    /// uses SCRAM-SHA-1 when talking to servers >= 3.0. Prior to server 3.0, uses MONGODB-CR.
+    /// If saslSupportedMechs is not present in the hello or legacy hello results for mechanism negotiation uses SCRAM-SHA-1.
     /// Else, uses SCRAM-SHA-256 if present in the list of mechanisms. Otherwise, uses
     /// SCRAM-SHA-1 the default, regardless of whether SCRAM-SHA-1 is in the list.
     /// </summary>
@@ -85,7 +84,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             // hello or legacy hello request and should query the server (provided that the server >= 4.0), merging results into
             // a new ConnectionDescription
             if (!description.HelloResult.HasSaslSupportedMechs
-                && Feature.ScramSha256Authentication.IsSupported(description.ServerVersion))
+                && Feature.ScramSha256Authentication.IsSupported(description.MaxWireVersion))
             {
                 var command = CustomizeInitialHelloCommand(HelloHelper.CreateCommand(_serverApi));
                 var helloProtocol = HelloHelper.CreateProtocol(command, _serverApi);
@@ -93,8 +92,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
                 var mergedHelloResult = new HelloResult(description.HelloResult.Wrapped.Merge(helloResult.Wrapped));
                 description = new ConnectionDescription(
                     description.ConnectionId,
-                    mergedHelloResult,
-                    description.BuildInfoResult);
+                    mergedHelloResult);
             }
 
             var authenticator = GetOrCreateAuthenticator(connection, description);
@@ -111,7 +109,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             // hello or legacy hello request and should query the server (provided that the server >= 4.0), merging results into
             // a new ConnectionDescription
             if (!description.HelloResult.HasSaslSupportedMechs
-                && Feature.ScramSha256Authentication.IsSupported(description.ServerVersion))
+                && Feature.ScramSha256Authentication.IsSupported(description.MaxWireVersion))
             {
                 var command = CustomizeInitialHelloCommand(HelloHelper.CreateCommand(_serverApi));
                 var helloProtocol = HelloHelper.CreateProtocol(command, _serverApi);
@@ -119,8 +117,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
                 var mergedHelloResult = new HelloResult(description.HelloResult.Wrapped.Merge(helloResult.Wrapped));
                 description = new ConnectionDescription(
                     description.ConnectionId,
-                    mergedHelloResult,
-                    description.BuildInfoResult);
+                    mergedHelloResult);
             }
 
             var authenticator = GetOrCreateAuthenticator(connection, description);
@@ -154,13 +151,8 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
                     ? (IAuthenticator)new ScramSha256Authenticator(_credential, _randomStringGenerator, _serverApi)
                     : new ScramSha1Authenticator(_credential, _randomStringGenerator, _serverApi);
             }
-            // If saslSupportedMechs is not present in the hello or legacy hello results for mechanism negotiation, then SCRAM-SHA-1
-            // MUST be used when talking to servers >= 3.0. Prior to server 3.0, MONGODB-CR MUST be used.
-#pragma warning disable 618
-            return Feature.ScramSha1Authentication.IsSupported(description.ServerVersion)
-                    ? (IAuthenticator)new ScramSha1Authenticator(_credential, _randomStringGenerator, _serverApi)
-                    : new MongoDBCRAuthenticator(_credential, _serverApi);
-#pragma warning restore 618
+            // If saslSupportedMechs is not present in the hello or legacy hello results for mechanism negotiation, then SCRAM-SHA-1 MUST be used
+            return new ScramSha1Authenticator(_credential, _randomStringGenerator, _serverApi);
         }
 
         private IAuthenticator GetOrCreateAuthenticator(IConnection connection, ConnectionDescription description)

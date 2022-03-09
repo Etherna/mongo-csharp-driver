@@ -20,8 +20,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Driver.Linq;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
@@ -108,9 +106,13 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
                 var executableQuery = ExpressionToExecutableQueryTranslator.Translate<TDocument, TOutput>(_provider, _expression);
                 return executableQuery.ToString();
             }
-            catch (Exception ex)
+            catch (ExpressionNotSupportedException ex)
             {
                 return ex.Message;
+            }
+            catch (Exception ex)
+            {
+                return ex.ToString();
             }
         }
     }

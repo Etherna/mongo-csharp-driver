@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
@@ -34,7 +35,9 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // fields
         private bool? _bypassDocumentValidation;
         private readonly CollectionNamespace _collectionNamespace;
+        private BsonValue _comment;
         private bool _isOrdered = true;
+        private BsonDocument _let;
         private int? _maxBatchCount;
         private int? _maxBatchLength;
         private int? _maxDocumentSize;
@@ -101,6 +104,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         }
 
         /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        /// <value>
+        /// The comment.
+        /// </value>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the writes must be performed in order.
         /// </summary>
         /// <value>
@@ -110,6 +125,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             get { return _isOrdered; }
             set { _isOrdered = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the let document.
+        /// </summary>
+        /// <value>
+        /// The let document.
+        /// </value>
+        public BsonDocument Let
+        {
+            get { return _let; }
+            set { _let = value; }
         }
 
         /// <summary>
@@ -213,8 +240,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             using (EventContext.BeginOperation())
             using (var context = RetryableWriteContext.Create(binding, _retryRequested, cancellationToken))
             {
-                EnsureCollationIsSupportedIfAnyRequestHasCollation(context);
-                EnsureHintIsSupportedIfAnyRequestHasHint(context);
+                EnsureHintIsSupportedIfAnyRequestHasHint();
                 context.DisableRetriesIfAnyWriteRequestIsNotRetryable(_requests);
                 var helper = new BatchHelper(_requests, _isOrdered, _writeConcern);
                 foreach (var batch in helper.GetBatches())
@@ -231,8 +257,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             using (EventContext.BeginOperation())
             using (var context = await RetryableWriteContext.CreateAsync(binding, _retryRequested, cancellationToken).ConfigureAwait(false))
             {
-                EnsureCollationIsSupportedIfAnyRequestHasCollation(context);
-                EnsureHintIsSupportedIfAnyRequestHasHint(context);
+                EnsureHintIsSupportedIfAnyRequestHasHint();
                 context.DisableRetriesIfAnyWriteRequestIsNotRetryable(_requests);
                 var helper = new BatchHelper(_requests, _isOrdered, _writeConcern);
                 foreach (var batch in helper.GetBatches())
@@ -249,7 +274,9 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             var requests = batch.Requests.Cast<DeleteRequest>();
             return new BulkDeleteOperation(_collectionNamespace, requests, _messageEncoderSettings)
             {
+                Comment = _comment,
                 IsOrdered = _isOrdered,
+                Let = _let,
                 MaxBatchCount = _maxBatchCount,
                 MaxBatchLength = _maxBatchLength,
                 WriteConcern = batch.WriteConcern,
@@ -263,6 +290,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             return new BulkInsertOperation(_collectionNamespace, requests, _messageEncoderSettings)
             {
                 BypassDocumentValidation = _bypassDocumentValidation,
+                Comment = _comment,
                 IsOrdered = _isOrdered,
                 MaxBatchCount = _maxBatchCount,
                 MaxBatchLength = _maxBatchLength,
@@ -278,7 +306,9 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             return new BulkUpdateOperation(_collectionNamespace, requests, _messageEncoderSettings)
             {
                 BypassDocumentValidation = _bypassDocumentValidation,
+                Comment = _comment,
                 IsOrdered = _isOrdered,
+                Let = _let,
                 MaxBatchCount = _maxBatchCount,
                 MaxBatchLength = _maxBatchLength,
                 WriteConcern = batch.WriteConcern,
@@ -297,29 +327,13 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             }
         }
 
-        private void EnsureCollationIsSupportedIfAnyRequestHasCollation(RetryableWriteContext context)
+        private void EnsureHintIsSupportedIfAnyRequestHasHint()
         {
-            var serverVersion = context.Channel.ConnectionDescription.ServerVersion;
-            if (!Feature.Collation.IsSupported(serverVersion))
-            {
-                foreach (var request in _requests)
-                {
-                    if (RequestHasCollation(request))
-                    {
-                        throw new NotSupportedException($"Server version {serverVersion} does not support collations.");
-                    }
-                }
-            }
-        }
-
-        private void EnsureHintIsSupportedIfAnyRequestHasHint(RetryableWriteContext context)
-        {
-            var serverVersion = context.Channel.ConnectionDescription.ServerVersion;
             foreach (var request in _requests)
             {
-                if (RequestHasHint(request) && !IsHintSupportedForRequestWithHint(request, serverVersion))
+                if (RequestHasHint(request) && !_writeConcern.IsAcknowledged)
                 {
-                    throw new NotSupportedException($"Server version {serverVersion} does not support hints.");
+                    throw new NotSupportedException("Hint is not supported for unacknowledged writes.");
                 }
             }
         }
@@ -358,38 +372,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             }
 
             return BulkWriteBatchResult.Create(result, exception, batch.IndexMap);
-        }
-
-        private bool IsHintSupportedForRequestWithHint(WriteRequest request, SemanticVersion serverVersion)
-        {
-            if (request is DeleteRequest && (Feature.HintForDeleteOperations.DriverMustThrowIfNotSupported(serverVersion) || !_writeConcern.IsAcknowledged))
-            {
-                return false;
-            }
-
-            if (request is UpdateRequest && (Feature.HintForUpdateAndReplaceOperations.DriverMustThrowIfNotSupported(serverVersion) || !_writeConcern.IsAcknowledged))
-            {
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool RequestHasCollation(WriteRequest request)
-        {
-            DeleteRequest deleteRequest;
-            if ((deleteRequest = request as DeleteRequest) != null)
-            {
-                return deleteRequest.Collation != null;
-            }
-
-            UpdateRequest updateRequest;
-            if ((updateRequest = request as UpdateRequest) != null)
-            {
-                return updateRequest.Collation != null;
-            }
-
-            return false;
         }
 
         private bool RequestHasHint(WriteRequest request)

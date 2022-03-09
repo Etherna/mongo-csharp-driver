@@ -23,7 +23,6 @@ using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -220,7 +219,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             using (var channel = channelSource.GetChannel(cancellationToken))
             using (var channelBinding = new ChannelReadBinding(channelSource.Server, channel, binding.ReadPreference, binding.Session.Fork()))
             {
-                var operation = CreateOperation(channel.ConnectionDescription.ServerVersion);
+                var operation = CreateOperation();
                 return operation.Execute(channelBinding, cancellationToken);
             }
         }
@@ -233,16 +232,14 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             using (var channel = await channelSource.GetChannelAsync(cancellationToken).ConfigureAwait(false))
             using (var channelBinding = new ChannelReadBinding(channelSource.Server, channel, binding.ReadPreference, binding.Session.Fork()))
             {
-                var operation = CreateOperation(channel.ConnectionDescription.ServerVersion);
+                var operation = CreateOperation();
                 return await operation.ExecuteAsync(channelBinding, cancellationToken).ConfigureAwait(false);
             }
         }
 
         // private methods
-        internal BsonDocument CreateCommand(SemanticVersion serverVersion)
+        internal BsonDocument CreateCommand()
         {
-            Feature.Collation.ThrowIfNotSupported(serverVersion, _collation);
-
             return new BsonDocument
             {
                 { "group", new BsonDocument
@@ -261,9 +258,9 @@ namespace Etherna.MongoDB.Driver.Core.Operations
            };
         }
 
-        private ReadCommandOperation<TResult[]> CreateOperation(SemanticVersion serverVersion)
+        private ReadCommandOperation<TResult[]> CreateOperation()
         {
-            var command = CreateCommand(serverVersion);
+            var command = CreateCommand();
             var resultSerializer = _resultSerializer ?? BsonSerializer.LookupSerializer<TResult>();
             var resultArraySerializer = new ArraySerializer<TResult>(resultSerializer);
             var commandResultSerializer = new ElementDeserializer<TResult[]>("retval", resultArraySerializer);

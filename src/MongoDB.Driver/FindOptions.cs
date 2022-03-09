@@ -29,9 +29,10 @@ namespace Etherna.MongoDB.Driver
         private bool? _allowPartialResults;
         private int? _batchSize;
         private Collation _collation;
-        private string _comment;
+        private BsonValue _comment;
         private CursorType _cursorType;
         private BsonValue _hint;
+        private BsonDocument _let;
         private BsonDocument _max;
         private TimeSpan? _maxAwaitTime;
         private TimeSpan? _maxTime;
@@ -91,7 +92,7 @@ namespace Etherna.MongoDB.Driver
         /// <summary>
         /// Gets or sets the comment.
         /// </summary>
-        public string Comment
+        public BsonValue Comment
         {
             get { return _comment; }
             set { _comment = value; }
@@ -113,6 +114,15 @@ namespace Etherna.MongoDB.Driver
         {
             get { return _hint; }
             set { _hint = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the let document.
+        /// </summary>
+        public BsonDocument Let
+        {
+            get { return _let; }
+            set { _let = value; }
         }
 
         /// <summary>

@@ -27,7 +27,6 @@ using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -42,7 +41,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         private int? _batchSize;
         private Collation _collation;
         private readonly CollectionNamespace _collectionNamespace;
-        private string _comment;
+        private BsonValue _comment;
         private readonly DatabaseNamespace _databaseNamespace;
         private BsonValue _hint;
         private BsonDocument _let;
@@ -140,7 +139,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         /// <value>
         /// The comment.
         /// </value>
-        public string Comment
+        public BsonValue Comment
         {
             get { return _comment; }
             set { _comment = value; }
@@ -298,7 +297,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
                 context.ChannelSource.Session.SetSnapshotTimeIfNeeded(result.AtClusterTime);
 
-                return CreateCursor(context.ChannelSource, context.Channel, operation.Command, result);
+                return CreateCursor(context.ChannelSource, context.Channel, result);
             }
         }
 
@@ -326,7 +325,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
                 context.ChannelSource.Session.SetSnapshotTimeIfNeeded(result.AtClusterTime);
 
-                return CreateCursor(context.ChannelSource, context.Channel,operation.Command, result);
+                return CreateCursor(context.ChannelSource, context.Channel, result);
             }
         }
 
@@ -347,9 +346,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
         internal BsonDocument CreateCommand(ConnectionDescription connectionDescription, ICoreSession session)
         {
-            Feature.ReadConcern.ThrowIfNotSupported(connectionDescription.ServerVersion, _readConcern);
-            Feature.Collation.ThrowIfNotSupported(connectionDescription.ServerVersion, _collation);
-
             var readConcern = ReadConcernHelper.GetReadConcernForCommand(session, connectionDescription, _readConcern);
             var command = new BsonDocument
             {
@@ -358,20 +354,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 { "allowDiskUse", () => _allowDiskUse.Value, _allowDiskUse.HasValue },
                 { "maxTimeMS", () => MaxTimeHelper.ToMaxTimeMS(_maxTime.Value), _maxTime.HasValue },
                 { "collation", () => _collation.ToBsonDocument(), _collation != null },
-                { "hint", () => _hint, _hint != null },
-                { "let", () => _let, _let != null },
-                { "comment", () => _comment, _comment != null },
-                { "readConcern", readConcern, readConcern != null }
-            };
-
-            var useCursor = _useCursor.GetValueOrDefault(true) || connectionDescription.ServerVersion >= new SemanticVersion(3, 6, 0);
-            if (useCursor)
-            {
-                command["cursor"] = new BsonDocument
+                { "hint", _hint, _hint != null },
+                { "let", _let, _let != null },
+                { "comment", _comment, _comment != null },
+                { "readConcern", readConcern, readConcern != null },
                 {
-                    { "batchSize", () => _batchSize.Value, _batchSize.HasValue }
-                };
-            }
+                    "cursor",
+                    new BsonDocument
+                    {
+                        { "batchSize", () => _batchSize.Value, _batchSize.HasValue }
+                    }
+                }
+            };
 
             return command;
         }
@@ -387,27 +381,27 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             };
         }
 
-        private AsyncCursor<TResult> CreateCursor(IChannelSourceHandle channelSource, IChannelHandle channel, BsonDocument command, AggregateResult result)
+        private AsyncCursor<TResult> CreateCursor(IChannelSourceHandle channelSource, IChannelHandle channel, AggregateResult result)
         {
             if (result.CursorId.HasValue)
             {
-                return CreateCursorFromCursorResult(channelSource, channel, command, result);
+                return CreateCursorFromCursorResult(channelSource, channel, result);
             }
             else
             {
                 // don't need connection pinning
-                return CreateCursorFromInlineResult(command, result);
+                return CreateCursorFromInlineResult(result);
             }
         }
 
-        private AsyncCursor<TResult> CreateCursorFromCursorResult(IChannelSourceHandle channelSource, IChannelHandle channel, BsonDocument command, AggregateResult result)
+        private AsyncCursor<TResult> CreateCursorFromCursorResult(IChannelSourceHandle channelSource, IChannelHandle channel, AggregateResult result)
         {
             var cursorId = result.CursorId.GetValueOrDefault(0);
             var getMoreChannelSource = ChannelPinningHelper.CreateGetMoreChannelSource(channelSource, channel, cursorId);
             return new AsyncCursor<TResult>(
                 getMoreChannelSource,
                 result.CollectionNamespace,
-                command,
+                _comment,
                 result.Results,
                 cursorId,
                 result.PostBatchResumeToken,
@@ -418,12 +412,12 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 _maxAwaitTime);
         }
 
-        private AsyncCursor<TResult> CreateCursorFromInlineResult(BsonDocument command, AggregateResult result)
+        private AsyncCursor<TResult> CreateCursorFromInlineResult(AggregateResult result)
         {
             return new AsyncCursor<TResult>(
                 null, // channelSource
                 CollectionNamespace,
-                command,
+                _comment,
                 result.Results,
                 0, // cursorId
                 null, // postBatchResumeToken

@@ -137,8 +137,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // methods
         internal BsonDocument CreateCommand(ConnectionDescription connectionDescription, ICoreSession session)
         {
-            Feature.ReadConcern.ThrowIfNotSupported(connectionDescription.ServerVersion, _readConcern);
-
             var readConcern = ReadConcernHelper.GetReadConcernForCommand(session, connectionDescription, _readConcern);
             return new BsonDocument
             {
@@ -157,7 +155,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             };
         }
 
-        private IReadOnlyList<IAsyncCursor<TDocument>> CreateCursors(IChannelSourceHandle channelSource, BsonDocument command, BsonDocument result)
+        private IReadOnlyList<IAsyncCursor<TDocument>> CreateCursors(IChannelSourceHandle channelSource, BsonDocument result)
         {
             var cursors = new List<AsyncCursor<TDocument>>();
 
@@ -182,11 +180,11 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                     var cursor = new AsyncCursor<TDocument>(
                         getMoreChannelSource.Fork(),
                         _collectionNamespace,
-                        command,
+                        comment: null,
                         firstBatch,
                         cursorId,
                         _batchSize ?? 0,
-                        0, // limit
+                        limit: 0,
                         _serializer,
                         _messageEncoderSettings);
 
@@ -209,7 +207,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             {
                 var operation = CreateOperation(channel, channelBinding);
                 var result = operation.Execute(channelBinding, cancellationToken);
-                return CreateCursors(channelSource, operation.Command, result);
+                return CreateCursors(channelSource, result);
             }
         }
 
@@ -225,7 +223,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             {
                 var operation = CreateOperation(channel, channelBinding);
                 var result = await operation.ExecuteAsync(channelBinding, cancellationToken).ConfigureAwait(false);
-                return CreateCursors(channelSource, operation.Command, result);
+                return CreateCursors(channelSource, result);
             }
         }
     }

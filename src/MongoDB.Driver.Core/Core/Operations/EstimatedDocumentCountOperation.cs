@@ -94,9 +94,9 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
             using (var context = RetryableReadContext.Create(binding, _retryRequested, cancellationToken))
             {
-                if (Feature.EstimatedDocumentCountByCollStats.IsSupported(context.Channel.ConnectionDescription.ServerVersion))
+                if (Feature.EstimatedDocumentCountByCollStats.IsSupported(context.Channel.ConnectionDescription.MaxWireVersion))
                 {
-                    var operation = CreateAggregationOperation(context.Channel.ConnectionDescription.ServerVersion);
+                    var operation = CreateAggregationOperation();
                     IAsyncCursor<BsonDocument> cursor;
                     try
                     {
@@ -127,9 +127,9 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
             using (var context = RetryableReadContext.Create(binding, _retryRequested, cancellationToken))
             {
-                if (Feature.EstimatedDocumentCountByCollStats.IsSupported(context.Channel.ConnectionDescription.ServerVersion))
+                if (Feature.EstimatedDocumentCountByCollStats.IsSupported(context.Channel.ConnectionDescription.MaxWireVersion))
                 {
-                    var operation = CreateAggregationOperation(context.Channel.ConnectionDescription.ServerVersion);
+                    var operation = CreateAggregationOperation();
                     IAsyncCursor<BsonDocument> cursor;
                     try
                     {
@@ -154,10 +154,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         }
 
         // private methods
-        private IExecutableInRetryableReadContext<IAsyncCursor<BsonDocument>> CreateAggregationOperation(SemanticVersion serverVersion)
+        private IExecutableInRetryableReadContext<IAsyncCursor<BsonDocument>> CreateAggregationOperation()
         {
-            Feature.ReadConcern.ThrowIfNotSupported(serverVersion, _readConcern);
-
             var pipeline = CreateAggregationPipeline();
             var aggregateOperation = new AggregateOperation<BsonDocument>(_collectionNamespace, pipeline, BsonDocumentSerializer.Instance, _messageEncoderSettings)
             {

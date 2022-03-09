@@ -21,6 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Operations;
 
 namespace Etherna.MongoDB.Driver.Core.Bindings
 {
@@ -84,10 +85,24 @@ namespace Etherna.MongoDB.Driver.Core.Bindings
         }
 
         /// <inheritdoc/>
+        public IChannelSourceHandle GetWriteChannelSource(IMayUseSecondaryCriteria mayUseSecondary, CancellationToken cancellationToken)
+        {
+            ThrowIfDisposed();
+            return _reference.Instance.GetWriteChannelSource(mayUseSecondary, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public Task<IChannelSourceHandle> GetWriteChannelSourceAsync(CancellationToken cancellationToken)
         {
             ThrowIfDisposed();
             return _reference.Instance.GetWriteChannelSourceAsync(cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public Task<IChannelSourceHandle> GetWriteChannelSourceAsync(IMayUseSecondaryCriteria mayUseSecondary, CancellationToken cancellationToken)
+        {
+            ThrowIfDisposed();
+            return _reference.Instance.GetWriteChannelSourceAsync(mayUseSecondary, cancellationToken);
         }
 
         /// <inheritdoc/>

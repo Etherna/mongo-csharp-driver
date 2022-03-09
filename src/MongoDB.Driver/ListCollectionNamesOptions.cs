@@ -23,9 +23,29 @@ namespace Etherna.MongoDB.Driver
     public sealed class ListCollectionNamesOptions
     {
         // fields
+        private bool? authorizedCollections;
+        private BsonValue _comment;
         private FilterDefinition<BsonDocument> _filter;
 
         // properties
+        /// <summary>
+        /// Gets or sets the AuthorizedCollections flag.
+        /// </summary>
+        public bool? AuthorizedCollections
+        {
+            get { return authorizedCollections; }
+            set { authorizedCollections = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
+        }
+
         /// <summary>
         /// Gets or sets the filter.
         /// </summary>

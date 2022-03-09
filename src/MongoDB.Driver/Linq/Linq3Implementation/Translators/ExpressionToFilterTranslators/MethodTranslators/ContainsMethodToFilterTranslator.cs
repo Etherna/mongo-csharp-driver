@@ -28,9 +28,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     {
         public static AstFilter Translate(TranslationContext context, MethodCallExpression expression)
         {
-            if (StringExpressionToRegexFilterTranslator.CanTranslate(expression))
+            if (StringExpressionToRegexFilterTranslator.TryTranslate(context, expression, out var filter))
             {
-                return StringExpressionToRegexFilterTranslator.Translate(context, expression);
+                return filter;
             }
 
             var method = expression.Method;

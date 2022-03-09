@@ -22,7 +22,6 @@ using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -34,6 +33,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // fields
         private Collation _collation;
         private readonly CollectionNamespace _collectionNamespace;
+        private BsonValue _comment;
         private BsonDocument _filter;
         private BsonValue _hint;
         private long? _limit;
@@ -76,6 +76,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public CollectionNamespace CollectionNamespace
         {
             get { return _collectionNamespace; }
+        }
+
+        /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        /// <value>
+        /// The comment.
+        /// </value>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
         }
 
         /// <summary>
@@ -174,9 +186,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // methods
         internal BsonDocument CreateCommand(ConnectionDescription connectionDescription, ICoreSession session)
         {
-            Feature.ReadConcern.ThrowIfNotSupported(connectionDescription.ServerVersion, _readConcern);
-            Feature.Collation.ThrowIfNotSupported(connectionDescription.ServerVersion, _collation);
-
             var readConcern = ReadConcernHelper.GetReadConcernForCommand(session, connectionDescription, _readConcern);
             return new BsonDocument
             {
@@ -187,6 +196,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 { "hint", _hint, _hint != null },
                 { "maxTimeMS", () => MaxTimeHelper.ToMaxTimeMS(_maxTime.Value), _maxTime.HasValue },
                 { "collation", () => _collation.ToBsonDocument(), _collation != null },
+                { "comment", _comment, _comment != null },
                 { "readConcern", readConcern, readConcern != null }
             };
         }

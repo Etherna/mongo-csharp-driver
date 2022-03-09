@@ -38,16 +38,12 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             return new RetryableInsertCommandOperation<InsertRequest>(CollectionNamespace, batch.Requests, InsertRequestSerializer.Instance, MessageEncoderSettings)
             {
                 BypassDocumentValidation = BypassDocumentValidation,
+                Comment = Comment,
                 IsOrdered = IsOrdered,
                 MaxBatchCount = MaxBatchCount,
                 RetryRequested = RetryRequested,
                 WriteConcern = WriteConcern
             };
-        }
-
-        protected override bool RequestHasCollation(InsertRequest request)
-        {
-            return false;
         }
 
         protected override bool RequestHasHint(InsertRequest request)

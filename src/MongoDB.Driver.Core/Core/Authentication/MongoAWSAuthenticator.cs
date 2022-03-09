@@ -95,15 +95,15 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             }
             if (password != null && username == null)
             {
-                throw new InvalidOperationException("When using MONGODB-AWS authentication if a password is provided via settings then a username must be provided also.");
+                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a password is provided via settings then a username must be provided also.");
             }
             if (username != null && password == null)
             {
-                throw new InvalidOperationException("When using MONGODB-AWS authentication if a username is provided via settings then a password must be provided also.");
+                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a username is provided via settings then a password must be provided also.");
             }
             if (sessionToken != null && (username == null || password == null))
             {
-                throw new InvalidOperationException("When using MONGODB-AWS authentication if a session token is provided via settings then a username and password must be provided also.");
+                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a session token is provided via settings then a username and password must be provided also.");
             }
 
             return new AwsCredentials(accessKeyId: username, secretAccessKey: password, sessionToken);
@@ -121,15 +121,15 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             }
             if (secretAccessKey != null && accessKeyId == null)
             {
-                throw new InvalidOperationException("When using MONGODB-AWS authentication if a secret access key is provided via environment variables then an access key ID must be provided also.");
+                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a secret access key is provided via environment variables then an access key ID must be provided also.");
             }
             if (accessKeyId != null && secretAccessKey == null)
             {
-                throw new InvalidOperationException("When using MONGODB-AWS authentication if an access key ID is provided via environment variables then a secret access key must be provided also.");
+                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if an access key ID is provided via environment variables then a secret access key must be provided also.");
             }
             if (sessionToken != null && (accessKeyId == null || secretAccessKey == null))
             {
-                throw new InvalidOperationException("When using MONGODB-AWS authentication if a session token is provided via environment variables then an access key ID and a secret access key must be provided also.");
+                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a session token is provided via environment variables then an access key ID and a secret access key must be provided also.");
             }
 
             return new AwsCredentials(accessKeyId, SecureStringHelper.ToSecureString(secretAccessKey), sessionToken);

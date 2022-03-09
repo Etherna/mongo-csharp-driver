@@ -23,8 +23,8 @@ using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -38,7 +38,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         private bool? _bypassDocumentValidation;
         private Collation _collation;
         private readonly CollectionNamespace _collectionNamespace;
-        private string _comment;
+        private BsonValue _comment;
         private readonly DatabaseNamespace _databaseNamespace;
         private BsonValue _hint;
         private BsonDocument _let;
@@ -46,6 +46,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         private readonly MessageEncoderSettings _messageEncoderSettings;
         private readonly IReadOnlyList<BsonDocument> _pipeline;
         private ReadConcern _readConcern;
+        private ReadPreference _readPreference;
         private WriteConcern _writeConcern;
 
         // constructors
@@ -131,7 +132,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         /// <value>
         /// The comment.
         /// </value>
-        public string Comment
+        public BsonValue Comment
         {
             get { return _comment; }
             set { _comment = value; }
@@ -222,6 +223,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         }
 
         /// <summary>
+        /// Gets or sets the read preference.
+        /// </summary>
+        public ReadPreference ReadPreference
+        {
+            get { return _readPreference; }
+            set
+            {
+                _readPreference = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the write concern.
         /// </summary>
         /// <value>
@@ -239,11 +252,12 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
-            using (var channelSource = binding.GetWriteChannelSource(cancellationToken))
+            var mayUseSecondary = new MayUseSecondary(_readPreference);
+            using (var channelSource = binding.GetWriteChannelSource(mayUseSecondary, cancellationToken))
             using (var channel = channelSource.GetChannel(cancellationToken))
             using (var channelBinding = new ChannelReadWriteBinding(channelSource.Server, channel, binding.Session.Fork()))
             {
-                var operation = CreateOperation(channelBinding.Session, channel.ConnectionDescription);
+                var operation = CreateOperation(channelBinding.Session, channel.ConnectionDescription, mayUseSecondary.EffectiveReadPreference);
                 return operation.Execute(channelBinding, cancellationToken);
             }
         }
@@ -253,45 +267,48 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
-            using (var channelSource = await binding.GetWriteChannelSourceAsync(cancellationToken).ConfigureAwait(false))
+            var mayUseSecondary = new MayUseSecondary(_readPreference);
+            using (var channelSource = await binding.GetWriteChannelSourceAsync(mayUseSecondary, cancellationToken).ConfigureAwait(false))
             using (var channel = await channelSource.GetChannelAsync(cancellationToken).ConfigureAwait(false))
             using (var channelBinding = new ChannelReadWriteBinding(channelSource.Server, channel, binding.Session.Fork()))
             {
-                var operation = CreateOperation(channelBinding.Session, channel.ConnectionDescription);
+                var operation = CreateOperation(channelBinding.Session, channel.ConnectionDescription, mayUseSecondary.EffectiveReadPreference);
                 return await operation.ExecuteAsync(channelBinding, cancellationToken).ConfigureAwait(false);
             }
         }
 
         internal BsonDocument CreateCommand(ICoreSessionHandle session, ConnectionDescription connectionDescription)
         {
-            var serverVersion = connectionDescription.ServerVersion;
-            Feature.Collation.ThrowIfNotSupported(serverVersion, _collation);
-
             var readConcern = _readConcern != null
                 ? ReadConcernHelper.GetReadConcernForCommand(session, connectionDescription, _readConcern)
                 : null;
-            var writeConcern = WriteConcernHelper.GetWriteConcernForCommandThatWrites(session, _writeConcern, serverVersion);
+            var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(session, _writeConcern);
             return new BsonDocument
             {
                 { "aggregate", _collectionNamespace == null ? (BsonValue)1 : _collectionNamespace.CollectionName },
                 { "pipeline", new BsonArray(_pipeline) },
                 { "allowDiskUse", () => _allowDiskUse.Value, _allowDiskUse.HasValue },
-                { "bypassDocumentValidation", () => _bypassDocumentValidation.Value, _bypassDocumentValidation.HasValue && Feature.BypassDocumentValidation.IsSupported(serverVersion) },
+                { "bypassDocumentValidation", () => _bypassDocumentValidation.Value, _bypassDocumentValidation.HasValue },
                 { "maxTimeMS", () => MaxTimeHelper.ToMaxTimeMS(_maxTime.Value), _maxTime.HasValue },
                 { "collation", () => _collation.ToBsonDocument(), _collation != null },
                 { "readConcern", readConcern, readConcern != null },
                 { "writeConcern", writeConcern, writeConcern != null },
-                { "cursor", new BsonDocument(), serverVersion >= new SemanticVersion(3, 6, 0) },
-                { "hint", () => _hint, _hint != null },
-                { "let", () => _let, _let != null },
-                { "comment", () => _comment, _comment != null }
+                { "cursor", new BsonDocument() },
+                { "hint", _hint, _hint != null },
+                { "let", _let, _let != null },
+                { "comment", _comment, _comment != null }
             };
         }
 
-        private WriteCommandOperation<BsonDocument> CreateOperation(ICoreSessionHandle session, ConnectionDescription connectionDescription)
+        private WriteCommandOperation<BsonDocument> CreateOperation(ICoreSessionHandle session, ConnectionDescription connectionDescription, ReadPreference effectiveReadPreference)
         {
             var command = CreateCommand(session, connectionDescription);
-            return new WriteCommandOperation<BsonDocument>(CollectionNamespace.DatabaseNamespace, command, BsonDocumentSerializer.Instance, MessageEncoderSettings);
+            var operation = new WriteCommandOperation<BsonDocument>(_databaseNamespace, command, BsonDocumentSerializer.Instance, MessageEncoderSettings);
+            if (effectiveReadPreference != null)
+            {
+                operation.ReadPreference = effectiveReadPreference;
+            }
+            return operation;
         }
 
         private void EnsureIsOutputToCollectionPipeline()
@@ -329,6 +346,22 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             }
 
             return pipeline; // unchanged
+        }
+
+        internal class MayUseSecondary : IMayUseSecondaryCriteria
+        {
+            public MayUseSecondary(ReadPreference readPreference)
+            {
+                ReadPreference = EffectiveReadPreference = readPreference;
+            }
+
+            public ReadPreference EffectiveReadPreference { get; set; }
+            public ReadPreference ReadPreference { get; }
+
+            public bool CanUseSecondary(ServerDescription server)
+            {
+                return Feature.AggregateOutOnSecondary.IsSupported(server.MaxWireVersion);
+            }
         }
     }
 }

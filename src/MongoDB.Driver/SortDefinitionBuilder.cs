@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq;
@@ -224,6 +223,9 @@ namespace Etherna.MongoDB.Driver
             _field = Ensure.IsNotNull(field, nameof(field));
             _direction = direction;
         }
+
+        public SortDirection Direction => _direction;
+        public FieldDefinition<TDocument> Field => _field;
 
         public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
         {

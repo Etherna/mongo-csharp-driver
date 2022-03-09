@@ -21,7 +21,6 @@ using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
-using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
@@ -36,6 +35,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // private fields
         private readonly CollectionNamespace _collectionNamespace;
         private readonly BatchableSource<DeleteRequest> _deletes;
+        private BsonDocument _let;
 
         // constructors
         /// <summary>
@@ -55,6 +55,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         }
 
         // public properties
+        /// <summary>
+        /// Gets or sets the let document.
+        /// </summary>
+        /// <value>
+        /// The let document.
+        /// </value>
+        public BsonDocument Let
+        {
+            get { return _let; }
+            set { _let = value; }
+        }
+
         /// <summary>
         /// Gets the collection namespace.
         /// </summary>
@@ -79,31 +91,25 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
         // protected methods
         /// <inheritdoc />
-        protected override BsonDocument CreateCommand(ICoreSessionHandle session, ConnectionDescription connectionDescription, int attempt, long? transactionNumber)
+        protected override BsonDocument CreateCommand(ICoreSessionHandle session, int attempt, long? transactionNumber)
         {
-            var serverVersion = connectionDescription.ServerVersion;
-            if (!Feature.Collation.IsSupported(serverVersion))
-            {
-                if (_deletes.Items.Skip(_deletes.Offset).Take(_deletes.Count).Any(d => d.Collation != null))
-                {
-                    throw new NotSupportedException($"Server version {serverVersion} does not support collations.");
-                }
-            }
-            if (Feature.HintForDeleteOperations.DriverMustThrowIfNotSupported(serverVersion) || (WriteConcern != null && !WriteConcern.IsAcknowledged))
+            if (WriteConcern != null && !WriteConcern.IsAcknowledged)
             {
                 if (_deletes.Items.Skip(_deletes.Offset).Take(_deletes.Count).Any(u => u.Hint != null))
                 {
-                    throw new NotSupportedException($"Server version {serverVersion} does not support hints.");
+                    throw new NotSupportedException("Hint is not supported for unacknowledged writes.");
                 }
             }
 
-            var writeConcern = WriteConcernHelper.GetWriteConcernForWriteCommand(session, WriteConcern);
+            var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(session, WriteConcern);
             return new BsonDocument
             {
                 { "delete", _collectionNamespace.CollectionName },
                 { "ordered", IsOrdered },
+                { "comment", Comment, Comment != null },
                 { "writeConcern", writeConcern, writeConcern != null },
-                { "txnNumber", () => transactionNumber.Value, transactionNumber.HasValue }
+                { "txnNumber", () => transactionNumber.Value, transactionNumber.HasValue },
+                { "let", _let, _let != null }
             };
         }
 

@@ -28,7 +28,6 @@ using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -50,6 +49,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         private readonly CollectionNamespace _collectionNamespace;
         private IChannelSource _channelSource;
         private bool _closed;
+        private readonly BsonValue _comment;
         private int _count;
         private IReadOnlyList<TDocument> _currentBatch;
         private long _cursorId;
@@ -60,11 +60,49 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         private readonly MessageEncoderSettings _messageEncoderSettings;
         private readonly long? _operationId;
         private BsonDocument _postBatchResumeToken;
-        private readonly BsonDocument _query;
         private readonly IBsonSerializer<TDocument> _serializer;
         private readonly bool _wasFirstBatchEmpty;
 
         // constructors
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AsyncCursor{TDocument}"/> class.
+        /// </summary>
+        /// <param name="channelSource">The channel source.</param>
+        /// <param name="collectionNamespace">The collection namespace.</param>
+        /// <param name="comment">The comment.</param>
+        /// <param name="firstBatch">The first batch.</param>
+        /// <param name="cursorId">The cursor identifier.</param>
+        /// <param name="batchSize">The size of a batch.</param>
+        /// <param name="limit">The limit.</param>
+        /// <param name="serializer">The serializer.</param>
+        /// <param name="messageEncoderSettings">The message encoder settings.</param>
+        /// <param name="maxTime">The maxTime for each batch.</param>
+        public AsyncCursor(
+            IChannelSource channelSource,
+            CollectionNamespace collectionNamespace,
+            BsonValue comment,
+            IReadOnlyList<TDocument> firstBatch,
+            long cursorId,
+            int? batchSize,
+            int? limit,
+            IBsonSerializer<TDocument> serializer,
+            MessageEncoderSettings messageEncoderSettings,
+            TimeSpan? maxTime = null)
+            : this(
+                channelSource,
+                collectionNamespace,
+                comment,
+                firstBatch,
+                cursorId,
+                null, // postBatchResumeToken
+                batchSize,
+                limit,
+                serializer,
+                messageEncoderSettings,
+                maxTime)
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AsyncCursor{TDocument}"/> class.
         /// </summary>
@@ -78,6 +116,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         /// <param name="serializer">The serializer.</param>
         /// <param name="messageEncoderSettings">The message encoder settings.</param>
         /// <param name="maxTime">The maxTime for each batch.</param>
+        [Obsolete("Use overload without query.")]
         public AsyncCursor(
             IChannelSource channelSource,
             CollectionNamespace collectionNamespace,
@@ -118,10 +157,52 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         /// <param name="serializer">The serializer.</param>
         /// <param name="messageEncoderSettings">The message encoder settings.</param>
         /// <param name="maxTime">The maxTime for each batch.</param>
+        [Obsolete("Use overload without query.")]
         public AsyncCursor(
             IChannelSource channelSource,
             CollectionNamespace collectionNamespace,
-            BsonDocument query,
+            BsonDocument query, // no longer used, so ingore it
+            IReadOnlyList<TDocument> firstBatch,
+            long cursorId,
+            BsonDocument postBatchResumeToken,
+            int? batchSize,
+            int? limit,
+            IBsonSerializer<TDocument> serializer,
+            MessageEncoderSettings messageEncoderSettings,
+            TimeSpan? maxTime)
+            : this(
+                  channelSource,
+                  collectionNamespace,
+                  comment: null,
+                  firstBatch,
+                  cursorId,
+                  postBatchResumeToken,
+                  batchSize,
+                  limit,
+                  serializer,
+                  messageEncoderSettings,
+                  maxTime)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AsyncCursor{TDocument}"/> class.
+        /// </summary>
+        /// <param name="channelSource">The channel source.</param>
+        /// <param name="collectionNamespace">The collection namespace.</param>
+        /// <param name="comment">The comment.</param>
+        /// <param name="firstBatch">The first batch.</param>
+        /// <param name="cursorId">The cursor identifier.</param>
+        /// <param name="postBatchResumeToken">The post batch resume token.</param>
+        /// <param name="batchSize">The size of a batch.</param>
+        /// <param name="limit">The limit.</param>
+        /// <param name="serializer">The serializer.</param>
+        /// <param name="messageEncoderSettings">The message encoder settings.</param>
+        /// <param name="maxTime">The maxTime for each batch.</param>
+        public AsyncCursor(
+            IChannelSource channelSource,
+            CollectionNamespace collectionNamespace,
+            BsonValue comment,
             IReadOnlyList<TDocument> firstBatch,
             long cursorId,
             BsonDocument postBatchResumeToken,
@@ -133,8 +214,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             _operationId = EventContext.OperationId;
             _channelSource = channelSource;
+            _comment = comment;
             _collectionNamespace = Ensure.IsNotNull(collectionNamespace, nameof(collectionNamespace));
-            _query = Ensure.IsNotNull(query, nameof(query));
             _firstBatch = Ensure.IsNotNull(firstBatch, nameof(firstBatch));
             _cursorId = cursorId;
             _postBatchResumeToken = postBatchResumeToken;
@@ -253,7 +334,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 { "getMore", _cursorId },
                 { "collection", _collectionNamespace.CollectionName },
                 { "batchSize", () => CalculateGetMoreNumberToReturn(), _batchSize > 0 || _limit > 0 },
-                { "maxTimeMS", () => MaxTimeHelper.ToMaxTimeMS(_maxTime.Value), _maxTime.HasValue }
+                { "maxTimeMS", () => MaxTimeHelper.ToMaxTimeMS(_maxTime.Value), _maxTime.HasValue },
+                { "comment", _comment, _comment != null },
             };
 
             return command;
@@ -326,34 +408,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             return CreateCursorBatch(result);
         }
 
-        private CursorBatch<TDocument> ExecuteGetMoreProtocol(IChannelHandle channel, CancellationToken cancellationToken)
-        {
-            var numberToReturn = CalculateGetMoreNumberToReturn();
-
-            return channel.GetMore<TDocument>(
-                _collectionNamespace,
-                _query,
-                _cursorId,
-                numberToReturn,
-                _serializer,
-                _messageEncoderSettings,
-                cancellationToken);
-        }
-
-        private Task<CursorBatch<TDocument>> ExecuteGetMoreProtocolAsync(IChannelHandle channel, CancellationToken cancellationToken)
-        {
-            var numberToReturn = CalculateGetMoreNumberToReturn();
-
-            return channel.GetMoreAsync<TDocument>(
-                _collectionNamespace,
-                _query,
-                _cursorId,
-                numberToReturn,
-                _serializer,
-                _messageEncoderSettings,
-                cancellationToken);
-        }
-
         private void ExecuteKillCursorsCommand(IChannelHandle channel, CancellationToken cancellationToken)
         {
             var command = CreateKillCursorsCommand();
@@ -393,22 +447,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 .ConfigureAwait(false);
 
             ThrowIfKillCursorsCommandFailed(result, channel.ConnectionDescription.ConnectionId);
-        }
-
-        private void ExecuteKillCursorsProtocol(IChannelHandle channel, CancellationToken cancellationToken)
-        {
-            channel.KillCursors(
-                new[] { _cursorId },
-                _messageEncoderSettings,
-                cancellationToken);
-        }
-
-        private Task ExecuteKillCursorsProtocolAsync(IChannelHandle channel, CancellationToken cancellationToken)
-        {
-            return channel.KillCursorsAsync(
-                new[] { _cursorId },
-                _messageEncoderSettings,
-                cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -518,14 +556,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             using (EventContext.BeginOperation(_operationId))
             using (var channel = _channelSource.GetChannel(cancellationToken))
             {
-                if (Feature.FindCommand.IsSupported(channel.ConnectionDescription.ServerVersion))
-                {
-                    return ExecuteGetMoreCommand(channel, cancellationToken);
-                }
-                else
-                {
-                    return ExecuteGetMoreProtocol(channel, cancellationToken);
-                }
+                return ExecuteGetMoreCommand(channel, cancellationToken);
             }
         }
 
@@ -534,14 +565,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             using (EventContext.BeginOperation(_operationId))
             using (var channel = await _channelSource.GetChannelAsync(cancellationToken).ConfigureAwait(false))
             {
-                if (Feature.FindCommand.IsSupported(channel.ConnectionDescription.ServerVersion))
-                {
-                    return await ExecuteGetMoreCommandAsync(channel, cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    return await ExecuteGetMoreProtocolAsync(channel, cancellationToken).ConfigureAwait(false);
-                }
+                return await ExecuteGetMoreCommandAsync(channel, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -559,14 +583,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             {
                 if (!channel.Connection.IsExpired)
                 {
-                    if (Feature.KillCursorsCommand.IsSupported(channel.ConnectionDescription.ServerVersion))
-                    {
-                        ExecuteKillCursorsCommand(channel, cancellationToken);
-                    }
-                    else
-                    {
-                        ExecuteKillCursorsProtocol(channel, cancellationToken);
-                    }
+                    ExecuteKillCursorsCommand(channel, cancellationToken);
                 }
             }
         }
@@ -580,14 +597,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             {
                 if (!channel.Connection.IsExpired)
                 {
-                    if (Feature.KillCursorsCommand.IsSupported(channel.ConnectionDescription.ServerVersion))
-                    {
-                        await ExecuteKillCursorsCommandAsync(channel, cancellationToken).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        await ExecuteKillCursorsProtocolAsync(channel, cancellationToken).ConfigureAwait(false);
-                    }
+                    await ExecuteKillCursorsCommandAsync(channel, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

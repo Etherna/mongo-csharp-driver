@@ -23,7 +23,6 @@ using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Operations.ElementNameValidators;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -39,6 +38,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         private readonly BsonDocument _filter;
         private BsonValue _hint;
         private bool _isUpsert;
+        private BsonDocument _let;
         private TimeSpan? _maxTime;
         private BsonDocument _projection;
         private ReturnDocument _returnDocument;
@@ -123,6 +123,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         }
 
         /// <summary>
+        /// Gets or sets the let document.
+        /// </summary>
+        /// <value>
+        /// The let document.
+        /// </value>
+        public BsonDocument Let
+        {
+            get { return _let; }
+            set { _let = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the maximum time the server should spend on this operation.
         /// </summary>
         /// <value>
@@ -184,17 +196,16 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // methods
         internal override BsonDocument CreateCommand(ICoreSessionHandle session, ConnectionDescription connectionDescription, long? transactionNumber)
         {
-            var serverVersion = connectionDescription.ServerVersion;
-            Feature.Collation.ThrowIfNotSupported(serverVersion, Collation);
-            if (Feature.HintForFindAndModifyFeature.DriverMustThrowIfNotSupported(serverVersion) || (WriteConcern != null && !WriteConcern.IsAcknowledged))
+            var maxWireVersion = connectionDescription.MaxWireVersion;
+            if (Feature.HintForFindAndModifyFeature.DriverMustThrowIfNotSupported(maxWireVersion) || (WriteConcern != null && !WriteConcern.IsAcknowledged))
             {
                 if (_hint != null)
                 {
-                    throw new NotSupportedException($"Server version {serverVersion} does not support hints.");
+                    throw new NotSupportedException($"Server version {WireVersion.GetServerVersionForErrorMessage(maxWireVersion)} does not support hints.");
                 }
             }
 
-            var writeConcern = WriteConcernHelper.GetWriteConcernForCommand(session, WriteConcern, serverVersion, Feature.FindAndModifyWriteConcern);
+            var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(session, WriteConcern);
             return new BsonDocument
             {
                 { "findAndModify", CollectionNamespace.CollectionName },
@@ -206,11 +217,13 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 { "upsert", true, _isUpsert },
                 { "maxTimeMS", () => MaxTimeHelper.ToMaxTimeMS(_maxTime.Value), _maxTime.HasValue },
                 { "writeConcern", writeConcern, writeConcern != null },
-                { "bypassDocumentValidation", () => _bypassDocumentValidation.Value, _bypassDocumentValidation.HasValue && Feature.BypassDocumentValidation.IsSupported(serverVersion) },
+                { "bypassDocumentValidation", () => _bypassDocumentValidation.Value, _bypassDocumentValidation.HasValue },
                 { "collation", () => Collation.ToBsonDocument(), Collation != null },
-                { "hint", () => _hint, _hint != null },
+                { "comment", Comment, Comment != null },
+                { "hint", _hint, _hint != null },
                 { "arrayFilters", () => new BsonArray(_arrayFilters), _arrayFilters != null },
-                { "txnNumber", () => transactionNumber, transactionNumber.HasValue }
+                { "txnNumber", () => transactionNumber, transactionNumber.HasValue },
+                { "let", _let, _let != null }
             };
         }
 

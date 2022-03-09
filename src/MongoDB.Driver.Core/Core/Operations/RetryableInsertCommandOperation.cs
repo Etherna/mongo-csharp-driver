@@ -20,7 +20,6 @@ using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
-using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
@@ -107,14 +106,15 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
         // protected methods
         /// <inheritdoc />
-        protected override BsonDocument CreateCommand(ICoreSessionHandle session, ConnectionDescription connectionDescription, int attempt, long? transactionNumber)
+        protected override BsonDocument CreateCommand(ICoreSessionHandle session, int attempt, long? transactionNumber)
         {
-            var writeConcern = WriteConcernHelper.GetWriteConcernForWriteCommand(session, WriteConcern);
+            var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(session, WriteConcern);
             return new BsonDocument
             {
                 { "insert", _collectionNamespace.CollectionName },
                 { "ordered", IsOrdered },
                 { "bypassDocumentValidation", () => _bypassDocumentValidation, _bypassDocumentValidation.HasValue },
+                { "comment", Comment, Comment != null },
                 { "writeConcern", writeConcern, writeConcern != null },
                 { "txnNumber", () => transactionNumber.Value, transactionNumber.HasValue }
             };

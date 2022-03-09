@@ -1,4 +1,4 @@
-/* Copyright 2013-present MongoDB Inc.
+﻿/* Copyright 2013-present MongoDB Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,8 +13,6 @@
 * limitations under the License.
 */
 
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,10 +28,12 @@ namespace Etherna.MongoDB.Driver.Core.Operations
     /// <summary>
     /// Represents a list collections operation.
     /// </summary>
-    public class ListCollectionsOperation : IReadOperation<IAsyncCursor<BsonDocument>>
+    public class ListCollectionsOperation : IReadOperation<IAsyncCursor<BsonDocument>>, IExecutableInRetryableReadContext<IAsyncCursor<BsonDocument>>
     {
         // fields
+        private bool? _authorizedCollections;
         private int? _batchSize;
+        private BsonValue _comment;
         private BsonDocument _filter;
         private readonly DatabaseNamespace _databaseNamespace;
         private readonly MessageEncoderSettings _messageEncoderSettings;
@@ -56,6 +56,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
         // properties
         /// <summary>
+        /// Gets or sets the AuthorizedCollections flag.
+        /// </summary>
+        /// <value>
+        /// Whether authorizedCollections flag is set.
+        /// </value>
+        public bool? AuthorizedCollections
+        {
+            get => _authorizedCollections;
+            set => _authorizedCollections = value;
+        }
+
+        /// <summary>
         /// Gets or sets the batch size.
         /// </summary>
         /// <value>
@@ -65,6 +77,15 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             get => _batchSize;
             set => _batchSize = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
         }
 
         /// <summary>
@@ -131,11 +152,22 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
-            using (EventContext.BeginOperation())
             using (var context = RetryableReadContext.Create(binding, _retryRequested, cancellationToken))
             {
-                var operation = CreateOperation(context.Channel);
-                return operation.Execute(context, cancellationToken);
+                return Execute(context, cancellationToken);
+            }
+        }
+
+        /// <inheritdoc/>
+        public IAsyncCursor<BsonDocument> Execute(RetryableReadContext context, CancellationToken cancellationToken)
+        {
+            Ensure.IsNotNull(context, nameof(context));
+
+            using (EventContext.BeginOperation())
+            {
+                var operation = CreateOperation();
+                var result = operation.Execute(context, cancellationToken);
+                return CreateCursor(context.ChannelSource, context.Channel, result);
             }
         }
 
@@ -144,36 +176,60 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
-            using (EventContext.BeginOperation())
             using (var context = await RetryableReadContext.CreateAsync(binding, _retryRequested, cancellationToken).ConfigureAwait(false))
             {
-                var operation = CreateOperation(context.Channel);
-                return await operation.ExecuteAsync(context, cancellationToken).ConfigureAwait(false);
+                return await ExecuteAsync(context, cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<IAsyncCursor<BsonDocument>> ExecuteAsync(RetryableReadContext context, CancellationToken cancellationToken)
+        {
+            Ensure.IsNotNull(context, nameof(context));
+
+            using (EventContext.BeginOperation())
+            {
+                var operation = CreateOperation();
+                var result = await operation.ExecuteAsync(context, cancellationToken).ConfigureAwait(false);
+                return CreateCursor(context.ChannelSource, context.Channel, result);
             }
         }
 
         // private methods
-        private IExecutableInRetryableReadContext<IAsyncCursor<BsonDocument>> CreateOperation(IChannel channel)
+        private ReadCommandOperation<BsonDocument> CreateOperation()
         {
-            if (Feature.ListCollectionsCommand.IsSupported(channel.ConnectionDescription.ServerVersion))
+            var command = new BsonDocument
             {
-                return new ListCollectionsUsingCommandOperation(_databaseNamespace, _messageEncoderSettings)
-                {
-                    BatchSize = _batchSize,
-                    Filter = _filter,
-                    NameOnly = _nameOnly,
-                    RetryRequested = _retryRequested // might be overridden by retryable read context
-                };
-            }
-            else
+                { "listCollections", 1 },
+                { "filter", _filter, _filter != null },
+                { "nameOnly", () => _nameOnly.Value, _nameOnly.HasValue },
+                { "cursor", () => new BsonDocument("batchSize", _batchSize.Value), _batchSize.HasValue },
+                { "authorizedCollections", () => _authorizedCollections.Value, _authorizedCollections.HasValue },
+                { "comment", _comment, _comment != null }
+            };
+            return new ReadCommandOperation<BsonDocument>(_databaseNamespace, command, BsonDocumentSerializer.Instance, _messageEncoderSettings)
             {
-                return new ListCollectionsUsingQueryOperation(_databaseNamespace, _messageEncoderSettings)
-                {
-                    BatchSize = _batchSize,
-                    Filter = _filter,
-                    RetryRequested = _retryRequested // might be overridden by retryable read context
-                };
-            }
+                RetryRequested = _retryRequested // might be overridden by retryable read context
+            };
+        }
+
+        private IAsyncCursor<BsonDocument> CreateCursor(IChannelSourceHandle channelSource, IChannelHandle channel, BsonDocument result)
+        {
+            var cursorDocument = result["cursor"].AsBsonDocument;
+            var cursorId = cursorDocument["id"].ToInt64();
+            var getMoreChannelSource = ChannelPinningHelper.CreateGetMoreChannelSource(channelSource, channel, cursorId);
+            var cursor = new AsyncCursor<BsonDocument>(
+                getMoreChannelSource,
+                CollectionNamespace.FromFullName(cursorDocument["ns"].AsString),
+                _comment,
+                cursorDocument["firstBatch"].AsBsonArray.OfType<BsonDocument>().ToList(),
+                cursorId,
+                batchSize: _batchSize ?? 0,
+                0,
+                BsonDocumentSerializer.Instance,
+                _messageEncoderSettings);
+
+            return cursor;
         }
     }
 }

@@ -37,6 +37,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // fields
         private Collation _collation;
         private CollectionNamespace _collectionNamespace;
+        private BsonValue _comment;
         private BsonDocument _filter;
         private string _fieldName;
         private TimeSpan? _maxTime;
@@ -73,6 +74,19 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             get { return _collation; }
             set { _collation = value; }
         }
+
+        /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        /// <value>
+        /// The comment.
+        /// </value>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
+        }
+
         /// <summary>
         /// Gets the collection namespace.
         /// </summary>
@@ -199,9 +213,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // private methods
         internal BsonDocument CreateCommand(ConnectionDescription connectionDescription, ICoreSession session)
         {
-            Feature.ReadConcern.ThrowIfNotSupported(connectionDescription.ServerVersion, _readConcern);
-            Feature.Collation.ThrowIfNotSupported(connectionDescription.ServerVersion, _collation);
-
             var readConcern = ReadConcernHelper.GetReadConcernForCommand(session, connectionDescription, _readConcern);
             return new BsonDocument
             {
@@ -210,6 +221,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 { "query", _filter, _filter != null },
                 { "maxTimeMS", () => MaxTimeHelper.ToMaxTimeMS(_maxTime.Value), _maxTime.HasValue },
                 { "collation", () => _collation.ToBsonDocument(), _collation != null },
+                { "comment", _comment, _comment != null },
                 { "readConcern", readConcern, readConcern != null }
             };
         }

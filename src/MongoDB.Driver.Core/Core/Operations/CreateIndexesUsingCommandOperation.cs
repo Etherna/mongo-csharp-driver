@@ -16,7 +16,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
@@ -26,7 +25,6 @@ using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -37,6 +35,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
     {
         // fields
         private readonly CollectionNamespace _collectionNamespace;
+        private BsonValue _comment;
         private CreateIndexCommitQuorum _commitQuorum;
         private TimeSpan? _maxTime;
         private readonly MessageEncoderSettings _messageEncoderSettings;
@@ -70,6 +69,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public CollectionNamespace CollectionNamespace
         {
             get { return _collectionNamespace; }
+        }
+
+        /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        /// <value>
+        /// The comment.
+        /// </value>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
         }
 
         /// <summary>
@@ -157,19 +168,20 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         // private methods
         internal BsonDocument CreateCommand(ICoreSessionHandle session, ConnectionDescription connectionDescription)
         {
-            var serverVersion = connectionDescription.ServerVersion;
-            var writeConcern = WriteConcernHelper.GetWriteConcernForCommandThatWrites(session, _writeConcern, serverVersion);
+            var maxWireVersion = connectionDescription.MaxWireVersion;
+            var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(session, _writeConcern);
             if (_commitQuorum != null)
             {
-                Feature.CreateIndexCommitQuorum.ThrowIfNotSupported(serverVersion);
+                Feature.CreateIndexCommitQuorum.ThrowIfNotSupported(maxWireVersion);
             }
 
             return new BsonDocument
             {
                 { "createIndexes", _collectionNamespace.CollectionName },
-                { "indexes", new BsonArray(_requests.Select(request => request.CreateIndexDocument(serverVersion))) },
+                { "indexes", new BsonArray(_requests.Select(request => request.CreateIndexDocument())) },
                 { "maxTimeMS", () => MaxTimeHelper.ToMaxTimeMS(_maxTime.Value), _maxTime.HasValue },
                 { "writeConcern", writeConcern, writeConcern != null },
+                { "comment", _comment, _comment != null },
                 { "commitQuorum", () => _commitQuorum.ToBsonValue(), _commitQuorum != null }
             };
         }

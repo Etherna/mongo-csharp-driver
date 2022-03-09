@@ -17,7 +17,6 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
@@ -34,15 +33,17 @@ namespace Etherna.MongoDB.Driver.Core.Servers
         private CancellationTokenSource _heartbeatCancellationTokenSource; // used to cancel an ongoing heartbeat
         private ServerDescription _currentDescription;
         private readonly EndPoint _endPoint;
-        private BuildInfoResult _handshakeBuildInfoResult;
         private HeartbeatDelay _heartbeatDelay;
         private readonly object _lock = new object();
+        private readonly CancellationToken _monitorCancellationToken; // used to cancel the entire monitor
         private readonly CancellationTokenSource _monitorCancellationTokenSource; // used to cancel the entire monitor
         private readonly IRoundTripTimeMonitor _roundTripTimeMonitor;
         private readonly ServerApi _serverApi;
         private readonly ServerId _serverId;
         private readonly InterlockedInt32 _state;
         private readonly ServerMonitorSettings _serverMonitorSettings;
+
+        private Thread _serverMonitorThread;
 
         private readonly Action<ServerHeartbeatStartedEvent> _heartbeatStartedEventHandler;
         private readonly Action<ServerHeartbeatSucceededEvent> _heartbeatSucceededEventHandler;
@@ -100,7 +101,8 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             eventSubscriber.TryGetEventHandler(out _sdamInformationEventHandler);
             _serverApi = serverApi;
 
-            _heartbeatCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_monitorCancellationTokenSource.Token);
+            _monitorCancellationToken = _monitorCancellationTokenSource.Token;
+            _heartbeatCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_monitorCancellationToken);
         }
 
         public ServerDescription Description => Interlocked.CompareExchange(ref _currentDescription, null, null);
@@ -117,7 +119,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                 {
                     _heartbeatCancellationTokenSource.Cancel();
                     _heartbeatCancellationTokenSource.Dispose();
-                    _heartbeatCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_monitorCancellationTokenSource.Token);
+                    _heartbeatCancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_monitorCancellationToken);
                     // the previous hello or legacy hello cancellation token is still cancelled
 
                     toDispose = _connection;
@@ -145,15 +147,14 @@ namespace Etherna.MongoDB.Driver.Core.Servers
         {
             if (_state.TryChange(State.Initial, State.Open))
             {
-                // the call to Task.Factory.StartNew is not normally recommended or necessary
-                // we are using it temporarily to work around a race condition in some of our tests
-                // the issue is that we set up some mocked async methods to return results immediately synchronously
-                // which results in the MonitorServerAsync method making more progress synchronously than the test expected
-                // by using Task.Factory.StartNew we introduce a short delay before the MonitorServerAsync Task starts executing
-                // the delay is whatever time it takes for the new Task to be activated and scheduled
-                // and the delay is usually long enough for the test to get past the race condition (though not guaranteed)
-                _ = Task.Factory.StartNew(() => _ = MonitorServerAsync().ConfigureAwait(false)).ConfigureAwait(false);
-                _ = _roundTripTimeMonitor.RunAsync().ConfigureAwait(false);
+                _roundTripTimeMonitor.Start();
+                _serverMonitorThread = new Thread(new ParameterizedThreadStart(ThreadStart)) { IsBackground = true };
+                _serverMonitorThread.Start(_monitorCancellationToken);
+            }
+
+            void ThreadStart(object monitorCancellationToken)
+            {
+                MonitorServer((CancellationToken)monitorCancellationToken);
             }
         }
 
@@ -188,7 +189,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             return HelloHelper.CreateProtocol(helloCommand, _serverApi, commandResponseHandling);
         }
 
-        private async Task<IConnection> InitializeConnectionAsync(CancellationToken cancellationToken) // called setUpConnection in spec
+        private IConnection InitializeConnection(CancellationToken cancellationToken) // called setUpConnection in spec
         {
             var connection = _connectionFactory.CreateConnection(_serverId, _endPoint);
 
@@ -197,7 +198,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             {
                 // if we are cancelling, it's because the server has
                 // been shut down and we really don't need to wait.
-                await connection.OpenAsync(cancellationToken).ConfigureAwait(false);
+                connection.Open(cancellationToken);
             }
             catch
             {
@@ -211,10 +212,9 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             return connection;
         }
 
-        private async Task MonitorServerAsync()
+        private void MonitorServer(CancellationToken monitorCancellationToken)
         {
             var metronome = new Metronome(_serverMonitorSettings.HeartbeatInterval);
-            var monitorCancellationToken = _monitorCancellationTokenSource.Token;
 
             while (!monitorCancellationToken.IsCancellationRequested)
             {
@@ -228,7 +228,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
 
                     try
                     {
-                        await HeartbeatAsync(cachedHeartbeatCancellationToken).ConfigureAwait(false);
+                        Heartbeat(cachedHeartbeatCancellationToken);
                     }
                     catch (OperationCanceledException) when (cachedHeartbeatCancellationToken.IsCancellationRequested)
                     {
@@ -245,7 +245,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                             {
                                 handler.Invoke(new SdamInformationEvent(() =>
                                     string.Format(
-                                        "Unexpected exception in ServerMonitor.MonitorServerAsync: {0}",
+                                        "Unexpected exception in ServerMonitor.MonitorServer: {0}",
                                         unexpectedException.ToString())));
                             }
                             catch
@@ -277,7 +277,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                         }
                         _heartbeatDelay = newHeartbeatDelay;
                     }
-                    await newHeartbeatDelay.Task.ConfigureAwait(false); // corresponds to wait method in spec
+                    newHeartbeatDelay.Wait(monitorCancellationToken); // corresponds to wait method in spec
                 }
                 catch
                 {
@@ -286,7 +286,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             }
         }
 
-        private async Task HeartbeatAsync(CancellationToken cancellationToken)
+        private void Heartbeat(CancellationToken cancellationToken)
         {
             CommandWireProtocol<BsonDocument> helloProtocol = null;
             bool processAnother = true;
@@ -305,7 +305,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                     }
                     if (connection == null)
                     {
-                        var initializedConnection = await InitializeConnectionAsync(cancellationToken).ConfigureAwait(false);
+                        var initializedConnection = InitializeConnection(cancellationToken);
                         lock (_lock)
                         {
                             if (_state.Value == State.Disposed)
@@ -314,7 +314,6 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                                 throw new OperationCanceledException("The ServerMonitor has been disposed.");
                             }
                             _connection = initializedConnection;
-                            _handshakeBuildInfoResult = _connection.Description.BuildInfoResult;
                             heartbeatHelloResult = _connection.Description.HelloResult;
                         }
                     }
@@ -328,7 +327,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                         {
                             helloProtocol = InitializeHelloProtocol(connection, previousDescription?.HelloOk ?? false);
                         }
-                        heartbeatHelloResult = await GetHelloResultAsync(connection, helloProtocol, cancellationToken).ConfigureAwait(false);
+                        heartbeatHelloResult = GetHelloResult(connection, helloProtocol, cancellationToken);
                     }
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -363,12 +362,6 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                 ServerDescription newDescription;
                 if (heartbeatHelloResult != null)
                 {
-                    if (_handshakeBuildInfoResult == null)
-                    {
-                        // we can be here only if there is a bug in the driver
-                        throw new ArgumentNullException("BuildInfo has been lost.");
-                    }
-
                     var averageRoundTripTime = _roundTripTimeMonitor.Average;
                     var averageRoundTripTimeRounded = TimeSpan.FromMilliseconds(Math.Round(averageRoundTripTime.TotalMilliseconds));
 
@@ -387,7 +380,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                         tags: heartbeatHelloResult.Tags,
                         topologyVersion: heartbeatHelloResult.TopologyVersion,
                         type: heartbeatHelloResult.ServerType,
-                        version: _handshakeBuildInfoResult.ServerVersion,
+                        version: WireVersion.ToServerVersion(heartbeatHelloResult.MaxWireVersion),
                         wireVersionRange: new Range<int>(heartbeatHelloResult.MinWireVersion, heartbeatHelloResult.MaxWireVersion));
                 }
                 else
@@ -428,7 +421,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             }
         }
 
-        private async Task<HelloResult> GetHelloResultAsync(
+        private HelloResult GetHelloResult(
             IConnection connection,
             CommandWireProtocol<BsonDocument> helloProtocol,
             CancellationToken cancellationToken)
@@ -442,7 +435,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             try
             {
                 var stopwatch = Stopwatch.StartNew();
-                var helloResult = await HelloHelper.GetResultAsync(connection, helloProtocol, cancellationToken).ConfigureAwait(false);
+                var helloResult = HelloHelper.GetResult(connection, helloProtocol, cancellationToken);
                 stopwatch.Stop();
 
                 if (_heartbeatSucceededEventHandler != null)

@@ -16,13 +16,12 @@
 using System;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Threading;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Driver.Linq;
 using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors;
 using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Translators;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
 {
@@ -43,8 +42,13 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
             Expression<Func<TSource, TResult>> expression,
             IBsonSerializer<TSource> sourceSerializer,
             IBsonSerializerRegistry serializerRegistry,
-            ExpressionTranslationOptions translationOptions)
+            ExpressionTranslationOptions translationOptions,
+            TranslationContextData contextData = null)
         {
+            if (contextData != null)
+            {
+                throw new InvalidOperationException("The LINQ2 provider does not support context data.");
+            }
             return AggregateExpressionTranslator.Translate(expression, sourceSerializer, serializerRegistry, translationOptions);
         }
 

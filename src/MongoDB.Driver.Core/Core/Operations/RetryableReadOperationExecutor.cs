@@ -17,8 +17,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Driver.Core.Bindings;
-using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Core.Servers;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -40,7 +38,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 return operation.ExecuteAttempt(context, attempt: 1, transactionNumber: null, cancellationToken);
             }
 
-            var initialServerVersion = context.Channel.ConnectionDescription.ServerVersion;
             Exception originalException;
             try
             {
@@ -58,16 +55,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 context.ReplaceChannel(context.ChannelSource.GetChannel(cancellationToken));
             }
             catch
-            {
-                throw originalException;
-            }
-
-            if (context.Channel.ConnectionDescription.ServerVersion < initialServerVersion)
-            {
-                throw originalException;
-            }
-
-            if (!AreRetryableReadsSupported(context))
             {
                 throw originalException;
             }
@@ -97,7 +84,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 return await operation.ExecuteAttemptAsync(context, attempt: 1, transactionNumber: null, cancellationToken).ConfigureAwait(false);
             }
 
-            var initialServerVersion = context.Channel.ConnectionDescription.ServerVersion;
             Exception originalException;
             try
             {
@@ -118,16 +104,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 throw originalException;
             }
 
-            if (context.Channel.ConnectionDescription.ServerVersion < initialServerVersion)
-            {
-                throw originalException;
-            }
-
-            if (!AreRetryableReadsSupported(context))
-            {
-                throw originalException;
-            }
-
             try
             {
                 return await operation.ExecuteAttemptAsync(context, attempt: 2, transactionNumber: null, cancellationToken).ConfigureAwait(false);
@@ -138,22 +114,17 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             }
         }
 
-        public static bool ShouldConnectionAcquireBeRetried(RetryableReadContext context, ServerDescription serverDescription)
+        public static bool ShouldConnectionAcquireBeRetried(RetryableReadContext context, Exception ex)
         {
-            return context.RetryRequested &&
-                Feature.RetryableReads.IsSupported(serverDescription.Version) &&
-                !context.Binding.Session.IsInTransaction;
+            // According the spec error during handshake should be handle according to RetryableReads logic
+            var innerException = ex is MongoAuthenticationException mongoAuthenticationException ? mongoAuthenticationException.InnerException : ex;
+            return context.RetryRequested && !context.Binding.Session.IsInTransaction && RetryabilityHelper.IsRetryableReadException(innerException);
         }
 
         // private static methods
-        private static bool AreRetryableReadsSupported(RetryableReadContext context)
-        {
-            return Feature.RetryableReads.IsSupported(context.Channel.ConnectionDescription.ServerVersion);
-        }
-
         private static bool ShouldReadBeRetried(RetryableReadContext context)
         {
-            return context.RetryRequested && AreRetryableReadsSupported(context) && !context.Binding.Session.IsInTransaction;
+            return context.RetryRequested && !context.Binding.Session.IsInTransaction;
         }
 
         private static bool ShouldThrowOriginalException(Exception retryException)

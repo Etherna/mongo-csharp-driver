@@ -28,7 +28,9 @@ namespace Etherna.MongoDB.Driver
     {
         // fields
         private Collation _collation;
+        private BsonValue _comment;
         private BsonValue _hint;
+        private BsonDocument _let;
         private TimeSpan? _maxTime;
         private ProjectionDefinition<TDocument, TProjection> _projection;
         private SortDefinition<TDocument> _sort;
@@ -44,12 +46,30 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Gets or sets the comment.
+        /// </summary>
+        public BsonValue Comment
+        {
+            get { return _comment; }
+            set { _comment = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the hint.
         /// </summary>
         public BsonValue Hint
         {
             get { return _hint; }
             set { _hint = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the let document.
+        /// </summary>
+        public BsonDocument Let
+        {
+            get { return _let; }
+            set { _let = value; }
         }
 
         /// <summary>

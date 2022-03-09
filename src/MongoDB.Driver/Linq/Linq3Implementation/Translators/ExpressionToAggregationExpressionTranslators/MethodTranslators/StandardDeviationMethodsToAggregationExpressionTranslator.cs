@@ -16,7 +16,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Driver.Linq;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 
@@ -56,6 +55,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     var serializer = BsonSerializer.LookupSerializer(expression.Type);
                     return new AggregationExpression(expression, ast, serializer);
                 }
+            }
+
+            if (SetWindowFieldsMethodToAggregationExpressionTranslator.CanTranslate(expression))
+            {
+                return SetWindowFieldsMethodToAggregationExpressionTranslator.Translate(context, expression);
             }
 
             throw new ExpressionNotSupportedException(expression);

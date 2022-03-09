@@ -75,30 +75,6 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         }
 
         /// <inheritdoc/>
-        public IMessageEncoder GetDeleteMessageEncoder()
-        {
-            return new DeleteMessageBinaryEncoder(_stream, _encoderSettings);
-        }
-
-        /// <inheritdoc/>
-        public IMessageEncoder GetGetMoreMessageEncoder()
-        {
-            return new GetMoreMessageBinaryEncoder(_stream, _encoderSettings);
-        }
-
-        /// <inheritdoc/>
-        public IMessageEncoder GetInsertMessageEncoder<TDocument>(IBsonSerializer<TDocument> serializer)
-        {
-            return new InsertMessageBinaryEncoder<TDocument>(_stream, _encoderSettings, serializer);
-        }
-
-        /// <inheritdoc/>
-        public IMessageEncoder GetKillCursorsMessageEncoder()
-        {
-            return new KillCursorsMessageBinaryEncoder(_stream, _encoderSettings);
-        }
-
-        /// <inheritdoc/>
         public IMessageEncoder GetQueryMessageEncoder()
         {
             return new QueryMessageBinaryEncoder(_stream, _encoderSettings);
@@ -108,12 +84,6 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         public IMessageEncoder GetReplyMessageEncoder<TDocument>(IBsonSerializer<TDocument> serializer)
         {
             return new ReplyMessageBinaryEncoder<TDocument>(_stream, _encoderSettings, serializer);
-        }
-
-        /// <inheritdoc/>
-        public IMessageEncoder GetUpdateMessageEncoder()
-        {
-            return new UpdateMessageBinaryEncoder(_stream, _encoderSettings);
         }
     }
 }
