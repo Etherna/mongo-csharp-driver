@@ -40,6 +40,7 @@ namespace Etherna.MongoDB.Bson.Serialization
         private static Dictionary<Type, IDiscriminatorConvention> __discriminatorConventions = new Dictionary<Type, IDiscriminatorConvention>();
         private static Dictionary<BsonValue, HashSet<Type>> __discriminators = new Dictionary<BsonValue, HashSet<Type>>();
         private static HashSet<Type> __discriminatedTypes = new HashSet<Type>();
+        private static ISerializationContextAccessor __serializationContextAccessor;
         private static BsonSerializerRegistry __serializerRegistry;
         private static TypeMappingSerializationProvider __typeMappingSerializationProvider;
         // ConcurrentDictionary<Type, object> is being used as a concurrent set of Type. The values will always be null.
@@ -51,7 +52,7 @@ namespace Etherna.MongoDB.Bson.Serialization
         // static constructor
         static BsonSerializer()
         {
-            CreateSerializerRegistry();
+            CreateStaticSerializerRegistry();
             RegisterIdGenerators();
         }
 
@@ -59,10 +60,9 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <summary>
         /// Gets the serializer registry.
         /// </summary>
-        public static IBsonSerializerRegistry SerializerRegistry
-        {
-            get { return __serializerRegistry; }
-        }
+        public static IBsonSerializerRegistry SerializerRegistry =>
+            __serializationContextAccessor?.TryGetCurrentBsonSerializerRegistry() ??
+            __serializerRegistry;
 
         /// <summary>
         /// Gets or sets whether to use the NullIdChecker on reference Id types that don't have an IdGenerator registered.
@@ -498,7 +498,7 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <returns>A serializer for the Type.</returns>
         public static IBsonSerializer LookupSerializer(Type type)
         {
-            return __serializerRegistry.GetSerializer(type);
+            return SerializerRegistry.GetSerializer(type);
         }
 
         /// <summary>
@@ -599,32 +599,21 @@ namespace Etherna.MongoDB.Bson.Serialization
         }
 
         /// <summary>
-        /// Registers a serialization provider.
+        /// Register a serialization context accessor
         /// </summary>
-        /// <param name="provider">The serialization provider.</param>
-        public static void RegisterSerializationProvider(IBsonSerializationProvider provider)
+        /// <param name="serializationContextAccessor">The serialization context accessor</param>
+        public static void RegisterSerializationContextAccessor(
+            ISerializationContextAccessor serializationContextAccessor)
         {
-            __serializerRegistry.RegisterSerializationProvider(provider);
-        }
-
-        /// <summary>
-        /// Registers a serializer for a type.
-        /// </summary>
-        /// <typeparam name="T">The type.</typeparam>
-        /// <param name="serializer">The serializer.</param>
-        public static void RegisterSerializer<T>(IBsonSerializer<T> serializer)
-        {
-            RegisterSerializer(typeof(T), serializer);
-        }
-
-        /// <summary>
-        /// Registers a serializer for a type.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <param name="serializer">The serializer.</param>
-        public static void RegisterSerializer(Type type, IBsonSerializer serializer)
-        {
-            __serializerRegistry.RegisterSerializer(type, serializer);
+            __configLock.EnterWriteLock();
+            try
+            {
+                __serializationContextAccessor = serializationContextAccessor;
+            }
+            finally
+            {
+                __configLock.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -702,7 +691,7 @@ namespace Etherna.MongoDB.Bson.Serialization
         }
 
         // private static methods
-        private static void CreateSerializerRegistry()
+        private static void CreateStaticSerializerRegistry()
         {
             __serializerRegistry = new BsonSerializerRegistry();
             __typeMappingSerializationProvider = new TypeMappingSerializationProvider();
