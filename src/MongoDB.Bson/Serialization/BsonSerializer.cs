@@ -599,24 +599,6 @@ namespace Etherna.MongoDB.Bson.Serialization
         }
 
         /// <summary>
-        /// Register a serialization context accessor
-        /// </summary>
-        /// <param name="serializationContextAccessor">The serialization context accessor</param>
-        public static void RegisterSerializationContextAccessor(
-            ISerializationContextAccessor serializationContextAccessor)
-        {
-            __configLock.EnterWriteLock();
-            try
-            {
-                __serializationContextAccessor = serializationContextAccessor;
-            }
-            finally
-            {
-                __configLock.ExitWriteLock();
-            }
-        }
-
-        /// <summary>
         /// Serializes a value.
         /// </summary>
         /// <typeparam name="TNominalType">The nominal type of the object.</typeparam>
@@ -657,6 +639,24 @@ namespace Etherna.MongoDB.Bson.Serialization
             serializer.Serialize(context, args, value);
         }
 
+        /// <summary>
+        /// Set a serialization context accessor
+        /// </summary>
+        /// <param name="serializationContextAccessor">The serialization context accessor</param>
+        public static void SetSerializationContextAccessor(
+            ISerializationContextAccessor serializationContextAccessor)
+        {
+            __configLock.EnterWriteLock();
+            try
+            {
+                __serializationContextAccessor = serializationContextAccessor;
+            }
+            finally
+            {
+                __configLock.ExitWriteLock();
+            }
+        }
+
         // internal static methods
         internal static void EnsureKnownTypesAreRegistered(Type nominalType)
         {
@@ -687,6 +687,24 @@ namespace Etherna.MongoDB.Bson.Serialization
             finally
             {
                 __configLock.ExitWriteLock();
+            }
+        }
+
+        /// <summary>
+        /// Try to register the discriminator convention for a type.
+        /// </summary>
+        /// <param name="type">Type type.</param>
+        /// <param name="convention">The discriminator convention.</param>
+        public static bool TryRegisterDiscriminatorConvention(Type type, IDiscriminatorConvention convention)
+        {
+            try
+            {
+                RegisterDiscriminatorConvention(type, convention);
+                return true;
+            }
+            catch (BsonSerializationException)
+            {
+                return false;
             }
         }
 
