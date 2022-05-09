@@ -26,7 +26,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             if (expression.NodeType == ExpressionType.ArrayIndex)
             {
                 var arrayExpression = expression.Left;
-                var arrayTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, arrayExpression);
+                var arrayTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, arrayExpression);
                 var indexExpression = expression.Right;
                 var indexTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, indexExpression);
                 var ast = AstExpression.ArrayElemAt(arrayTranslation.Ast, indexTranslation.Ast);

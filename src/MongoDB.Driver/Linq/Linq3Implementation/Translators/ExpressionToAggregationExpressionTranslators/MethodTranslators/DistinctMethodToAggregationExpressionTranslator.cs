@@ -30,7 +30,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             if (method.Is(EnumerableMethod.Distinct))
             {
                 var sourceExpression = arguments[0];
-                var sourceTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, sourceExpression);
+                var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);
                 var ast = AstExpression.SetIntersection(sourceTranslation.Ast);
                 return new AggregationExpression(expression, ast, sourceTranslation.Serializer);
             }

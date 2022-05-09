@@ -18,12 +18,12 @@
     <Product>MongoDB.Driver.Core</Product>
     <Company>MongoDB Inc.</Company>
     <Copyright>Copyright © 2010-present MongoDB Inc.</Copyright>
-    <Description>Fork by Etherna of the official MongoDB supported Driver Core library. See https://docs.mongodb.com/drivers/csharp/ for more details.</Description>
+    <Description>Fork by Etherna of the official MongoDB supported Driver Core library. See https://www.mongodb.com/docs/drivers/csharp/ for more details.</Description>
     <Authors>Etherna Sagl</Authors>
     <PackageIcon>packageIcon.png</PackageIcon>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageDescription>Fork by Etherna of the Core Component of the Official MongoDB .NET Driver.</PackageDescription>
-    <PackageProjectUrl>https://docs.mongodb.com/drivers/csharp/</PackageProjectUrl>
+    <PackageProjectUrl>https://www.mongodb.com/docs/drivers/csharp/</PackageProjectUrl>
     <PackageLicenseFile>License.txt</PackageLicenseFile>
     <PackageTags>mongodb;mongo;nosql</PackageTags>
     <PackageLanguage>en-US</PackageLanguage>

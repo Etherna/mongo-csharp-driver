@@ -39,7 +39,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     skipExpression = sourceSkipExpression.Arguments[1];
                 }
 
-                var sourceTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, sourceExpression);
+                var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);
                 var countTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, countExpression);
                 AstExpression ast;
                 if (skipExpression == null)

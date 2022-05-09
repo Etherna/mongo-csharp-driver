@@ -14,48 +14,130 @@
 */
 
 using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
-using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators.MethodTranslators
 {
     internal static class StartsWithContainsOrEndsWithMethodToAggregationExpressionTranslator
     {
-        private static readonly MethodInfo[] __startsWithContainsOrEndWithMethods;
+        private static readonly MethodInfo[] __startsWithContainsOrEndsWithMethods;
         private static readonly MethodInfo[] __withComparisonTypeMethods;
         private static readonly MethodInfo[] __withIgnoreCaseAndCultureMethods;
 
         static StartsWithContainsOrEndsWithMethodToAggregationExpressionTranslator()
         {
-            __startsWithContainsOrEndWithMethods = new[]
+            __startsWithContainsOrEndsWithMethods = new[]
             {
-                StringMethod.StartsWith,
-                StringMethod.StartsWithWithComparisonType,
-                StringMethod.StartsWithWithIgnoreCaseAndCulture,
-                StringMethod.Contains,
-                StringMethod.EndsWith,
-                StringMethod.EndsWithWithComparisonType,
-                StringMethod.EndsWithWithIgnoreCaseAndCulture
+                StringMethod.StartsWithWithChar,
+                StringMethod.StartsWithWithString,
+                StringMethod.StartsWithWithStringAndComparisonType,
+                StringMethod.StartsWithWithStringAndIgnoreCaseAndCulture,
+                StringMethod.ContainsWithChar,
+                StringMethod.ContainsWithCharAndComparisonType,
+                StringMethod.ContainsWithString,
+                StringMethod.ContainsWithStringAndComparisonType,
+                StringMethod.EndsWithWithChar,
+                StringMethod.EndsWithWithString,
+                StringMethod.EndsWithWithStringAndComparisonType,
+                StringMethod.EndsWithWithStringAndIgnoreCaseAndCulture
             };
 
             __withComparisonTypeMethods = new[]
             {
-                StringMethod.StartsWithWithComparisonType,
-                StringMethod.EndsWithWithComparisonType
+                StringMethod.StartsWithWithStringAndComparisonType,
+                StringMethod.ContainsWithCharAndComparisonType,
+                StringMethod.ContainsWithStringAndComparisonType,
+                StringMethod.EndsWithWithStringAndComparisonType
             };
 
             __withIgnoreCaseAndCultureMethods = new[]
             {
-                StringMethod.StartsWithWithIgnoreCaseAndCulture,
-                StringMethod.EndsWithWithIgnoreCaseAndCulture
+                StringMethod.StartsWithWithStringAndIgnoreCaseAndCulture,
+                StringMethod.EndsWithWithStringAndIgnoreCaseAndCulture
             };
+        }
+
+        public static bool CanTranslate(MethodCallExpression expression)
+        {
+            var method = expression.Method;
+
+            if (method.IsOneOf(__startsWithContainsOrEndsWithMethods))
+            {
+                return true;
+            }
+
+            // on .NET Framework string.Contains(char) compiles to Enumerable.Contains<char>(string, char)
+            // on all frameworks we will translate Enumerable.Contains<char>(string, char) the same as string.Contains(char)
+            if (method.Is(EnumerableMethod.Contains) && expression.Arguments[0].Type == typeof(string))
+            {
+                return true;
+            }
+
+#if NETSTANDARD2_0
+            // some String methods are defined in .NET Core 2.1 but not in .NET Standard 2.0 so we have to identify them using reflection in .NET Standard 2.0
+            if (method.DeclaringType == typeof(string) && !method.IsStatic)
+            {
+                var parameters = method.GetParameters();
+                switch (method.Name)
+                {
+                    case "Contains":
+                        switch (parameters.Length)
+                        {
+                            case 1:
+                                if (parameters[0].ParameterType == typeof(char))
+                                {
+                                    return true;
+                                }
+                                break;
+
+                            case 2:
+                                if (parameters[0].ParameterType == typeof(char) &&
+                                    parameters[1].ParameterType == typeof(StringComparison))
+                                {
+                                    return true;
+                                }
+                                if (parameters[0].ParameterType == typeof(string) &&
+                                    parameters[1].ParameterType == typeof(StringComparison))
+                                {
+                                    return true;
+                                }
+                                if (parameters[0].ParameterType == typeof(string) &&
+                                    parameters[1].ParameterType == typeof(CultureInfo))
+                                {
+                                    return true;
+                                }
+                                break;
+                        }
+                        break;
+
+                    case "EndsWith":
+                    case "StartsWith":
+                        switch (parameters.Length)
+                        {
+                            case 1:
+                                if (parameters[0].ParameterType == typeof(char))
+                                {
+                                    return true;
+                                }
+                                break;
+                        }
+                        break;
+                }
+            }
+#endif
+
+            return false;
         }
 
         public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
@@ -63,19 +145,50 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             var method = expression.Method;
             var arguments = expression.Arguments;
 
-            if (method.IsOneOf(__startsWithContainsOrEndWithMethods))
+            if (CanTranslate(expression))
             {
-                var objectExpression = expression.Object;
+                Expression objectExpression;
+                if (method.Is(EnumerableMethod.Contains))
+                {
+                    objectExpression = arguments[0];
+                    arguments = new ReadOnlyCollection<Expression>(arguments.Skip(1).ToList());
+
+                    if (objectExpression.Type != typeof(string))
+                    {
+                        throw new ExpressionNotSupportedException(objectExpression, expression, because: "type implementing IEnumerable<char> is not string");
+                    }
+                }
+                else
+                {
+                    objectExpression = expression.Object;
+                }
+
                 var objectTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, objectExpression);
                 var valueExpression = arguments[0];
-                var valueTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, valueExpression);
+                AggregationExpression valueTranslation;
+                if (valueExpression.Type == typeof(char) &&
+                    valueExpression is ConstantExpression constantValueExpression)
+                {
+                    var c = (char)constantValueExpression.Value;
+                    var value = new string(c, 1);
+                    valueTranslation = new AggregationExpression(valueExpression, value, objectTranslation.Serializer);
+                }
+                else
+                {
+                    valueTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, valueExpression);
+                    if (valueTranslation.Serializer is IRepresentationConfigurable representationConfigurable &&
+                        representationConfigurable.Representation != BsonType.String)
+                    {
+                        throw new ExpressionNotSupportedException(valueExpression, expression, because: "it is not serialized as a string");
+                    }
+                }
                 bool ignoreCase = false;
-                if (method.IsOneOf(__withComparisonTypeMethods))
+                if (IsWithComparisonTypeMethod(method))
                 {
                     var comparisonTypeExpression = arguments[1];
                     ignoreCase = GetIgnoreCaseFromComparisonType(comparisonTypeExpression);
                 }
-                if (method.IsOneOf(__withIgnoreCaseAndCultureMethods))
+                if (IsWithIgnoreCaseAndCultureMethod(method))
                 {
                     var ignoreCaseExpression = arguments[1];
                     var cultureExpression = arguments[2];
@@ -86,7 +199,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 if (ignoreCase)
                 {
                     stringAst = AstExpression.ToLower(stringAst);
-                    substringAst = AstExpression.ToLower(stringAst);
+                    substringAst = AstExpression.ToLower(substringAst);
                 }
                 var ast = CreateAst(method.Name, stringAst, substringAst);
                 return new AggregationExpression(expression, ast, new BooleanSerializer());
@@ -118,8 +231,13 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 {
                     var (stringVar, stringSimpleAst) = AstExpression.UseVarIfNotSimple("string", stringAst);
                     var (substringVar, substringSimpleAst) = AstExpression.UseVarIfNotSimple("substring", substringAst);
-                    var startAst = AstExpression.Subtract(AstExpression.StrLenCP(stringSimpleAst), AstExpression.StrLenCP(substringSimpleAst));                      
-                    var ast = AstExpression.Gte(AstExpression.IndexOfCP(stringSimpleAst, substringSimpleAst, startAst), 0);
+                    var startAst = AstExpression.Subtract(AstExpression.StrLenCP(stringSimpleAst), AstExpression.StrLenCP(substringSimpleAst));
+                    var startVar = AstExpression.Var("start");
+                    var ast = AstExpression.Let(
+                        var: AstExpression.VarBinding(startVar, startAst),
+                        @in: AstExpression.And(
+                            AstExpression.Gte(startVar, 0),
+                            AstExpression.Eq(AstExpression.IndexOfCP(stringSimpleAst, substringSimpleAst, startVar), startVar)));
                     return AstExpression.Let(stringVar, substringVar, ast);
                 }
             }
@@ -133,7 +251,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     case StringComparison.CurrentCultureIgnoreCase: return true;
                 }
 
-                throw new ExpressionNotSupportedException(comparisonTypeExpression, expression);
+                throw new ExpressionNotSupportedException(comparisonTypeExpression, expression, because: $"{comparisonType} is not supported");
             }
 
             bool GetIgnoreCaseFromIgnoreCaseAndCulture(Expression ignoreCaseExpression, Expression cultureExpression)
@@ -141,12 +259,60 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var ignoreCase = ignoreCaseExpression.GetConstantValue<bool>(containingExpression: expression);
                 var culture = cultureExpression.GetConstantValue<CultureInfo>(containingExpression: expression);
 
-                if (culture == CultureInfo.CurrentCulture)
+                if (culture != CultureInfo.CurrentCulture)
                 {
-                    return ignoreCase;
+                    throw new ExpressionNotSupportedException(cultureExpression, expression, because: "the supplied culture is not the current culture");
                 }
 
-                throw new ExpressionNotSupportedException(cultureExpression, expression);
+                return ignoreCase;
+            }
+
+            bool IsWithComparisonTypeMethod(MethodInfo method)
+            {
+                if (method.IsOneOf(__withComparisonTypeMethods))
+                {
+                    return true;
+                }
+
+#if NETSTANDARD2_0
+                // some String methods are defined in .NET Core 2.1 but not in .NET Standard 2.0 so we have to identify them using reflection in .NET Standard 2.0
+                var parameters = method.GetParameters();
+                if (parameters.Length > 0)
+                {
+                    var lastParameter = parameters[parameters.Length - 1];
+                    if (lastParameter.ParameterType == typeof(StringComparison))
+                    {
+                        return true;
+                    }
+                }
+#endif
+
+                return false;
+            }
+
+            bool IsWithIgnoreCaseAndCultureMethod(MethodInfo method)
+            {
+                if (method.IsOneOf(__withIgnoreCaseAndCultureMethods))
+                {
+                    return true;
+                }
+
+#if NETSTANDARD2_0
+                // some String methods are defined in .NET Core 2.1 but not in .NET Standard 2.0 so we have to identify them using reflection in .NET Standard 2.0
+                var parameters = method.GetParameters();
+                if (parameters.Length > 2)
+                {
+                    var nextToLastParameter = parameters[parameters.Length - 2];
+                    var lastParameter = parameters[parameters.Length - 1];
+                    if (nextToLastParameter.ParameterType == typeof(bool) &&
+                        lastParameter.ParameterType == typeof(CultureInfo))
+                    {
+                        return true;
+                    }
+                }
+#endif
+
+                return false;
             }
         }
     }

@@ -14,6 +14,7 @@
 */
 
 using System.Linq.Expressions;
+using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
@@ -26,7 +27,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         // public methods
         public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
-            if (expression.Method.Is(StringMethod.Contains))
+            if (StartsWithContainsOrEndsWithMethodToAggregationExpressionTranslator.CanTranslate(expression))
             {
                 return StartsWithContainsOrEndsWithMethodToAggregationExpressionTranslator.Translate(context, expression);
             }
@@ -56,9 +57,15 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 sourceExpression = expression.Object;
                 valueExpression = arguments[0];
-                var ienumerableInterface = sourceExpression.Type.GetIEnumerableGenericInterface();
-                var itemType = ienumerableInterface.GetGenericArguments()[0];
-                return itemType == valueExpression.Type;
+                if (sourceExpression.Type.TryGetIEnumerableGenericInterface(out var ienumerableInterface))
+                {
+                    var itemType = ienumerableInterface.GetGenericArguments()[0];
+                    if (itemType == valueExpression.Type)
+                    {
+                        // string.Contains(char) is not translated like other Contains methods because string is not represented as an array
+                        return sourceExpression.Type != typeof(string) && valueExpression.Type != typeof(char);
+                    }
+                }
             }
 
             sourceExpression = null;
@@ -68,7 +75,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
         private static AggregationExpression TranslateEnumerableContains(TranslationContext context, Expression expression, Expression sourceExpression, Expression valueExpression)
         {
-            var sourceTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, sourceExpression);
+            var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);
             var valueTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, valueExpression);
             var ast = AstExpression.In(valueTranslation.Ast, sourceTranslation.Ast);
             return new AggregationExpression(expression, ast, new BooleanSerializer());

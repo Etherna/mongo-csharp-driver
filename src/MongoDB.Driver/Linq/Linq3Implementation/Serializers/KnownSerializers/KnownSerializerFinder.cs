@@ -58,7 +58,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSeria
                 return null;
             }
 
-            _currentKnownSerializersNode = new KnownSerializersNode(_currentKnownSerializersNode);
+            _currentKnownSerializersNode = new KnownSerializersNode(node, _currentKnownSerializersNode);
 
             if (node == _root)
             {

@@ -29,7 +29,15 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSeria
         // public methods
         public void Add(Expression expression, KnownSerializersNode knownSerializers)
         {
-            if (_registry.ContainsKey(expression)) return;
+            if (knownSerializers.Expression != expression)
+            {
+                throw new ArgumentException($"Expression {expression} does not match knownSerializers.Expression {knownSerializers.Expression}.");
+            }
+
+            if (_registry.ContainsKey(expression))
+            {
+                return;
+            }
 
             _registry.Add(expression, knownSerializers);
         }
@@ -40,9 +48,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSeria
             var possibleSerializers = _registry.TryGetValue(expression, out var knownSerializers) ? knownSerializers.GetPossibleSerializers(expressionType) : new HashSet<IBsonSerializer>();
             return possibleSerializers.Count switch
             {
-                0 => defaultSerializer ?? throw new InvalidOperationException($"Cannot find serializer for {expression}."),
-                > 1 => throw new InvalidOperationException($"More than one possible serializer found for {expression}."),
-                _ => possibleSerializers.First()
+                0 => defaultSerializer ?? BsonSerializer.LookupSerializer(expressionType), // sometimes there is no known serializer from the context (e.g. CSHARP-4062)
+                1 => possibleSerializers.First(),
+                _ => throw new InvalidOperationException($"More than one possible serializer found for {expression}.")
             };
         }
     }

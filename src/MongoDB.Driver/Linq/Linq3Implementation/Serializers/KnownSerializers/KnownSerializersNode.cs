@@ -16,25 +16,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
-using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSerializers
 {
     internal class KnownSerializersNode
     {
         // private fields
+        private readonly Expression _expression;
         private readonly Dictionary<Type, HashSet<IBsonSerializer>> _knownSerializers = new Dictionary<Type, HashSet<IBsonSerializer>>();
         private readonly KnownSerializersNode _parent;
 
         // constructors
-        public KnownSerializersNode(KnownSerializersNode parent)
+        public KnownSerializersNode(Expression expression, KnownSerializersNode parent)
         {
+            _expression = expression;
             _parent = parent; // will be null for the root node
         }
 
         // public properties
+        public Expression Expression => _expression;
         public Dictionary<Type, HashSet<IBsonSerializer>> KnownSerializers => _knownSerializers;
         public KnownSerializersNode Parent => _parent;
 
@@ -49,7 +52,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSeria
 
             set.Add(serializer);
 
-            _parent?.AddKnownSerializer(type, serializer);
+            if (ShouldPropagateKnownSerializerToParent())
+            {
+                _parent.AddKnownSerializer(type, serializer);
+            }
         }
 
         public HashSet<IBsonSerializer> GetPossibleSerializers(Type type)
@@ -77,7 +83,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSeria
             }
 
             Type itemType = null;
-            if (type.TryGetIEnumerableGenericInterface(out var ienumerableGenericInterface))
+            if (type != typeof(string) && type.TryGetIEnumerableGenericInterface(out var ienumerableGenericInterface))
             {
                 itemType = ienumerableGenericInterface.GetGenericArguments()[0];
             }
@@ -108,6 +114,21 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSeria
             }
 
             return possibleSerializers;
+        }
+
+        private bool ShouldPropagateKnownSerializerToParent()
+        {
+            if (_parent == null)
+            {
+                return false;
+            }
+
+            return _parent.Expression.NodeType switch
+            {
+                ExpressionType.MemberInit => false,
+                ExpressionType.New => false,
+                _ => true
+            };
         }
     }
 }

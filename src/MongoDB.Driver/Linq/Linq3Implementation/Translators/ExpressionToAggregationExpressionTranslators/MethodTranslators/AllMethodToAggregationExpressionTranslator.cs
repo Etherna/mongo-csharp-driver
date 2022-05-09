@@ -31,7 +31,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             if (method.Is(EnumerableMethod.All))
             {
                 var sourceExpression = arguments[0];
-                var sourceTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, sourceExpression);
+                var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);
 
                 var predicateLambda = (LambdaExpression)arguments[1];
                 var predicateParameter = predicateLambda.Parameters[0];

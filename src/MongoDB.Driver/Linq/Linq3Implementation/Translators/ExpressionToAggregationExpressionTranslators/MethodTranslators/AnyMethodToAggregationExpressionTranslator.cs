@@ -29,7 +29,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             var arguments = expression.Arguments;
 
             var sourceExpression = arguments[0];
-            var sourceTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, sourceExpression);
+            var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);
 
             if (method.Is(EnumerableMethod.Any))
             {
