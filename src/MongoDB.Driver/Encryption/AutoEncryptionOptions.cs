@@ -13,11 +13,15 @@
 * limitations under the License.
 */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Driver.Core;
+using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Encryption;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Shared;
 
@@ -30,6 +34,8 @@ namespace Etherna.MongoDB.Driver.Encryption
     {
         // private fields
         private readonly bool _bypassAutoEncryption;
+        private readonly bool? _bypassQueryAnalysis;
+        private readonly IReadOnlyDictionary<string, BsonDocument> _encryptedFieldsMap;
         private readonly IReadOnlyDictionary<string, object> _extraOptions;
         private readonly IMongoClient _keyVaultClient;
         private readonly CollectionNamespace _keyVaultNamespace;
@@ -48,6 +54,8 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <param name="keyVaultClient">The keyVault client.</param>
         /// <param name="schemaMap">The schema map.</param>
         /// <param name="tlsOptions">The tls options.</param>
+        /// <param name="encryptedFieldsMap">[Beta] The encryptedFields map.</param>
+        /// <param name="bypassQueryAnalysis">[Beta] The bypass query analysis flag.</param>
         public AutoEncryptionOptions(
             CollectionNamespace keyVaultNamespace,
             IReadOnlyDictionary<string, IReadOnlyDictionary<string, object>> kmsProviders,
@@ -55,19 +63,24 @@ namespace Etherna.MongoDB.Driver.Encryption
             Optional<IReadOnlyDictionary<string, object>> extraOptions = default,
             Optional<IMongoClient> keyVaultClient = default,
             Optional<IReadOnlyDictionary<string, BsonDocument>> schemaMap = default,
-            Optional<IReadOnlyDictionary<string, SslSettings>> tlsOptions = default)
+            Optional<IReadOnlyDictionary<string, SslSettings>> tlsOptions = default,
+            Optional<IReadOnlyDictionary<string, BsonDocument>> encryptedFieldsMap = default,
+            Optional<bool?> bypassQueryAnalysis = default)
         {
             _keyVaultNamespace = Ensure.IsNotNull(keyVaultNamespace, nameof(keyVaultNamespace));
             _kmsProviders = Ensure.IsNotNull(kmsProviders, nameof(kmsProviders));
             _bypassAutoEncryption = bypassAutoEncryption.WithDefault(false);
+            _bypassQueryAnalysis = bypassQueryAnalysis.WithDefault(null);
             _extraOptions = extraOptions.WithDefault(null);
             _keyVaultClient = keyVaultClient.WithDefault(null);
             _schemaMap = schemaMap.WithDefault(null);
             _tlsOptions = tlsOptions.WithDefault(new Dictionary<string, SslSettings>());
+            _encryptedFieldsMap = encryptedFieldsMap.WithDefault(null);
 
             EncryptionExtraOptionsValidator.EnsureThatExtraOptionsAreValid(_extraOptions);
             KmsProvidersHelper.EnsureKmsProvidersAreValid(_kmsProviders);
             KmsProvidersHelper.EnsureKmsProvidersTlsSettingsAreValid(_tlsOptions);
+            EncryptedCollectionHelper.EnsureCollectionsValid(_schemaMap, _encryptedFieldsMap);
         }
 
         // public properties
@@ -80,11 +93,26 @@ namespace Etherna.MongoDB.Driver.Encryption
         public bool BypassAutoEncryption => _bypassAutoEncryption;
 
         /// <summary>
+        /// [Beta] Gets a value indicating whether to bypass query analysis.
+        /// </summary>
+        public bool? BypassQueryAnalysis => _bypassQueryAnalysis;
+
+        /// <summary>
+        /// [Beta] Gets the encrypted fields map.
+        /// Supplying an encryptedFieldsMap provides more security than relying on an encryptedFields obtained from the server. It protects against a malicious server advertising a false encryptedFields.
+        /// </summary>
+        public IReadOnlyDictionary<string, BsonDocument> EncryptedFieldsMap => _encryptedFieldsMap;
+
+        /// <summary>
         /// Gets the extra options.
         /// </summary>
         /// <value>
         /// The extra options.
         /// </value>
+        /// <remarks>
+        /// All MongoClient objects in the same process should use the same setting for extraOptions.cryptSharedLibPath,
+        /// as it is an error to load more that one crypt_shared dynamic library simultaneously in a single operating system process.
+        /// </remarks>
         public IReadOnlyDictionary<string, object> ExtraOptions => _extraOptions;
 
         /// <summary>
@@ -133,19 +161,23 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <param name="keyVaultNamespace">The keyVault namespace.</param>
         /// <param name="kmsProviders">The kms providers.</param>
         /// <param name="bypassAutoEncryption">The bypass auto encryption flag.</param>
+        /// <param name="bypassQueryAnalysis">[Beta] The bypass query analysis flag.</param>
         /// <param name="extraOptions">The extra options.</param>
         /// <param name="keyVaultClient">The keyVault client.</param>
         /// <param name="schemaMap">The schema map.</param>
         /// <param name="tlsOptions">The tls options.</param>
+        /// <param name="encryptedFieldsMap">[Beta] The encryptedFields map.</param>
         /// <returns>A new instance of <see cref="AutoEncryptionOptions"/>.</returns>
         public AutoEncryptionOptions With(
             Optional<CollectionNamespace> keyVaultNamespace = default,
             Optional<IReadOnlyDictionary<string, IReadOnlyDictionary<string, object>>> kmsProviders = default,
             Optional<bool> bypassAutoEncryption = default,
+            Optional<bool?> bypassQueryAnalysis = default,
             Optional<IReadOnlyDictionary<string, object>> extraOptions = default,
             Optional<IMongoClient> keyVaultClient = default,
             Optional<IReadOnlyDictionary<string, BsonDocument>> schemaMap = default,
-            Optional<IReadOnlyDictionary<string, SslSettings>> tlsOptions = default)
+            Optional<IReadOnlyDictionary<string, SslSettings>> tlsOptions = default,
+            Optional<IReadOnlyDictionary<string, BsonDocument>> encryptedFieldsMap = default)
         {
             return new AutoEncryptionOptions(
                 keyVaultNamespace.WithDefault(_keyVaultNamespace),
@@ -154,7 +186,9 @@ namespace Etherna.MongoDB.Driver.Encryption
                 Optional.Create(extraOptions.WithDefault(_extraOptions)),
                 Optional.Create(keyVaultClient.WithDefault(_keyVaultClient)),
                 Optional.Create(schemaMap.WithDefault(_schemaMap)),
-                Optional.Create(tlsOptions.WithDefault(_tlsOptions)));
+                Optional.Create(tlsOptions.WithDefault(_tlsOptions)),
+                Optional.Create(encryptedFieldsMap.WithDefault(_encryptedFieldsMap)),
+                Optional.Create(bypassQueryAnalysis.WithDefault(_bypassQueryAnalysis)));
         }
 
         /// <inheritdoc />
@@ -165,12 +199,14 @@ namespace Etherna.MongoDB.Driver.Encryption
 
             return
                 _bypassAutoEncryption.Equals(rhs._bypassAutoEncryption) &&
+                _bypassQueryAnalysis == rhs._bypassQueryAnalysis &&
                 ExtraOptionsEquals(_extraOptions, rhs._extraOptions) &&
                 object.ReferenceEquals(_keyVaultClient, rhs._keyVaultClient) &&
                 _keyVaultNamespace.Equals(rhs._keyVaultNamespace) &&
-                KmsProvidersHelper.Equals(_kmsProviders, rhs._kmsProviders) &&
+                KmsProvidersEqualityHelper.Equals(_kmsProviders, rhs._kmsProviders) &&
                 _schemaMap.IsEquivalentTo(rhs._schemaMap, object.Equals) &&
-               _tlsOptions.IsEquivalentTo(rhs._tlsOptions, object.Equals);
+               _tlsOptions.IsEquivalentTo(rhs._tlsOptions, object.Equals) &&
+               _encryptedFieldsMap.IsEquivalentTo(rhs._encryptedFieldsMap, object.Equals);
         }
 
         /// <inheritdoc />
@@ -178,12 +214,14 @@ namespace Etherna.MongoDB.Driver.Encryption
         {
             return new Hasher()
                 .Hash(_bypassAutoEncryption)
+                .Hash(_bypassQueryAnalysis)
                 .HashElements(_extraOptions)
                 .Hash(_keyVaultClient)
                 .Hash(_keyVaultNamespace)
                 .HashElements(_kmsProviders)
                 .HashElements(_tlsOptions)
                 .HashElements(_schemaMap)
+                .HashElements(_encryptedFieldsMap)
                 .GetHashCode();
         }
 
@@ -201,6 +239,10 @@ namespace Etherna.MongoDB.Driver.Encryption
 
             sb.Append("{ ");
             sb.AppendFormat("BypassAutoEncryption : {0}, ", _bypassAutoEncryption);
+            if (_bypassQueryAnalysis.HasValue)
+            {
+                sb.AppendFormat("BypassQueryAnalysis : {0}, ", _bypassQueryAnalysis.Value);
+            }
             sb.AppendFormat("KmsProviders : {0}, ", _kmsProviders.ToJson(jsonWriterSettings));
             if (_keyVaultNamespace != null)
             {
@@ -216,12 +258,27 @@ namespace Etherna.MongoDB.Driver.Encryption
             }
             if (_tlsOptions != null)
             {
-                sb.AppendFormat("TlsOptions: {0}", _tlsOptions.Select(t => new BsonDocument(t.Key, "<hidden>")).ToJson(jsonWriterSettings));
+                sb.AppendFormat("TlsOptions : {0}, ", _tlsOptions.Select(t => new BsonDocument(t.Key, "<hidden>")).ToJson(jsonWriterSettings));
+            }
+            if (_encryptedFieldsMap != null)
+            {
+                sb.AppendFormat("EncryptedFieldsMap : {0}, ", _encryptedFieldsMap.ToJson(jsonWriterSettings));
             }
             sb.Remove(sb.Length - 2, 2);
             sb.Append(" }");
             return sb.ToString();
         }
+
+        // internal methods
+        internal CryptClientSettings ToCryptClientSettings() =>
+             new CryptClientSettings(
+                    _bypassQueryAnalysis,
+                    ExtraOptions.GetValueOrDefault<string, string, object>("cryptSharedLibPath"),
+                    cryptSharedLibSearchPath: _bypassAutoEncryption ? null : "$SYSTEM",
+                    _encryptedFieldsMap,
+                    ExtraOptions.GetValueOrDefault<bool?, string, object>("cryptSharedLibRequired"),
+                    _kmsProviders,
+                    _schemaMap);
 
         // private methods
         private bool ExtraOptionsEquals(IReadOnlyDictionary<string, object> x, IReadOnlyDictionary<string, object> y)

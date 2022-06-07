@@ -14,10 +14,6 @@
 */
 
 using System;
-using System.IO;
-using Etherna.MongoDB.Bson.IO;
-using Etherna.MongoDB.Bson.Serialization.Attributes;
-using Etherna.MongoDB.Bson.Serialization.Options;
 
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
@@ -26,6 +22,16 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     /// </summary>
     public class ObjectIdSerializer : StructSerializerBase<ObjectId>, IRepresentationConfigurable<ObjectIdSerializer>
     {
+        #region static
+        private static readonly ObjectIdSerializer __instance = new ObjectIdSerializer();
+
+        // public static properties
+        /// <summary>
+        /// Gets a cached instance of an ObjectId serializer.
+        /// </summary>
+        public static ObjectIdSerializer Instance => __instance;
+        #endregion
+
         // private fields
         private readonly BsonType _representation;
 

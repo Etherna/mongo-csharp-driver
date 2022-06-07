@@ -27,6 +27,18 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <summary>
         /// Random algorithm.
         /// </summary>
-        AEAD_AES_256_CBC_HMAC_SHA_512_Random
+        AEAD_AES_256_CBC_HMAC_SHA_512_Random,
+        /// <summary>
+        /// [Beta] Indexed algorithm.
+        /// </summary>
+        /// <remarks>
+        /// To insert or query with an "Indexed" encrypted payload, use a MongoClient configured with AutoEncryptionOptions.
+        /// AutoEncryptionOptions.BypassQueryAnalysis may be true. AutoEncryptionOptions.BypassAutoEncryption must be false.
+        /// </remarks>
+        Indexed,
+        /// <summary>
+        /// [Beta] Unindexed algorithm.
+        /// </summary>
+        Unindexed
     }
 }

@@ -1,22 +1,22 @@
 +++
 date = "2021-02-12T15:36:56Z"
 draft = false
-title = "Versioned API"
+title = "Stable API"
 [menu.main]
   parent = "Driver"
-  identifier = "Versioned API"
+  identifier = "Stable API"
   weight = 70
   pre = "<i class='fa'></i>"
 +++
 
-## Versioned API
+## Stable API
 
-Versioned API is a new feature in MongoDB 5.0 that allows user-selectable API versions, subsets of MongoDB
+Stable API is a new feature in MongoDB 5.0 that allows user-selectable API versions, subsets of MongoDB
 server semantics, to be declared on a client. During communication with a server, clients with a declared
 API version will force the server to behave in a manner compatible with the API version. Declaring an API
 version on a client can be used to ensure consistent responses from a server, providing long term API
 stability for an application. The declared API version is applied to all commands run through the client, including those sent through
-the generic RunCommand helper. Specifying versioned API options in the command document AND declaring an API version on the client is not supported and will lead to undefined behaviour.
+the generic RunCommand helper. Specifying stable API options in the command document AND declaring an API version on the client is not supported and will lead to undefined behaviour.
 
 You can specify [`ServerApi`]({{< apiref "T_MongoDB_Driver_Core_ServerApi" >}}) via [`MongoClientSettings`]({{< apiref "T_MongoDB_Driver_MongoClientSettings" >}}):
 
@@ -67,3 +67,12 @@ var database = client.GetDatabase("db");
 var result = database.RunCommand<BsonDocument>(new BsonDocument("commandDeprecatedInV1", 1)); // Example fail:
 // MongoDB.Driver.MongoCommandException : Command commandDeprecatedInV1 failed: Provided deprecationErrors:true, but the command commandDeprecatedInV1 is deprecated in API Version 1.
 ```
+
+### EstimatedDocumentCount and Stable API
+
+`EstimatedDocumentCount` is implemented using the `count` server command. Due to an oversight in versions
+5.0.0-5.0.8 of MongoDB, the `count` command, which `EstimatedDocumentCount` uses in its implementation,
+was not included in v1 of the Stable API. If you are using the Stable API with `EstimatedDocumentCount`,
+you must upgrade to server version 5.0.9+ or set `strict: false` when configuring `ServerApi` to avoid
+encountering errors.
+

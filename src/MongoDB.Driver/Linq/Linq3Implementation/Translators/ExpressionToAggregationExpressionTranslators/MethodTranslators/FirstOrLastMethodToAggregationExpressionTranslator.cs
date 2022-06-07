@@ -49,9 +49,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 return new AggregationExpression(expression, ast, itemSerializer);
             }
 
-            if (SetWindowFieldsMethodToAggregationExpressionTranslator.CanTranslate(expression))
+            if (WindowMethodToAggregationExpressionTranslator.CanTranslate(expression))
             {
-                return SetWindowFieldsMethodToAggregationExpressionTranslator.Translate(context, expression);
+                return WindowMethodToAggregationExpressionTranslator.Translate(context, expression);
             }
 
             throw new ExpressionNotSupportedException(expression);

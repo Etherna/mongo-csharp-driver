@@ -8,8 +8,8 @@ Getting Started
 
 ### Untyped Documents
 ```C#
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver;
 ```
 
 ```C#
@@ -31,8 +31,8 @@ foreach(var document in list)
 ### Typed Documents
 
 ```C#
-using MongoDB.Bson;
-using MongoDB.Driver;
+using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver;
 ```
 
 ```C#

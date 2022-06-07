@@ -135,6 +135,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters
             return new AstFieldOperationFilter(field, new AstComparisonFilterOperation(AstComparisonFilterOperator.Ne, value));
         }
 
+        public static AstFieldOperationFilter Nin(AstFilterField field, IEnumerable<BsonValue> values)
+        {
+            return new AstFieldOperationFilter(field, new AstNinFilterOperation(values));
+        }
+
         public static AstFilter Not(AstFilter filter)
         {
             if (filter is AstFieldOperationFilter fieldOperationFilter)

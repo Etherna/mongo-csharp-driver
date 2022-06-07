@@ -28,6 +28,7 @@ using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Operations;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Driver.Encryption;
 using Etherna.MongoDB.Driver.Linq;
 
 namespace Etherna.MongoDB.Driver
@@ -39,7 +40,6 @@ namespace Etherna.MongoDB.Driver
         private readonly ICluster _cluster;
         private readonly DatabaseNamespace _databaseNamespace;
         private readonly LinqProvider _linqProvider;
-        private readonly MessageEncoderSettings _messageEncoderSettings;
         private readonly IOperationExecutor _operationExecutor;
         private readonly MongoDatabaseSettings _settings;
 
@@ -53,17 +53,6 @@ namespace Etherna.MongoDB.Driver
             _operationExecutor = Ensure.IsNotNull(operationExecutor, nameof(operationExecutor));
 
             _linqProvider = _client.Settings.LinqProvider;
-            _messageEncoderSettings = new MessageEncoderSettings
-            {
-                { MessageEncoderSettingsName.ReadEncoding, _settings.ReadEncoding ?? Utf8Encodings.Strict },
-                { MessageEncoderSettingsName.WriteEncoding, _settings.WriteEncoding ?? Utf8Encodings.Strict }
-            };
-#pragma warning disable 618
-            if (BsonDefaults.GuidRepresentationMode == GuidRepresentationMode.V2)
-            {
-                _messageEncoderSettings.Add(MessageEncoderSettingsName.GuidRepresentation, _settings.GuidRepresentation);
-            }
-#pragma warning restore 618
         }
 
         // public properties
@@ -227,7 +216,14 @@ namespace Etherna.MongoDB.Driver
             var genericMethodDefinition = typeof(MongoDatabaseImpl).GetTypeInfo().GetMethod("CreateCollectionHelper", BindingFlags.NonPublic | BindingFlags.Instance);
             var documentType = options.GetType().GetTypeInfo().GetGenericArguments()[0];
             var methodInfo = genericMethodDefinition.MakeGenericMethod(documentType);
-            methodInfo.Invoke(this, new object[] { session, name, options, cancellationToken });
+            try
+            {
+                methodInfo.Invoke(this, new object[] { session, name, options, cancellationToken });
+            }
+            catch (TargetInvocationException exception)
+            {
+                throw exception.InnerException;
+            }
         }
 
         public override Task CreateCollectionAsync(string name, CreateCollectionOptions options, CancellationToken cancellationToken)
@@ -235,26 +231,35 @@ namespace Etherna.MongoDB.Driver
             return UsingImplicitSessionAsync(session => CreateCollectionAsync(session, name, options, cancellationToken), cancellationToken);
         }
 
-        public override Task CreateCollectionAsync(IClientSessionHandle session, string name, CreateCollectionOptions options, CancellationToken cancellationToken)
+        public override async Task CreateCollectionAsync(IClientSessionHandle session, string name, CreateCollectionOptions options, CancellationToken cancellationToken)
         {
             Ensure.IsNotNull(session, nameof(session));
             Ensure.IsNotNullOrEmpty(name, nameof(name));
 
             if (options == null)
             {
-                return CreateCollectionHelperAsync<BsonDocument>(session, name, null, cancellationToken);
+                await CreateCollectionHelperAsync<BsonDocument>(session, name, null, cancellationToken).ConfigureAwait(false);
+                return;
             }
 
             if (options.GetType() == typeof(CreateCollectionOptions))
             {
                 var genericOptions = CreateCollectionOptions<BsonDocument>.CoercedFrom(options);
-                return CreateCollectionHelperAsync<BsonDocument>(session, name, genericOptions, cancellationToken);
+                await CreateCollectionHelperAsync<BsonDocument>(session, name, genericOptions, cancellationToken).ConfigureAwait(false);
+                return;
             }
 
             var genericMethodDefinition = typeof(MongoDatabaseImpl).GetTypeInfo().GetMethod("CreateCollectionHelperAsync", BindingFlags.NonPublic | BindingFlags.Instance);
             var documentType = options.GetType().GetTypeInfo().GetGenericArguments()[0];
             var methodInfo = genericMethodDefinition.MakeGenericMethod(documentType);
-            return (Task)methodInfo.Invoke(this, new object[] { session, name, options, cancellationToken });
+            try
+            {
+                await ((Task)methodInfo.Invoke(this, new object[] { session, name, options, cancellationToken })).ConfigureAwait(false);
+            }
+            catch (TargetInvocationException exception)
+            {
+                throw exception.InnerException;
+            }
         }
 
         public override void CreateView<TDocument, TResult>(string viewName, string viewOn, PipelineDefinition<TDocument, TResult> pipeline, CreateViewOptions<TDocument> options = null, CancellationToken cancellationToken = default(CancellationToken))
@@ -291,28 +296,48 @@ namespace Etherna.MongoDB.Driver
 
         public override void DropCollection(string name, CancellationToken cancellationToken)
         {
-            UsingImplicitSession(session => DropCollection(session, name, cancellationToken), cancellationToken);
+            DropCollection(name, options: null, cancellationToken);
+        }
+
+        public override void DropCollection(string name, DropCollectionOptions options, CancellationToken cancellationToken = default)
+        {
+            UsingImplicitSession(session => DropCollection(session, name, options, cancellationToken), cancellationToken);
         }
 
         public override void DropCollection(IClientSessionHandle session, string name, CancellationToken cancellationToken)
         {
+            DropCollection(session, name, options: null, cancellationToken);
+        }
+
+        public override void DropCollection(IClientSessionHandle session, string name, DropCollectionOptions options, CancellationToken cancellationToken)
+        {
             Ensure.IsNotNull(session, nameof(session));
             Ensure.IsNotNullOrEmpty(name, nameof(name));
-            var operation = CreateDropCollectionOperation(name);
+            var operation = CreateDropCollectionOperation(name, options, session, cancellationToken);
             ExecuteWriteOperation(session, operation, cancellationToken);
         }
 
         public override Task DropCollectionAsync(string name, CancellationToken cancellationToken)
         {
-            return UsingImplicitSessionAsync(session => DropCollectionAsync(session, name, cancellationToken), cancellationToken);
+            return DropCollectionAsync(name, options: null, cancellationToken);
+        }
+
+        public override Task DropCollectionAsync(string name, DropCollectionOptions options, CancellationToken cancellationToken)
+        {
+            return UsingImplicitSessionAsync(session => DropCollectionAsync(session, name, options, cancellationToken), cancellationToken);
         }
 
         public override Task DropCollectionAsync(IClientSessionHandle session, string name, CancellationToken cancellationToken)
         {
+            return DropCollectionAsync(session, name, options: null, cancellationToken);
+        }
+
+        public override async Task DropCollectionAsync(IClientSessionHandle session, string name, DropCollectionOptions options, CancellationToken cancellationToken)
+        {
             Ensure.IsNotNull(session, nameof(session));
             Ensure.IsNotNullOrEmpty(name, nameof(name));
-            var operation = CreateDropCollectionOperation(name);
-            return ExecuteWriteOperationAsync(session, operation, cancellationToken);
+            var operation = await CreateDropCollectionOperationAsync(name, options, session, cancellationToken).ConfigureAwait(false);
+            await ExecuteWriteOperationAsync(session, operation, cancellationToken).ConfigureAwait(false);
         }
 
         public override IMongoCollection<TDocument> GetCollection<TDocument>(string name, MongoCollectionSettings settings)
@@ -633,37 +658,45 @@ namespace Etherna.MongoDB.Driver
             return ExecuteWriteOperationAsync(session, operation, cancellationToken);
         }
 
-        private CreateCollectionOperation CreateCreateCollectionOperation<TDocument>(string name, CreateCollectionOptions<TDocument> options)
+        private IWriteOperation<BsonDocument> CreateCreateCollectionOperation<TDocument>(string name, CreateCollectionOptions<TDocument> options)
         {
-            var messageEncoderSettings = GetMessageEncoderSettings();
-            BsonDocument validator = null;
-            if (options.Validator != null)
-            {
-                var serializerRegistry = options.SerializerRegistry ?? BsonSerializer.SerializerRegistry;
-                var documentSerializer = options.DocumentSerializer ?? serializerRegistry.GetSerializer<TDocument>();
-                validator = options.Validator.Render(documentSerializer, serializerRegistry, _linqProvider);
-            }
+            var serializerRegistry = options.SerializerRegistry ?? BsonSerializer.SerializerRegistry;
+            var documentSerializer = options.DocumentSerializer ?? serializerRegistry.GetSerializer<TDocument>();
 
-#pragma warning disable 618
-            return new CreateCollectionOperation(new CollectionNamespace(_databaseNamespace, name), messageEncoderSettings)
-            {
-                AutoIndexId = options.AutoIndexId,
-                Capped = options.Capped,
-                Collation = options.Collation,
-                ExpireAfter = options.ExpireAfter,
-                IndexOptionDefaults = options.IndexOptionDefaults?.ToBsonDocument(),
-                MaxDocuments = options.MaxDocuments,
-                MaxSize = options.MaxSize,
-                NoPadding = options.NoPadding,
-                StorageEngine = options.StorageEngine,
-                TimeSeriesOptions = options.TimeSeriesOptions,
-                UsePowerOf2Sizes = options.UsePowerOf2Sizes,
-                ValidationAction = options.ValidationAction,
-                ValidationLevel = options.ValidationLevel,
-                Validator = validator,
-                WriteConcern = _settings.WriteConcern
-            };
-#pragma warning restore
+            var clusteredIndex = options.ClusteredIndex?.Render(documentSerializer, serializerRegistry);
+            var validator = options.Validator?.Render(documentSerializer, serializerRegistry, _linqProvider);
+
+            var collectionNamespace = new CollectionNamespace(_databaseNamespace, name);
+
+            var effectiveEncryptedFields = EncryptedCollectionHelper.GetEffectiveEncryptedFields(collectionNamespace, options.EncryptedFields, _client.Settings?.AutoEncryptionOptions?.EncryptedFieldsMap);
+            var messageEncoderSettings = GetMessageEncoderSettings(withGuidRepresentationUnspecified: effectiveEncryptedFields != null);
+
+            return CreateCollectionOperation.CreateEncryptedCreateCollectionOperationIfConfigured(
+                collectionNamespace,
+                effectiveEncryptedFields,
+                messageEncoderSettings,
+                createCollectionOperationConfigurator: cco =>
+                {
+#pragma warning disable CS0618 // Type or member is obsolete
+                    cco.AutoIndexId = options.AutoIndexId;
+#pragma warning restore CS0618 // Type or member is obsolete
+                    cco.Capped = options.Capped;
+                    cco.ChangeStreamPreAndPostImages = options.ChangeStreamPreAndPostImagesOptions?.BackingDocument;
+                    cco.ClusteredIndex = clusteredIndex;
+                    cco.Collation = options.Collation;
+                    cco.ExpireAfter = options.ExpireAfter;
+                    cco.IndexOptionDefaults = options.IndexOptionDefaults?.ToBsonDocument();
+                    cco.MaxDocuments = options.MaxDocuments;
+                    cco.MaxSize = options.MaxSize;
+                    cco.NoPadding = options.NoPadding;
+                    cco.StorageEngine = options.StorageEngine;
+                    cco.TimeSeriesOptions = options.TimeSeriesOptions;
+                    cco.UsePowerOf2Sizes = options.UsePowerOf2Sizes;
+                    cco.ValidationAction = options.ValidationAction;
+                    cco.ValidationLevel = options.ValidationLevel;
+                    cco.Validator = validator;
+                    cco.WriteConcern = _settings.WriteConcern;
+                });
         }
 
         private CreateViewOperation CreateCreateViewOperation<TDocument, TResult>(string viewName, string viewOn, PipelineDefinition<TDocument, TResult> pipeline, CreateViewOptions<TDocument> options)
@@ -678,14 +711,69 @@ namespace Etherna.MongoDB.Driver
             };
         }
 
-        private DropCollectionOperation CreateDropCollectionOperation(string name)
+        private IWriteOperation<BsonDocument> CreateDropCollectionOperation(string name, DropCollectionOptions options, IClientSessionHandle session, CancellationToken cancellationToken)
         {
             var collectionNamespace = new CollectionNamespace(_databaseNamespace, name);
-            var messageEncoderSettings = GetMessageEncoderSettings();
-            return new DropCollectionOperation(collectionNamespace, messageEncoderSettings)
+
+            options = options ?? new DropCollectionOptions();
+
+            var encryptedFieldsMap = _client.Settings?.AutoEncryptionOptions?.EncryptedFieldsMap;
+            if (!EncryptedCollectionHelper.TryGetEffectiveEncryptedFields(collectionNamespace, options.EncryptedFields, encryptedFieldsMap, out var effectiveEncryptedFields))
             {
-                WriteConcern = _settings.WriteConcern
-            };
+                if (encryptedFieldsMap != null)
+                {
+                    var listCollectionOptions = new ListCollectionsOptions() { Filter = $"{{ name : '{collectionNamespace.CollectionName}' }}" };
+                    var currrentCollectionInfo = ListCollections(session, listCollectionOptions, cancellationToken).FirstOrDefault();
+                    effectiveEncryptedFields = currrentCollectionInfo
+                        ?.GetValue("options", defaultValue: null)
+                        ?.AsBsonDocument
+                        ?.GetValue("encryptedFields", defaultValue: null)
+                        ?.ToBsonDocument();
+                }
+            }
+
+            var messageEncoderSettings = GetMessageEncoderSettings(withGuidRepresentationUnspecified: effectiveEncryptedFields != null);
+            return DropCollectionOperation.CreateEncryptedDropCollectionOperationIfConfigured(
+                collectionNamespace,
+                effectiveEncryptedFields,
+                messageEncoderSettings,
+                (dco) =>
+                {
+                    dco.WriteConcern = _settings.WriteConcern;
+                });
+        }
+
+        private async Task<IWriteOperation<BsonDocument>> CreateDropCollectionOperationAsync(string name, DropCollectionOptions options, IClientSessionHandle session, CancellationToken cancellationToken)
+        {
+            var collectionNamespace = new CollectionNamespace(_databaseNamespace, name);
+
+            options = options ?? new DropCollectionOptions();
+
+            var encryptedFieldsMap = _client.Settings?.AutoEncryptionOptions?.EncryptedFieldsMap;
+            if (!EncryptedCollectionHelper.TryGetEffectiveEncryptedFields(collectionNamespace, options.EncryptedFields, encryptedFieldsMap, out var effectiveEncryptedFields))
+            {
+                if (encryptedFieldsMap != null)
+                {
+                    var listCollectionOptions = new ListCollectionsOptions() { Filter = $"{{ name : '{collectionNamespace.CollectionName}' }}" };
+                    var currentCollectionsInfo = await ListCollectionsAsync(session, listCollectionOptions, cancellationToken).ConfigureAwait(false);
+                    var currentCollectionInfo = await currentCollectionsInfo.FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+                    effectiveEncryptedFields = currentCollectionInfo
+                        ?.GetValue("options", defaultValue: null)
+                        ?.AsBsonDocument
+                        ?.GetValue("encryptedFields", defaultValue: null)
+                        ?.ToBsonDocument();
+                }
+            }
+
+            var messageEncoderSettings = GetMessageEncoderSettings(withGuidRepresentationUnspecified: effectiveEncryptedFields != null);
+            return DropCollectionOperation.CreateEncryptedDropCollectionOperationIfConfigured(
+                collectionNamespace,
+                effectiveEncryptedFields,
+                messageEncoderSettings,
+                (dco) =>
+                {
+                    dco.WriteConcern = _settings.WriteConcern;
+                });
         }
 
         private ListCollectionsOperation CreateListCollectionNamesOperation(ListCollectionNamesOptions options)
@@ -814,7 +902,7 @@ namespace Etherna.MongoDB.Driver
             }
         }
 
-        private MessageEncoderSettings GetMessageEncoderSettings()
+        private MessageEncoderSettings GetMessageEncoderSettings(bool withGuidRepresentationUnspecified = false)
         {
             var messageEncoderSettings = new MessageEncoderSettings
             {
@@ -824,7 +912,7 @@ namespace Etherna.MongoDB.Driver
 #pragma warning disable 618
             if (BsonDefaults.GuidRepresentationMode == GuidRepresentationMode.V2)
             {
-                messageEncoderSettings.Add(MessageEncoderSettingsName.GuidRepresentation, _settings.GuidRepresentation);
+                messageEncoderSettings.Add(MessageEncoderSettingsName.GuidRepresentation, withGuidRepresentationUnspecified ? GuidRepresentation.Unspecified : _settings.GuidRepresentation);
             }
 #pragma warning restore 618
 

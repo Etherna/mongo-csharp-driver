@@ -27,7 +27,9 @@ namespace Etherna.MongoDB.Driver
         // fields
         private bool? _autoIndexId;
         private bool? _capped;
+        private ChangeStreamPreAndPostImagesOptions _changeStreamPreAndPostImagesOptions;
         private Collation _collation;
+        private BsonDocument _encryptedFields;
         private TimeSpan? _expireAfter;
         private IndexOptionDefaults _indexOptionDefaults;
         private long? _maxDocuments;
@@ -69,6 +71,23 @@ namespace Etherna.MongoDB.Driver
             set { _capped = value; }
         }
 
+        /// <summary>
+        /// Gets or sets  Gets or sets a change streams pre and post images options.
+        /// </summary>
+        public ChangeStreamPreAndPostImagesOptions ChangeStreamPreAndPostImagesOptions
+        {
+            get { return _changeStreamPreAndPostImagesOptions; }
+            set { _changeStreamPreAndPostImagesOptions = value; }
+        }
+
+        /// <summary>
+        /// [Beta] Gets or sets encrypted fields.
+        /// </summary>
+        public BsonDocument EncryptedFields
+        {
+            get { return _encryptedFields; }
+            set { _encryptedFields = value; }
+        }
 
         /// <summary>
         /// Gets or sets a timespan indicating how long documents in a time series collection should be retained.
@@ -207,6 +226,8 @@ namespace Etherna.MongoDB.Driver
                     AutoIndexId = options.AutoIndexId,
                     Capped = options.Capped,
                     Collation = options.Collation,
+                    ChangeStreamPreAndPostImagesOptions = options.ChangeStreamPreAndPostImagesOptions,
+                    EncryptedFields = options.EncryptedFields,
                     ExpireAfter = options.ExpireAfter,
                     IndexOptionDefaults = options.IndexOptionDefaults,
                     MaxDocuments = options.MaxDocuments,
@@ -227,10 +248,20 @@ namespace Etherna.MongoDB.Driver
         #endregion
 
         // private fields
+        private ClusteredIndexOptions<TDocument> _clusteredIndex;
         private IBsonSerializer<TDocument> _documentSerializer;
         private FilterDefinition<TDocument> _validator;
 
         // public properties
+        /// <summary>
+        /// Gets or sets the <see cref="ClusteredIndexOptions{TDocument}"/>.
+        /// </summary>
+        public ClusteredIndexOptions<TDocument> ClusteredIndex
+        {
+            get { return _clusteredIndex; }
+            set { _clusteredIndex = value; }
+        }
+
         /// <summary>
         /// Gets or sets the document serializer.
         /// </summary>

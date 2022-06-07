@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Configuration;
 using MongoDB.Libmongocrypt;
 
 namespace Etherna.MongoDB.Driver.Encryption
@@ -39,9 +40,17 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <param name="clientEncryptionOptions">The client encryption options.</param>
         public ClientEncryption(ClientEncryptionOptions clientEncryptionOptions)
         {
-            _cryptClient = CryptClientCreator.CreateCryptClient(
+            var cryptClientSettings = new CryptClientSettings(
+                bypassQueryAnalysis: null,
+                cryptSharedLibPath: null,
+                cryptSharedLibSearchPath: null,
+                encryptedFieldsMap: null,
+                isCryptSharedLibRequired: null,
                 kmsProviders: clientEncryptionOptions.KmsProviders,
                 schemaMap: null);
+
+            _cryptClient = CryptClientCreator.CreateCryptClient(cryptClientSettings);
+
             _libMongoCryptController = new ExplicitEncryptionLibMongoCryptController(
                 _cryptClient,
                 clientEncryptionOptions);
@@ -121,12 +130,7 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <returns>The encrypted value.</returns>
         public BsonBinaryData Encrypt(BsonValue value, EncryptOptions encryptOptions, CancellationToken cancellationToken)
         {
-            return _libMongoCryptController.EncryptField(
-                value,
-                encryptOptions.KeyId,
-                encryptOptions.AlternateKeyName,
-                encryptOptions.Algorithm,
-                cancellationToken);
+            return _libMongoCryptController.EncryptField(value, encryptOptions, cancellationToken);
         }
 
         /// <summary>
@@ -138,12 +142,7 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <returns>The encrypted value.</returns>
         public Task<BsonBinaryData> EncryptAsync(BsonValue value, EncryptOptions encryptOptions, CancellationToken cancellationToken)
         {
-            return _libMongoCryptController.EncryptFieldAsync(
-                value,
-                encryptOptions.KeyId,
-                encryptOptions.AlternateKeyName,
-                encryptOptions.Algorithm,
-                cancellationToken);
+            return _libMongoCryptController.EncryptFieldAsync(value, encryptOptions, cancellationToken);
         }
     }
 }

@@ -13,7 +13,7 @@
 * limitations under the License.
 */
 
-using System;
+using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
@@ -38,27 +38,35 @@ namespace Etherna.MongoDB.Driver
             string databaseName = null;
 
             reader.ReadStartDocument();
+
             while (reader.ReadBsonType() != 0)
             {
                 var fieldName = reader.ReadName();
+
                 switch (fieldName)
                 {
-                    case "db":
+                    case "db" when reader.CurrentBsonType == BsonType.String:
                         databaseName = reader.ReadString();
                         break;
 
-                    case "coll":
+                    case "coll" when reader.CurrentBsonType == BsonType.String:
                         collectionName = reader.ReadString();
                         break;
 
                     default:
-                        throw new FormatException($"Invalid field name: \"{fieldName}\".");
+                        reader.SkipValue();
+                        break;
                 }
             }
             reader.ReadEndDocument();
 
-            var databaseNamespace = new DatabaseNamespace(databaseName);
-            return new CollectionNamespace(databaseNamespace, collectionName);
+            if (!string.IsNullOrWhiteSpace(databaseName) && !string.IsNullOrWhiteSpace(collectionName))
+            {
+                var databaseNamespace = new DatabaseNamespace(databaseName);
+                return new CollectionNamespace(databaseNamespace, collectionName);
+            }
+
+            return null;
         }
 
         protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, CollectionNamespace value)

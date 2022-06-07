@@ -21,7 +21,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Encryption
 {
@@ -30,6 +29,8 @@ namespace Etherna.MongoDB.Driver.Encryption
         #region static
         private static readonly Dictionary<string, Type[]> __supportedExtraOptions = new Dictionary<string, Type[]>
         {
+            { "cryptSharedLibPath", new [] { typeof(string) } },
+            { "cryptSharedLibRequired", new [] { typeof(bool) } },
             { "mongocryptdURI", new [] { typeof(string) } },
             { "mongocryptdBypassSpawn", new [] { typeof(bool) } },
             { "mongocryptdSpawnPath", new [] { typeof(string) } },
@@ -66,10 +67,12 @@ namespace Etherna.MongoDB.Driver.Encryption
 
     internal class MongocryptdFactory
     {
+        private readonly bool? _bypassQueryAnalysis;
         private readonly IReadOnlyDictionary<string, object> _extraOptions;
 
-        public MongocryptdFactory(IReadOnlyDictionary<string, object> extraOptions)
+        public MongocryptdFactory(IReadOnlyDictionary<string, object> extraOptions, bool? bypassQueryAnalysis)
         {
+            _bypassQueryAnalysis = bypassQueryAnalysis;
             _extraOptions = extraOptions ?? new Dictionary<string, object>();
         }
 
@@ -113,6 +116,15 @@ namespace Etherna.MongoDB.Driver.Encryption
         {
             path = null;
             args = null;
+
+            // bypassAutoEncryption=true doesn't enable autoencryption
+            if (_bypassQueryAnalysis.GetValueOrDefault(defaultValue: false))
+            {
+                return false;
+            }
+
+            // csfle shared library option is not validated here as
+            // Mongocryptd invocation is libmongocrypt responsibility
             if (!_extraOptions.TryGetValue("mongocryptdBypassSpawn", out var mongoCryptBypassSpawn)
                 || !(bool)mongoCryptBypassSpawn)
             {

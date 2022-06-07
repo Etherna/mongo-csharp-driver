@@ -13,6 +13,7 @@
 * limitations under the License.
 */
 
+using System;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Attributes;
@@ -62,6 +63,14 @@ namespace Etherna.MongoDB.Driver
         public CollectionNamespace CollectionNamespace => GetValue<CollectionNamespace>(nameof(CollectionNamespace), null);
 
         /// <summary>
+        /// Gets the database namespace.
+        /// </summary>
+        /// <value>
+        /// The database namespace.
+        /// </value>
+        public DatabaseNamespace DatabaseNamespace => GetValue<DatabaseNamespace>(nameof(DatabaseNamespace), null);
+
+        /// <summary>
         /// Gets the document key.
         /// </summary>
         /// <value>
@@ -87,6 +96,28 @@ namespace Etherna.MongoDB.Driver
                 else
                 {
                     return GetValue<TDocument>(nameof(FullDocument), default(TDocument));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets the full document before change.
+        /// </summary>
+        /// <value>
+        /// The full document before change.
+        /// </value>
+        public TDocument FullDocumentBeforeChange
+        {
+            get
+            {
+                // if TDocument is BsonDocument avoid deserializing it again to prevent possible duplicate element name errors
+                if (typeof(TDocument) == typeof(BsonDocument) && BackingDocument.TryGetValue("fullDocumentBeforeChange", out var fullDocumentBeforeChange))
+                {
+                    return (TDocument)(object)fullDocumentBeforeChange.AsBsonDocument;
+                }
+                else
+                {
+                    return GetValue<TDocument>(nameof(FullDocumentBeforeChange), default(TDocument));
                 }
             }
         }
@@ -122,5 +153,13 @@ namespace Etherna.MongoDB.Driver
         /// The update description.
         /// </value>
         public ChangeStreamUpdateDescription UpdateDescription => GetValue<ChangeStreamUpdateDescription>(nameof(UpdateDescription), null);
+
+        /// <summary>
+        /// Gets the wall time of the change stream event.
+        /// </summary>
+        /// <value>
+        /// The wall time.
+        /// </value>
+        public DateTime? WallTime => GetValue<DateTime?>(nameof(WallTime), null);
     }
 }

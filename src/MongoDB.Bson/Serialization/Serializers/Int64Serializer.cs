@@ -14,9 +14,7 @@
 */
 
 using System;
-using System.IO;
 using Etherna.MongoDB.Bson.IO;
-using Etherna.MongoDB.Bson.Serialization.Attributes;
 using Etherna.MongoDB.Bson.Serialization.Options;
 
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
@@ -26,6 +24,15 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     /// </summary>
     public class Int64Serializer : StructSerializerBase<long>, IRepresentationConfigurable<Int64Serializer>, IRepresentationConverterConfigurable<Int64Serializer>
     {
+        #region static
+        private static readonly Int64Serializer __instance = new Int64Serializer();
+
+        /// <summary>
+        /// Gets a cached instance of an Int64Serializer;
+        /// </summary>
+        public static Int64Serializer Instance => __instance;
+        #endregion
+
         // private fields
         private readonly BsonType _representation;
         private readonly RepresentationConverter _converter;

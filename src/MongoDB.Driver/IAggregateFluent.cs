@@ -138,6 +138,30 @@ namespace Etherna.MongoDB.Driver
         IAggregateFluent<AggregateCountResult> Count();
 
         /// <summary>
+        /// Appends a $densify stage to the pipeline.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="range">The range.</param>
+        /// <param name="partitionByFields">The fields to partition by.</param>
+        /// <returns>The fluent aggregate interface.</returns>
+        IAggregateFluent<TResult> Densify(
+            FieldDefinition<TResult> field,
+            DensifyRange range,
+            IEnumerable<FieldDefinition<TResult>> partitionByFields = null);
+
+        /// <summary>
+        /// Appends a $densify stage to the pipeline.
+        /// </summary>
+        /// <param name="field">The field.</param>
+        /// <param name="range">The range.</param>
+        /// <param name="partitionByFields">The fields to partition by.</param>
+        /// <returns>The fluent aggregate interface.</returns>
+        IAggregateFluent<TResult> Densify(
+            FieldDefinition<TResult> field,
+            DensifyRange range,
+            params FieldDefinition<TResult>[] partitionByFields);
+
+        /// <summary>
         /// Appends a $facet stage to the pipeline.
         /// </summary>
         /// <typeparam name="TNewResult">The type of the new result.</typeparam>

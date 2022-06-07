@@ -16,7 +16,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Etherna.MongoDB.Driver
+namespace Etherna.MongoDB.Driver.Core
 {
     internal static class IReadOnlyDictionaryExtensions
     {
@@ -48,6 +48,22 @@ namespace Etherna.MongoDB.Driver
             }
 
             return true;
+        }
+
+        public static TValueResult GetValueOrDefault<TValueResult, TKey, TValue>(this IReadOnlyDictionary<TKey, TValue> dictionary, TKey key)
+            where TValue : class
+        {
+            if (dictionary == null)
+            {
+                return default;
+            }
+
+            if (dictionary.TryGetValue(key, out TValue value) && value is TValueResult result)
+            {
+                return result;
+            }
+
+            return default;
         }
     }
 }

@@ -17,7 +17,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Driver.Core.Operations;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -143,6 +142,12 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <inheritdoc />
+        public virtual void DropCollection(string name, DropCollectionOptions options, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public virtual void DropCollection(IClientSessionHandle session, string name, DropCollectionOptions options, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+        /// <inheritdoc />
         public abstract Task DropCollectionAsync(string name, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <inheritdoc />
@@ -150,6 +155,12 @@ namespace Etherna.MongoDB.Driver
         {
             throw new NotImplementedException();
         }
+
+        /// <inheritdoc />
+        public virtual Task DropCollectionAsync(string name, DropCollectionOptions options, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+
+        /// <inheritdoc />
+        public virtual Task DropCollectionAsync(IClientSessionHandle session, string name, DropCollectionOptions options, CancellationToken cancellationToken = default) => throw new NotImplementedException();
 
         /// <inheritdoc />
         public abstract IMongoCollection<TDocument> GetCollection<TDocument>(string name, MongoCollectionSettings settings = null);

@@ -19,9 +19,10 @@ using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
-using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
+using Etherna.MongoDB.Driver.Encryption;
+using static Etherna.MongoDB.Driver.Encryption.EncryptedCollectionHelper;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -30,12 +31,50 @@ namespace Etherna.MongoDB.Driver.Core.Operations
     /// </summary>
     public class CreateCollectionOperation : IWriteOperation<BsonDocument>
     {
+        #region static
+        internal static IWriteOperation<BsonDocument> CreateEncryptedCreateCollectionOperationIfConfigured(
+            CollectionNamespace collectionNamespace,
+            BsonDocument encryptedFields,
+            MessageEncoderSettings messageEncoderSettings,
+            Action<CreateCollectionOperation> createCollectionOperationConfigurator)
+        {
+            var mainOperation = new CreateCollectionOperation(
+                collectionNamespace,
+                messageEncoderSettings)
+            {
+                EncryptedFields = encryptedFields
+            };
+
+            createCollectionOperationConfigurator?.Invoke(mainOperation);
+
+            if (encryptedFields != null)
+            {
+                return new CompositeWriteOperation<BsonDocument>(
+                    (CreateInnerCollectionOperation(EncryptedCollectionHelper.GetAdditionalCollectionName(encryptedFields, collectionNamespace, HelperCollectionForEncryption.Esc)), IsMainOperation: false),
+                    (CreateInnerCollectionOperation(EncryptedCollectionHelper.GetAdditionalCollectionName(encryptedFields, collectionNamespace, HelperCollectionForEncryption.Ecc)), IsMainOperation: false),
+                    (CreateInnerCollectionOperation(EncryptedCollectionHelper.GetAdditionalCollectionName(encryptedFields, collectionNamespace, HelperCollectionForEncryption.Ecos)), IsMainOperation: false),
+                    (mainOperation, IsMainOperation: true),
+                    (new CreateIndexesOperation(collectionNamespace, new[] { new CreateIndexRequest(EncryptedCollectionHelper.AdditionalCreateIndexDocument) }, messageEncoderSettings), IsMainOperation: false));
+            }
+            else
+            {
+                return mainOperation;
+            }
+
+            CreateCollectionOperation CreateInnerCollectionOperation(string collectionName)
+                => new CreateCollectionOperation(new CollectionNamespace(collectionNamespace.DatabaseNamespace.DatabaseName, collectionName), messageEncoderSettings) { ClusteredIndex = new BsonDocument { { "key", new BsonDocument("_id", 1) }, { "unique", true } } };
+        }
+        #endregion
+
         // fields
         private bool? _autoIndexId;
         private bool? _capped;
+        private BsonDocument _changeStreamPreAndPostImages;
+        private BsonDocument _clusteredIndex;
         private Collation _collation;
         private readonly CollectionNamespace _collectionNamespace;
         private BsonValue _comment;
+        private BsonDocument _encryptedFields;
         private TimeSpan? _expireAfter;
         private BsonDocument _indexOptionDefaults;
         private long? _maxDocuments;
@@ -91,6 +130,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         }
 
         /// <summary>
+        /// Gets or sets a change streams pre and post images options.
+        /// </summary>
+        /// <value>
+        /// change streams pre and post images options.
+        /// </value>
+        public BsonDocument ChangeStreamPreAndPostImages
+        {
+            get { return _changeStreamPreAndPostImages; }
+            set { _changeStreamPreAndPostImages = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the collation.
         /// </summary>
         /// <value>
@@ -123,6 +174,12 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public CollectionNamespace CollectionNamespace
         {
             get { return _collectionNamespace; }
+        }
+
+        internal BsonDocument EncryptedFields
+        {
+            get { return _encryptedFields; }
+            private set { _encryptedFields = value; }
         }
 
         /// <summary>
@@ -281,14 +338,27 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             set { _writeConcern = value; }
         }
 
+        /// <summary>
+        /// Gets or sets the clustered index definition.
+        /// </summary>
+        /// <value>
+        /// The clustered index definition.
+        /// </value>
+        public BsonDocument ClusteredIndex
+        {
+            get => _clusteredIndex;
+            set => _clusteredIndex = value;
+        }
+
         // methods
-        internal BsonDocument CreateCommand(ICoreSessionHandle session, ConnectionDescription connectionDescription)
+        internal BsonDocument CreateCommand(ICoreSessionHandle session)
         {
             var flags = GetFlags();
             var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(session, _writeConcern);
             return new BsonDocument
             {
                 { "create", _collectionNamespace.CollectionName },
+                { "clusteredIndex", _clusteredIndex, _clusteredIndex != null },
                 { "capped", () => _capped.Value, _capped.HasValue },
                 { "autoIndexId", () => _autoIndexId.Value, _autoIndexId.HasValue },
                 { "size", () => _maxSize.Value, _maxSize.HasValue },
@@ -303,7 +373,9 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 { "comment",  _comment, _comment != null },
                 { "writeConcern", writeConcern, writeConcern != null },
                 { "expireAfterSeconds", () => _expireAfter.Value.TotalSeconds, _expireAfter.HasValue },
-                { "timeseries", () => _timeSeriesOptions.ToBsonDocument(), _timeSeriesOptions != null }
+                { "timeseries", () => _timeSeriesOptions.ToBsonDocument(), _timeSeriesOptions != null },
+                { "encryptedFields", _encryptedFields, _encryptedFields != null },
+                { "changeStreamPreAndPostImages", _changeStreamPreAndPostImages, _changeStreamPreAndPostImages != null }
             };
         }
 
@@ -337,7 +409,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             using (var channel = channelSource.GetChannel(cancellationToken))
             using (var channelBinding = new ChannelReadWriteBinding(channelSource.Server, channel, binding.Session.Fork()))
             {
-                var operation = CreateOperation(channelBinding.Session, channel.ConnectionDescription);
+                var operation = CreateOperation(channelBinding.Session);
                 return operation.Execute(channelBinding, cancellationToken);
             }
         }
@@ -351,14 +423,14 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             using (var channel = await channelSource.GetChannelAsync(cancellationToken).ConfigureAwait(false))
             using (var channelBinding = new ChannelReadWriteBinding(channelSource.Server, channel, binding.Session.Fork()))
             {
-                var operation = CreateOperation(channelBinding.Session, channel.ConnectionDescription);
+                var operation = CreateOperation(channelBinding.Session);
                 return await operation.ExecuteAsync(channelBinding, cancellationToken).ConfigureAwait(false);
             }
         }
 
-        private WriteCommandOperation<BsonDocument> CreateOperation(ICoreSessionHandle session, ConnectionDescription connectionDescription)
+        private WriteCommandOperation<BsonDocument> CreateOperation(ICoreSessionHandle session)
         {
-            var command = CreateCommand(session, connectionDescription);
+            var command = CreateCommand(session);
             return new WriteCommandOperation<BsonDocument>(_collectionNamespace.DatabaseNamespace, command, BsonDocumentSerializer.Instance, _messageEncoderSettings);
         }
 

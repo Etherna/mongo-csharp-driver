@@ -14,10 +14,7 @@
 */
 
 using System;
-using System.IO;
 using Etherna.MongoDB.Bson.IO;
-using Etherna.MongoDB.Bson.Serialization.Attributes;
-using Etherna.MongoDB.Bson.Serialization.Options;
 
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
@@ -26,6 +23,15 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     /// </summary>
     public class BooleanSerializer : StructSerializerBase<bool>, IRepresentationConfigurable<BooleanSerializer>
     {
+        #region static
+        private static readonly BooleanSerializer __instance = new BooleanSerializer();
+
+        /// <summary>
+        /// Gets a cached instance of a BooleanSerializer.
+        /// </summary>
+        public static BooleanSerializer Instance => __instance;
+        #endregion
+
         // private fields
         private readonly BsonType _representation;
 

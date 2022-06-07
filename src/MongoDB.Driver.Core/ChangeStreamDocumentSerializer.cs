@@ -42,12 +42,15 @@ namespace Etherna.MongoDB.Driver
 
             RegisterMember("ClusterTime", "clusterTime", BsonTimestampSerializer.Instance);
             RegisterMember("CollectionNamespace", "ns", ChangeStreamDocumentCollectionNamespaceSerializer.Instance);
+            RegisterMember("DatabaseNamespace", "ns", ChangeStreamDocumentDatabaseNamespaceSerializer.Instance);
             RegisterMember("DocumentKey", "documentKey", BsonDocumentSerializer.Instance);
             RegisterMember("FullDocument", "fullDocument", _documentSerializer);
+            RegisterMember("FullDocumentBeforeChange", "fullDocumentBeforeChange", _documentSerializer);
             RegisterMember("OperationType", "operationType", ChangeStreamOperationTypeSerializer.Instance);
             RegisterMember("RenameTo", "to", ChangeStreamDocumentCollectionNamespaceSerializer.Instance);
             RegisterMember("ResumeToken", "_id", BsonDocumentSerializer.Instance);
             RegisterMember("UpdateDescription", "updateDescription", ChangeStreamUpdateDescriptionSerializer.Instance);
+            RegisterMember("WallTime", "wallTime", DateTimeSerializer.UtcInstance);
         }
 
         // public methods

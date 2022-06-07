@@ -17,6 +17,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver.Linq
@@ -31,6 +32,40 @@ namespace Etherna.MongoDB.Driver.Linq
             Ensure.IsNotNull(source, nameof(source));
 
             return new HashSet<T>(source);
+        }
+
+        /// <summary>
+        /// Represents all elements in an array (corresponds to the server's "$[]" update operator).
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+        /// <param name="source">A source of values.</param>
+        /// <returns>Only meant to be used in Update specifications.</returns>
+        public static TSource AllElements<TSource>(this IEnumerable<TSource> source)
+        {
+            throw new NotSupportedException("This method is not functional. It is only usable in conjunction with MongoDB.");
+        }
+
+        /// <summary>
+        /// Represents all matching elements in an array when using an array filter (corresponds to the server's "$[identifier]" update operator).
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+        /// <param name="source">A source of values.</param>
+        /// <param name="identifier">The name of the identifier in the corresponding array filter.</param>
+        /// <returns>Only meant to be used in Update specifications.</returns>
+        public static TSource AllMatchingElements<TSource>(this IEnumerable<TSource> source, string identifier)
+        {
+            throw new NotSupportedException("This method is not functional. It is only usable in conjunction with MongoDB.");
+        }
+
+        /// <summary>
+        /// Represents the first matching element in an array used in a query (corresponds to the server's "$" update operator).
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+        /// <param name="source">A source of values.</param>
+        /// <returns>Only meant to be used in Update specifications.</returns>
+        public static TSource FirstMatchingElement<TSource>(this IEnumerable<TSource> source)
+        {
+            throw new NotSupportedException("This method is not functional. It is only usable in conjunction with MongoDB.");
         }
 
         /// <summary>
@@ -551,6 +586,19 @@ namespace Etherna.MongoDB.Driver.Linq
         public static decimal? StandardDeviationSample<TSource>(this IEnumerable<TSource> source, Func<TSource, decimal?> selector)
         {
             return source.Select(selector).StandardDeviationSample();
+        }
+
+        /// <summary>
+        /// Filters a sequence of values based on a predicate and limits the number of results.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+        /// <param name="source">The source values.</param>
+        /// <param name="predicate">The predicate.</param>
+        /// <param name="limit">The limit.</param>
+        /// <returns>The filtered results.</returns>
+        public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, int limit)
+        {
+            throw new NotSupportedException("This method is not functional. It is only usable in conjunction with MongoDB.");
         }
     }
 }
