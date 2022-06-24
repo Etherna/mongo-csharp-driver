@@ -42,7 +42,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSeria
         public KnownSerializersNode Parent => _parent;
 
         // public methods
-        public void AddKnownSerializer(Type type, IBsonSerializer serializer)
+        public void AddKnownSerializer(Type type, IBsonSerializer serializer, bool allowPropagation = true)
         {
             if (!_knownSerializers.TryGetValue(type, out var set))
             {
@@ -52,7 +52,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSeria
 
             set.Add(serializer);
 
-            if (ShouldPropagateKnownSerializerToParent())
+            if (allowPropagation && ShouldPropagateKnownSerializerToParent())
             {
                 _parent.AddKnownSerializer(type, serializer);
             }

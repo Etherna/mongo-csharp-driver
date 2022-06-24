@@ -127,7 +127,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             };
         }
 
-        private static bool IsEnumComparisonExpression(BinaryExpression expression)
+        internal static bool IsEnumComparisonExpression(BinaryExpression expression)
         {
             return
                 IsComparisonOperator(expression.NodeType) &&
