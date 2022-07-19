@@ -93,7 +93,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     valueSerializer,
                     AstStage.Group(
                         id: BsonNull.Value,
-                        fields: AstExpression.AccumulatorField("_max", AstAccumulatorOperator.Max, valueAst)),
+                        fields: AstExpression.AccumulatorField("_max", AstUnaryAccumulatorOperator.Max, valueAst)),
                     AstStage.ReplaceRoot(AstExpression.GetField(root, "_max")));
 
                 return ExecutableQuery.Create(

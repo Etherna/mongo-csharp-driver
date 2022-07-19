@@ -91,7 +91,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     {
                         startOfWeek = null;
                     }
-                    serializer = BsonInt64Serializer.Instance;
+                    serializer = Int64Serializer.Instance;
                 }
                 else
                 {

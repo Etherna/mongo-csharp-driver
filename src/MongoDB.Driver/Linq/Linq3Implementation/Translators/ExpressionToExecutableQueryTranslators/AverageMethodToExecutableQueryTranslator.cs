@@ -152,7 +152,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     outputWrappedValueSerializer,
                     AstStage.Group(
                         id: BsonNull.Value,
-                        fields: AstExpression.AccumulatorField("_v", AstAccumulatorOperator.Avg, valueExpression)),
+                        fields: AstExpression.AccumulatorField("_v", AstUnaryAccumulatorOperator.Avg, valueExpression)),
                     AstStage.Project(AstProject.ExcludeId()));
 
                 return ExecutableQuery.Create(

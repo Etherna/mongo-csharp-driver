@@ -420,7 +420,7 @@ Task("TestCsfleWithMockedKmsNet472").IsDependentOn("TestCsfleWithMockedKms");
 Task("TestCsfleWithMockedKmsNetStandard20").IsDependentOn("TestCsfleWithMockedKms");
 Task("TestCsfleWithMockedKmsNetStandard21").IsDependentOn("TestCsfleWithMockedKms");
 
-Task("TestMongocryptd")
+Task("TestCsfleWithMongocryptd")
     .IsDependentOn("Build")
     .DoesForEach(
         items: GetFiles("./**/*.Tests.csproj"),
@@ -443,9 +443,9 @@ Task("TestMongocryptd")
         );
     });
 
-Task("TestMongocryptdNet472").IsDependentOn("TestMongocryptd");
-Task("TestMongocryptdNetStandard20").IsDependentOn("TestMongocryptd");
-Task("TestMongocryptdNetStandard21").IsDependentOn("TestMongocryptd");
+Task("TestCsfleWithMongocryptdNet472").IsDependentOn("TestCsfleWithMongocryptd");
+Task("TestCsfleWithMongocryptdNetStandard20").IsDependentOn("TestCsfleWithMongocryptd");
+Task("TestCsfleWithMongocryptdNetStandard21").IsDependentOn("TestCsfleWithMongocryptd");
 
 Task("Docs")
     .IsDependentOn("ApiDocs")
@@ -700,7 +700,10 @@ Task("TestsPackaging")
                         {
                             Framework = moniker,
                             Configuration = configuration,
-                            ArgumentCustomization = args => args.Append($"-- RunConfiguration.TargetPlatform={processorArchitecture}")
+                            ArgumentCustomization = args => 
+                                args
+                                .Append("/p:LangVersion=9")
+                                .Append($"-- RunConfiguration.TargetPlatform={processorArchitecture}")
                         }
                     );
                 } 
@@ -715,7 +718,7 @@ Task("TestsPackaging")
                     }
                     
                     Information("Creating console project...");
-                    DotNetCoreTool(csprojFullPath, "new console", $"--target-framework-override {moniker} --language C# ");
+                    DotNetCoreTool(csprojFullPath, "new console", $"--target-framework-override {moniker} --language C# --langVersion 9");
                     Information("Created test project");
                     
                     // the below two packages are added just to allow using the same code as in xunit

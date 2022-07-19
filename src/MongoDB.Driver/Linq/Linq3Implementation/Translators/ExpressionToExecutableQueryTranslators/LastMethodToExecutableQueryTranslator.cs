@@ -77,7 +77,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     pipeline.OutputSerializer,
                     AstStage.Group(
                         id: BsonNull.Value,
-                        fields: AstExpression.AccumulatorField("_last", AstAccumulatorOperator.Last, AstExpression.Var("ROOT"))));
+                        fields: AstExpression.AccumulatorField("_last", AstUnaryAccumulatorOperator.Last, AstExpression.Var("ROOT"))));
 
                 var finalizer = method.Name == "LastOrDefault" ? __singleOrDefaultFinalizer : __singleFinalizer;
 

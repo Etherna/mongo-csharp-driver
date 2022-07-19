@@ -270,7 +270,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var pipeline = ExpressionToPipelineTranslator.Translate(context, sourceExpression);
                 var sourceSerializer = pipeline.OutputSerializer;
 
-                var stdDevOperator = method.IsOneOf(__standardDeviationPopulationMethods) ? AstAccumulatorOperator.StdDevPop : AstAccumulatorOperator.StdDevSamp;
+                var stdDevOperator = method.IsOneOf(__standardDeviationPopulationMethods) ? AstUnaryAccumulatorOperator.StdDevPop : AstUnaryAccumulatorOperator.StdDevSamp;
                 AstExpression valueAst;
                 if (method.IsOneOf(__standardDeviationWithSelectorMethods))
                 {
