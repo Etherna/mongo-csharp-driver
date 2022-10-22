@@ -14,6 +14,7 @@
 */
 
 using System;
+using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Bson
 {
@@ -122,7 +123,7 @@ namespace Etherna.MongoDB.Bson
         /// <returns>The hash code.</returns>
         public override int GetHashCode()
         {
-            return BsonType.GetHashCode();
+            return Hasher.GetHashCode(BsonType);
         }
 
         /// <summary>

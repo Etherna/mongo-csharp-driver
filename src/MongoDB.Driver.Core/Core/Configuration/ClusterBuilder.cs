@@ -23,6 +23,7 @@ using Etherna.MongoDB.Driver.Core.ConnectionPools;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Events.Diagnostics;
+using Etherna.MongoDB.Driver.Core.Logging;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Servers;
 
@@ -41,7 +42,10 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
         private ClusterSettings _clusterSettings;
         private ConnectionPoolSettings _connectionPoolSettings;
         private ConnectionSettings _connectionSettings;
+        private LoggingSettings _loggingSettings;
+#pragma warning disable CS0618 // Type or member is obsolete
         private SdamLoggingSettings _sdamLoggingSettings;
+#pragma warning restore CS0618 // Type or member is obsolete
         private ServerSettings _serverSettings;
         private SslStreamSettings _sslStreamSettings;
         private Func<IStreamFactory, IStreamFactory> _streamFactoryWrapper;
@@ -54,7 +58,9 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
         public ClusterBuilder()
         {
             _clusterSettings = new ClusterSettings();
+#pragma warning disable CS0618 // Type or member is obsolete
             _sdamLoggingSettings = new SdamLoggingSettings(null);
+#pragma warning restore CS0618 // Type or member is obsolete
             _serverSettings = new ServerSettings();
             _connectionPoolSettings = new ConnectionPoolSettings();
             _connectionSettings = new ConnectionSettings();
@@ -114,10 +120,25 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
         }
 
         /// <summary>
+        /// Configures the logging settings.
+        /// </summary>
+        /// <param name="configurator">The logging settings configurator delegate.</param>
+        /// <returns>A reconfigured cluster builder.</returns>
+        [CLSCompliant(false)]
+        public ClusterBuilder ConfigureLoggingSettings(Func<LoggingSettings, LoggingSettings> configurator)
+        {
+            Ensure.IsNotNull(configurator, nameof(configurator));
+
+            _loggingSettings = configurator(_loggingSettings);
+            return this;
+        }
+
+        /// <summary>
         /// Configures the SDAM logging settings.
         /// </summary>
         /// <param name="configurator">The SDAM logging settings configurator delegate.</param>
         /// <returns>A reconfigured cluster builder.</returns>
+        [Obsolete("Use ConfigureLoggingSettings instead.")]
         public ClusterBuilder ConfigureSdamLogging(Func<SdamLoggingSettings, SdamLoggingSettings> configurator)
         {
             _sdamLoggingSettings = configurator(_sdamLoggingSettings);
@@ -218,7 +239,8 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
             return new ClusterFactory(
                 _clusterSettings,
                 serverFactory,
-                _eventAggregator);
+                _eventAggregator,
+                _loggingSettings?.ToInternalLoggerFactory());
         }
 
         private IConnectionPoolFactory CreateConnectionPoolFactory()
@@ -229,14 +251,16 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
                 _connectionSettings,
                 streamFactory,
                 _eventAggregator,
-                _clusterSettings.ServerApi);
+                _clusterSettings.ServerApi,
+                _loggingSettings.ToInternalLoggerFactory());
 
             var connectionPoolSettings = _connectionPoolSettings.WithInternal(isPausable: !_connectionSettings.LoadBalanced);
 
             return new ExclusiveConnectionPoolFactory(
                 connectionPoolSettings,
                 connectionFactory,
-                _eventAggregator);
+                _eventAggregator,
+                _loggingSettings.ToInternalLoggerFactory());
         }
 
         private ServerFactory CreateServerFactory()
@@ -258,7 +282,8 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
                 connectionPoolFactory,
                 serverMonitorFactory,
                 _eventAggregator,
-                _clusterSettings.ServerApi);
+                _clusterSettings.ServerApi,
+                _loggingSettings.ToInternalLoggerFactory());
         }
 
         private IServerMonitorFactory CreateServerMonitorFactory()
@@ -292,13 +317,15 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
                 serverMonitorConnectionSettings,
                 serverMonitorStreamFactory,
                 new EventAggregator(),
-                _clusterSettings.ServerApi);
+                _clusterSettings.ServerApi,
+                loggerFactory: null);
 
             return new ServerMonitorFactory(
                 serverMonitorSettings,
                 serverMonitorConnectionFactory,
                 _eventAggregator,
-                _clusterSettings.ServerApi);
+                _clusterSettings.ServerApi,
+                _loggingSettings.ToInternalLoggerFactory());
         }
 
         private IStreamFactory CreateTcpStreamFactory(TcpStreamSettings tcpStreamSettings)

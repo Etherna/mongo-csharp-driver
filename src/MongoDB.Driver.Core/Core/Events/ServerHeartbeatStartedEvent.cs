@@ -21,9 +21,9 @@ using Etherna.MongoDB.Driver.Core.Servers;
 namespace Etherna.MongoDB.Driver.Core.Events
 {
     /// <summary>
-    /// Occurs when a heartbeat succeeded.
+    /// Occurs before heartbeat is issued.
     /// </summary>
-    public struct ServerHeartbeatStartedEvent
+    public struct ServerHeartbeatStartedEvent : IEvent
     {
         private readonly bool _awaited;
         private readonly ConnectionId _connectionId;
@@ -77,5 +77,8 @@ namespace Etherna.MongoDB.Driver.Core.Events
         {
             get { return _timestamp; }
         }
+
+        // explicit interface implementations
+        EventType IEvent.Type => EventType.ServerHeartbeatStarted;
     }
 }

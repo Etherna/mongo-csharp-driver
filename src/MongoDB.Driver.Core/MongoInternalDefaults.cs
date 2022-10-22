@@ -17,6 +17,11 @@ namespace Etherna.MongoDB.Driver
 {
     internal static class MongoInternalDefaults
     {
+        public static class Logging
+        {
+            public const int MaxDocumentSize = 1000;
+        }
+
         public static class ConnectionPool
         {
             public const int MaxConnecting = 2;

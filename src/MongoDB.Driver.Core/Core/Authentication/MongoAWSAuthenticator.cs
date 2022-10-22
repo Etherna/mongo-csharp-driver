@@ -16,14 +16,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Security;
+using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Authentication.External;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Authentication
 {
@@ -53,6 +53,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             UsernamePasswordCredential credential,
             IEnumerable<KeyValuePair<string, string>> properties,
             IRandomByteGenerator randomByteGenerator,
+            IExternalAuthenticationCredentialsProvider<AwsCredentials> externalAuthenticationCredentialsProvider,
             IClock clock)
         {
             if (credential.Source != "$external")
@@ -60,7 +61,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
                 throw new ArgumentException("MONGODB-AWS authentication may only use the $external source.", nameof(credential));
             }
 
-            return CreateMechanism(credential.Username, credential.Password, properties, randomByteGenerator, clock);
+            return CreateMechanism(credential.Username, credential.Password, properties, randomByteGenerator, externalAuthenticationCredentialsProvider, clock);
         }
 
         private static MongoAWSMechanism CreateMechanism(
@@ -68,18 +69,12 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             SecureString password,
             IEnumerable<KeyValuePair<string, string>> properties,
             IRandomByteGenerator randomByteGenerator,
+            IExternalAuthenticationCredentialsProvider<AwsCredentials> externalAuthenticationCredentialsProvider,
             IClock clock)
         {
             var awsCredentials =
                 CreateAwsCredentialsFromMongoCredentials(username, password, properties) ??
-                CreateAwsCredentialsFromEnvironmentVariables() ??
-                CreateAwsCredentialsFromEcsResponse() ??
-                CreateAwsCredentialsFromEc2Response();
-
-            if (awsCredentials == null)
-            {
-                throw new InvalidOperationException("Unable to find credentials for MONGODB-AWS authentication.");
-            }
+                externalAuthenticationCredentialsProvider.CreateCredentialsFromExternalSource();
 
             return new MongoAWSMechanism(awsCredentials, randomByteGenerator, clock);
         }
@@ -106,61 +101,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
                 throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a session token is provided via settings then a username and password must be provided also.");
             }
 
-            return new AwsCredentials(accessKeyId: username, secretAccessKey: password, sessionToken);
-        }
-
-        private static AwsCredentials CreateAwsCredentialsFromEnvironmentVariables()
-        {
-            var accessKeyId = Environment.GetEnvironmentVariable("AWS_ACCESS_KEY_ID");
-            var secretAccessKey = Environment.GetEnvironmentVariable("AWS_SECRET_ACCESS_KEY");
-            var sessionToken = Environment.GetEnvironmentVariable("AWS_SESSION_TOKEN");
-
-            if (accessKeyId == null && secretAccessKey == null && sessionToken == null)
-            {
-                return null;
-            }
-            if (secretAccessKey != null && accessKeyId == null)
-            {
-                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a secret access key is provided via environment variables then an access key ID must be provided also.");
-            }
-            if (accessKeyId != null && secretAccessKey == null)
-            {
-                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if an access key ID is provided via environment variables then a secret access key must be provided also.");
-            }
-            if (sessionToken != null && (accessKeyId == null || secretAccessKey == null))
-            {
-                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a session token is provided via environment variables then an access key ID and a secret access key must be provided also.");
-            }
-
-            return new AwsCredentials(accessKeyId, SecureStringHelper.ToSecureString(secretAccessKey), sessionToken);
-        }
-
-        private static AwsCredentials CreateAwsCredentialsFromEcsResponse()
-        {
-            var relativeUri = Environment.GetEnvironmentVariable("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI");
-            if (relativeUri == null)
-            {
-                return null;
-            }
-
-            var response = AwsHttpClientHelper.GetECSResponseAsync(relativeUri).GetAwaiter().GetResult();
-            var parsedResponse = BsonDocument.Parse(response);
-            var accessKeyId = parsedResponse.GetValue("AccessKeyId", null)?.AsString;
-            var secretAccessKey = parsedResponse.GetValue("SecretAccessKey", null)?.AsString;
-            var sessionToken = parsedResponse.GetValue("Token", null)?.AsString;
-
-            return new AwsCredentials(accessKeyId, SecureStringHelper.ToSecureString(secretAccessKey), sessionToken);
-        }
-
-        private static AwsCredentials CreateAwsCredentialsFromEc2Response()
-        {
-            var response = AwsHttpClientHelper.GetEC2ResponseAsync().GetAwaiter().GetResult();
-            var parsedResponse = BsonDocument.Parse(response);
-            var accessKeyId = parsedResponse.GetValue("AccessKeyId", null)?.AsString;
-            var secretAccessKey = parsedResponse.GetValue("SecretAccessKey", null)?.AsString;
-            var sessionToken = parsedResponse.GetValue("Token", null)?.AsString;
-
-            return new AwsCredentials(accessKeyId, SecureStringHelper.ToSecureString(secretAccessKey), sessionToken);
+            return new AwsCredentials(accessKeyId: username, secretAccessKey: password, sessionToken, expiration: null);
         }
 
         private static string ExtractSessionTokenFromMechanismProperties(IEnumerable<KeyValuePair<string, string>> properties)
@@ -194,40 +135,26 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
         }
         #endregion
 
+        private readonly ICredentialsCache<AwsCredentials> _credentialsCache;
+
         // constructors
         /// <summary>
         /// Initializes a new instance of the <see cref="MongoAWSAuthenticator"/> class.
         /// </summary>
         /// <param name="credential">The credentials.</param>
         /// <param name="properties">The properties.</param>
-        [Obsolete("Use the newest overload instead.")]
-        public MongoAWSAuthenticator(UsernamePasswordCredential credential, IEnumerable<KeyValuePair<string, string>> properties)
-            : this(credential, properties, serverApi: null)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoAWSAuthenticator"/> class.
-        /// </summary>
-        /// <param name="credential">The credentials.</param>
-        /// <param name="properties">The properties.</param>
         /// <param name="serverApi">The server API.</param>
         public MongoAWSAuthenticator(
             UsernamePasswordCredential credential,
             IEnumerable<KeyValuePair<string, string>> properties,
             ServerApi serverApi)
-            : this(credential, properties, new DefaultRandomByteGenerator(), SystemClock.Instance, serverApi)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MongoAWSAuthenticator"/> class.
-        /// </summary>
-        /// <param name="username">The username.</param>
-        /// <param name="properties">The properties.</param>
-        [Obsolete("Use the newest overload instead.")]
-        public MongoAWSAuthenticator(string username, IEnumerable<KeyValuePair<string, string>> properties)
-            : this(username, properties, serverApi: null)
+            : this(
+                  credential,
+                  properties,
+                  new DefaultRandomByteGenerator(),
+                  ExternalCredentialsAuthenticators.Instance.Aws,
+                  SystemClock.Instance,
+                  serverApi)
         {
         }
 
@@ -241,7 +168,13 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             string username,
             IEnumerable<KeyValuePair<string, string>> properties,
             ServerApi serverApi)
-            : this(username, properties, new DefaultRandomByteGenerator(), SystemClock.Instance, serverApi)
+            : this(
+                  username,
+                  properties,
+                  new DefaultRandomByteGenerator(),
+                  ExternalCredentialsAuthenticators.Instance.Aws,
+                  SystemClock.Instance,
+                  serverApi)
         {
         }
 
@@ -249,20 +182,24 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             UsernamePasswordCredential credential,
             IEnumerable<KeyValuePair<string, string>> properties,
             IRandomByteGenerator randomByteGenerator,
+            IExternalAuthenticationCredentialsProvider<AwsCredentials> externalAuthenticationCredentialsProvider,
             IClock clock,
             ServerApi serverApi)
-            : base(CreateMechanism(credential, properties, randomByteGenerator, clock), serverApi)
+            : base(CreateMechanism(credential, properties, randomByteGenerator, externalAuthenticationCredentialsProvider, clock), serverApi)
         {
+            _credentialsCache = externalAuthenticationCredentialsProvider as ICredentialsCache<AwsCredentials>; // can be null
         }
 
         internal MongoAWSAuthenticator(
             string username,
             IEnumerable<KeyValuePair<string, string>> properties,
             IRandomByteGenerator randomByteGenerator,
+            IExternalAuthenticationCredentialsProvider<AwsCredentials> externalAuthenticationCredentialsProvider,
             IClock clock,
             ServerApi serverApi)
-            : base(CreateMechanism(username, null, properties, randomByteGenerator, clock), serverApi)
+            : base(CreateMechanism(username, null, properties, randomByteGenerator, externalAuthenticationCredentialsProvider, clock), serverApi)
         {
+            _credentialsCache = externalAuthenticationCredentialsProvider as ICredentialsCache<AwsCredentials>; // can be null
         }
 
         /// <inheritdoc/>
@@ -271,115 +208,35 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             get { return "$external"; }
         }
 
+        /// <inheritdoc/>
+        public override void Authenticate(IConnection connection, ConnectionDescription description, CancellationToken cancellationToken)
+        {
+            try
+            {
+                base.Authenticate(connection, description, cancellationToken);
+            }
+            catch
+            {
+                _credentialsCache?.Clear();
+                throw;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override async Task AuthenticateAsync(IConnection connection, ConnectionDescription description, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await base.AuthenticateAsync(connection, description, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                _credentialsCache?.Clear();
+                throw;
+            }
+        }
+
         // nested classes
-        private class AwsCredentials
-        {
-            private readonly string _accessKeyId;
-            private readonly SecureString _secretAccessKey;
-            private readonly string _sessionToken;
-
-            public AwsCredentials(string accessKeyId, SecureString secretAccessKey, string sessionToken)
-            {
-                _accessKeyId = Ensure.IsNotNull(accessKeyId, nameof(accessKeyId));
-                _secretAccessKey = Ensure.IsNotNull(secretAccessKey, nameof(secretAccessKey));
-                _sessionToken = sessionToken; // can be null
-            }
-
-            public string AccessKeyId => _accessKeyId;
-            public SecureString SecretAccessKey => _secretAccessKey;
-            public string SessionToken => _sessionToken;
-        }
-
-        private static class AwsHttpClientHelper
-        {
-            // private static
-            private static readonly Uri __ec2BaseUri = new Uri("http://169.254.169.254");
-            private static readonly Uri __ecsBaseUri = new Uri("http://169.254.170.2");
-            private static readonly Lazy<HttpClient> __httpClientInstance = new Lazy<HttpClient>(() => new HttpClient
-            {
-                Timeout = TimeSpan.FromSeconds(10)
-            });
-
-            public static async Task<string> GetEC2ResponseAsync()
-            {
-                var tokenRequest = CreateTokenRequest(__ec2BaseUri);
-                var token = await GetHttpContentAsync(tokenRequest, "Failed to acquire EC2 token.").ConfigureAwait(false);
-
-                var roleRequest = CreateRoleRequest(__ec2BaseUri, token);
-                var roleName = await GetHttpContentAsync(roleRequest, "Failed to acquire EC2 role name.").ConfigureAwait(false);
-
-                var credentialsRequest = CreateCredentialsRequest(__ec2BaseUri, roleName, token);
-                var credentials = await GetHttpContentAsync(credentialsRequest, "Failed to acquire EC2 credentials.").ConfigureAwait(false);
-
-                return credentials;
-            }
-
-            public static async Task<string> GetECSResponseAsync(string relativeUri)
-            {
-                var credentialsRequest = new HttpRequestMessage
-                {
-                    RequestUri = new Uri(__ecsBaseUri, relativeUri),
-                    Method = HttpMethod.Get
-                };
-
-                return await GetHttpContentAsync(credentialsRequest, "Failed to acquire ECS credentials.").ConfigureAwait(false);
-            }
-
-            // private static methods
-            private static HttpRequestMessage CreateCredentialsRequest(Uri baseUri, string roleName, string token)
-            {
-                var credentialsUri = new Uri(baseUri, "latest/meta-data/iam/security-credentials/");
-                var credentialsRequest = new HttpRequestMessage
-                {
-                    RequestUri = new Uri(credentialsUri, roleName),
-                    Method = HttpMethod.Get
-                };
-                credentialsRequest.Headers.Add("X-aws-ec2-metadata-token", token);
-
-                return credentialsRequest;
-            }
-
-            private static HttpRequestMessage CreateRoleRequest(Uri baseUri, string token)
-            {
-                var roleRequest = new HttpRequestMessage
-                {
-                    RequestUri = new Uri(baseUri, "latest/meta-data/iam/security-credentials/"),
-                    Method = HttpMethod.Get
-                };
-                roleRequest.Headers.Add("X-aws-ec2-metadata-token", token);
-
-                return roleRequest;
-            }
-
-            private static HttpRequestMessage CreateTokenRequest(Uri baseUri)
-            {
-                var tokenRequest = new HttpRequestMessage
-                {
-                    RequestUri = new Uri(baseUri, "latest/api/token"),
-                    Method = HttpMethod.Put,
-                };
-                tokenRequest.Headers.Add("X-aws-ec2-metadata-token-ttl-seconds", "30");
-
-                return tokenRequest;
-            }
-
-            private static async Task<string> GetHttpContentAsync(HttpRequestMessage request, string exceptionMessage)
-            {
-                HttpResponseMessage response;
-                try
-                {
-                    response = await __httpClientInstance.Value.SendAsync(request).ConfigureAwait(false);
-                    response.EnsureSuccessStatusCode();
-                }
-                catch (Exception ex) when (ex is OperationCanceledException || ex is MongoClientException)
-                {
-                    throw new MongoClientException(exceptionMessage, ex);
-                }
-
-                return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            }
-        }
-
         private class MongoAWSMechanism : ISaslMechanism
         {
             private readonly AwsCredentials _awsCredentials;

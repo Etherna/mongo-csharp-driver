@@ -14,6 +14,7 @@
 */
 
 using System.Net;
+using Microsoft.Extensions.Logging;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
@@ -29,6 +30,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
         // fields
         private readonly IConnectionInitializer _connectionInitializer;
         private readonly IEventSubscriber _eventSubscriber;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly ConnectionSettings _settings;
         private readonly IStreamFactory _streamFactory;
 
@@ -37,20 +39,25 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             ConnectionSettings settings,
             IStreamFactory streamFactory,
             IEventSubscriber eventSubscriber,
-            ServerApi serverApi)
+            ServerApi serverApi,
+            ILoggerFactory loggerFactory)
         {
             _settings = Ensure.IsNotNull(settings, nameof(settings));
             _streamFactory = Ensure.IsNotNull(streamFactory, nameof(streamFactory));
             _eventSubscriber = Ensure.IsNotNull(eventSubscriber, nameof(eventSubscriber));
             _connectionInitializer = new ConnectionInitializer(settings.ApplicationName, settings.Compressors, serverApi);
+            _loggerFactory = loggerFactory;
         }
+
+        // properties
+        public ConnectionSettings ConnectionSettings => _settings;
 
         // methods
         public IConnection CreateConnection(ServerId serverId, EndPoint endPoint)
         {
             Ensure.IsNotNull(serverId, nameof(serverId));
             Ensure.IsNotNull(endPoint, nameof(endPoint));
-            return new BinaryConnection(serverId, endPoint, _settings, _streamFactory, _connectionInitializer, _eventSubscriber);
+            return new BinaryConnection(serverId, endPoint, _settings, _streamFactory, _connectionInitializer, _eventSubscriber, _loggerFactory);
         }
     }
 }

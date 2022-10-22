@@ -21,11 +21,11 @@ using System.Reflection;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
-using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators.PropertyTranslators;
+using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
 {
@@ -36,7 +36,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             var containerExpression = expression.Expression;
             var member = expression.Member;
 
-            if (member is PropertyInfo property)
+            if (member is PropertyInfo property && property.DeclaringType.IsNullable())
             {
                 switch (property.Name)
                 {

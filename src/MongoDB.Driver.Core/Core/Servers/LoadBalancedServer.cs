@@ -16,11 +16,13 @@
 using System;
 using System.Net;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.ConnectionPools;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Logging;
 
 namespace Etherna.MongoDB.Driver.Core.Servers
 {
@@ -36,8 +38,8 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             ServerSettings serverSettings,
             EndPoint endPoint,
             IConnectionPoolFactory connectionPoolFactory,
-            IEventSubscriber eventSubscriber,
-            ServerApi serverApi)
+            ServerApi serverApi,
+            EventLogger<LogCategories.SDAM> eventLogger)
             : base(
                   clusterId,
                   clusterClock,
@@ -49,8 +51,8 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                   serverSettings,
                   endPoint,
                   connectionPoolFactory,
-                  eventSubscriber,
-                  serverApi)
+                  serverApi,
+                  eventLogger)
         {
             _baseDescription = _currentDescription = new ServerDescription(ServerId, endPoint, reasonChanged: "ServerInitialDescription");
         }

@@ -26,6 +26,7 @@ using Etherna.MongoDB.Bson;
 [assembly: Preserve(AllMembers = true)]
 
 [assembly: InternalsVisibleTo("Etherna.MongoDB.Driver")]
+[assembly: InternalsVisibleTo("Etherna.MongoDB.Driver.TestHelpers")]
 [assembly: InternalsVisibleTo("Etherna.MongoDB.Driver.Legacy")]
 [assembly: InternalsVisibleTo("Etherna.MongoDB.Driver.Core.FunctionalTests")]
 [assembly: InternalsVisibleTo("Etherna.MongoDB.Driver.Core.TestHelpers")]

@@ -61,6 +61,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __currentOpCommand = new Feature("CurrentOpCommand", WireVersion.Server32);
         private static readonly Feature __dateOperatorsNewIn50 = new Feature("DateOperatorsNewIn50", WireVersion.Server50);
         private static readonly Feature __densifyStage = new Feature("DensifyStage", WireVersion.Server51);
+        private static readonly Feature __documentsStage = new Feature("DocumentsStage", WireVersion.Server51);
         private static readonly Feature __documentValidation = new Feature("DocumentValidation", WireVersion.Server32);
         private static readonly Feature __directConnectionSetting = new Feature("DirectConnectionSetting", WireVersion.Server44);
         private static readonly Feature __eval = new Feature("Eval", WireVersion.Zero, WireVersion.Server42);
@@ -116,6 +117,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __streamingHello = new Feature("StreamingHello", WireVersion.Server44);
         private static readonly Feature __tailableCursor = new Feature("TailableCursor", WireVersion.Server32);
         private static readonly Feature __transactions = new Feature("Transactions", WireVersion.Server40);
+        private static readonly Feature __updateWithAggregationPipeline = new Feature("UpdateWithAggregationPipeline", WireVersion.Server42);
         private static readonly Feature __userManagementCommands = new Feature("UserManagementCommands", WireVersion.Server26);
         private static readonly Feature __views = new Feature("Views", WireVersion.Server34);
         private static readonly Feature __wildcardIndexes = new Feature("WildcardIndexes", WireVersion.Server42);
@@ -332,6 +334,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// Gets the aggregate $densify stage feature.
         /// </summary>
         public static Feature DensifyStage => __densifyStage;
+
+        /// <summary>
+        /// Gets the documents stage feature.
+        /// </summary>
+        public static Feature DocumentsStage => __documentsStage;
 
         /// <summary>
         /// Gets the document validation feature.
@@ -650,6 +657,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// </summary>
         [Obsolete("This property will be removed in a later release.")]
         public static Feature UserManagementCommands => __userManagementCommands;
+
+        /// <summary>
+        /// Gets the update with aggregation pipeline feature.
+        /// </summary>
+        public static Feature UpdateWithAggregationPipeline => __updateWithAggregationPipeline;
 
         /// <summary>
         /// Gets the views feature.

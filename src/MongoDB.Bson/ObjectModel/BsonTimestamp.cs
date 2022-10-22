@@ -15,6 +15,7 @@
 
 using System;
 using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Bson
 {
@@ -184,7 +185,7 @@ namespace Etherna.MongoDB.Bson
         {
             // see Effective Java by Joshua Bloch
             int hash = 17;
-            hash = 37 * hash + BsonType.GetHashCode();
+            hash = 37 * hash + Hasher.GetHashCode(BsonType);
             hash = 37 * hash + _value.GetHashCode();
             return hash;
         }

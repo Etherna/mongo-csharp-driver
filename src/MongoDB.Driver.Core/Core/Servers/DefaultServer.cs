@@ -19,12 +19,13 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using Microsoft.Extensions.Logging;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.ConnectionPools;
 using Etherna.MongoDB.Driver.Core.Connections;
-using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Logging;
 using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver.Core.Servers
@@ -58,8 +59,8 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             EndPoint endPoint,
             IConnectionPoolFactory connectionPoolFactory,
             IServerMonitorFactory monitorFactory,
-            IEventSubscriber eventSubscriber,
-            ServerApi serverApi)
+            ServerApi serverApi,
+            EventLogger<LogCategories.SDAM> eventLogger)
             : base(
                   clusterId,
                   clusterClock,
@@ -69,8 +70,8 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                   settings,
                   endPoint,
                   connectionPoolFactory,
-                  eventSubscriber,
-                  serverApi)
+                  serverApi,
+                  eventLogger)
         {
             _monitor = Ensure.IsNotNull(monitorFactory, nameof(monitorFactory)).Create(ServerId, endPoint);
             _baseDescription = _currentDescription = new ServerDescription(ServerId, endPoint, reasonChanged: "ServerInitialDescription", heartbeatInterval: settings.HeartbeatInterval);
@@ -171,6 +172,13 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                     $"InvalidatedBecause:{reasonInvalidated}",
                     lastUpdateTimestamp: DateTime.UtcNow,
                     topologyVersion: topologyVersion);
+
+            EventLogger.Logger?.LogDebug(
+                StructuredLogTemplateProviders.ServerId_Message_Description,
+                ServerId,
+                newDescription,
+                "Invalidating description");
+
             SetDescription(newDescription, clearConnectionPool);
             // TODO: make the heartbeat request conditional so we adhere to this part of the spec
             // > Network error when reading or writing: ... Clients MUST NOT request an immediate check of the server;

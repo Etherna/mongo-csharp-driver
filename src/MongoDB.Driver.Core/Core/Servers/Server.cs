@@ -28,6 +28,7 @@ using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.ConnectionPools;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Logging;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
@@ -53,14 +54,9 @@ namespace Etherna.MongoDB.Driver.Core.Servers
         private readonly ServerSettings _settings;
         private readonly InterlockedInt32 _state;
         private readonly ServerApi _serverApi;
+        private readonly EventLogger<LogCategories.SDAM> _eventLogger;
 
         private int _outstandingOperationsCount;
-
-        private readonly Action<ServerOpeningEvent> _openingEventHandler;
-        private readonly Action<ServerOpenedEvent> _openedEventHandler;
-        private readonly Action<ServerClosingEvent> _closingEventHandler;
-        private readonly Action<ServerClosedEvent> _closedEventHandler;
-        private readonly Action<ServerDescriptionChangedEvent> _descriptionChangedEventHandler;
 
         // constructors
         public Server(
@@ -74,8 +70,8 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             ServerSettings settings,
             EndPoint endPoint,
             IConnectionPoolFactory connectionPoolFactory,
-            IEventSubscriber eventSubscriber,
-            ServerApi serverApi)
+            ServerApi serverApi,
+            EventLogger<LogCategories.SDAM> eventLogger)
         {
             ClusterConnectionModeHelper.EnsureConnectionModeValuesAreValid(clusterConnectionMode, connectionModeSwitch, directConnection);
 
@@ -85,7 +81,6 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             _directConnection = directConnection;
             _settings = Ensure.IsNotNull(settings, nameof(settings));
             _endPoint = Ensure.IsNotNull(endPoint, nameof(endPoint));
-            Ensure.IsNotNull(eventSubscriber, nameof(eventSubscriber));
 
             _serverId = new ServerId(clusterId, endPoint);
             _connectionPool = Ensure.IsNotNull(connectionPoolFactory, nameof(connectionPoolFactory)).CreateConnectionPool(_serverId, endPoint, this);
@@ -93,11 +88,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             _serverApi = serverApi;
             _outstandingOperationsCount = 0;
 
-            eventSubscriber.TryGetEventHandler(out _openingEventHandler);
-            eventSubscriber.TryGetEventHandler(out _openedEventHandler);
-            eventSubscriber.TryGetEventHandler(out _closingEventHandler);
-            eventSubscriber.TryGetEventHandler(out _closedEventHandler);
-            eventSubscriber.TryGetEventHandler(out _descriptionChangedEventHandler);
+            _eventLogger = Ensure.IsNotNull(eventLogger, nameof(eventLogger));
         }
 
         // events
@@ -110,6 +101,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
         public EndPoint EndPoint => _endPoint;
         public bool IsInitialized => _state.Value != State.Initial;
         public ServerId ServerId => _serverId;
+        protected EventLogger<LogCategories.SDAM> EventLogger => _eventLogger;
 
         int IClusterableServer.OutstandingOperationsCount => Interlocked.CompareExchange(ref _outstandingOperationsCount, 0, 0);
 
@@ -118,10 +110,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
         {
             if (_state.TryChange(State.Disposed))
             {
-                if (_closingEventHandler != null)
-                {
-                    _closingEventHandler(new ServerClosingEvent(_serverId));
-                }
+                _eventLogger.LogAndPublish(new ServerClosingEvent(_serverId));
 
                 var stopwatch = Stopwatch.StartNew();
 
@@ -130,10 +119,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                 _connectionPool.Dispose();
                 stopwatch.Stop();
 
-                if (_closedEventHandler != null)
-                {
-                    _closedEventHandler(new ServerClosedEvent(_serverId, stopwatch.Elapsed));
-                }
+                _eventLogger.LogAndPublish(new ServerClosedEvent(_serverId, stopwatch.Elapsed));
             }
         }
 
@@ -181,20 +167,14 @@ namespace Etherna.MongoDB.Driver.Core.Servers
         {
             if (_state.TryChange(State.Initial, State.Open))
             {
-                if (_openingEventHandler != null)
-                {
-                    _openingEventHandler(new ServerOpeningEvent(_serverId, _settings));
-                }
+                _eventLogger.LogAndPublish(new ServerOpeningEvent(_serverId, _settings));
 
                 var stopwatch = Stopwatch.StartNew();
                 _connectionPool.Initialize();
                 InitializeSubClass();
                 stopwatch.Stop();
 
-                if (_openedEventHandler != null)
-                {
-                    _openedEventHandler(new ServerOpenedEvent(_serverId, _settings, stopwatch.Elapsed));
-                }
+                _eventLogger.LogAndPublish(new ServerOpenedEvent(_serverId, _settings, stopwatch.Elapsed));
             }
         }
 
@@ -242,10 +222,9 @@ namespace Etherna.MongoDB.Driver.Core.Servers
 
         protected void TriggerServerDescriptionChanged(object sender, ServerDescriptionChangedEventArgs e)
         {
-            var shouldServerDescriptionChangedEventBePublished = !e.OldServerDescription.SdamEquals(e.NewServerDescription);
-            if (shouldServerDescriptionChangedEventBePublished && _descriptionChangedEventHandler != null)
+            if (!e.OldServerDescription.SdamEquals(e.NewServerDescription))
             {
-                _descriptionChangedEventHandler(new ServerDescriptionChangedEvent(e.OldServerDescription, e.NewServerDescription));
+                _eventLogger.LogAndPublish(new ServerDescriptionChangedEvent(e.OldServerDescription, e.NewServerDescription));
             }
 
             var handler = DescriptionChanged;

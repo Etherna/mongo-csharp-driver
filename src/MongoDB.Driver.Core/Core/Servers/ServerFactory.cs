@@ -14,10 +14,12 @@
 */
 
 using System.Net;
+using Microsoft.Extensions.Logging;
 using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.ConnectionPools;
 using Etherna.MongoDB.Driver.Core.Events;
+using Etherna.MongoDB.Driver.Core.Logging;
 using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver.Core.Servers
@@ -35,6 +37,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
         private readonly IEventSubscriber _eventSubscriber;
         private readonly ServerApi _serverApi;
         private readonly ServerSettings _settings;
+        private readonly ILoggerFactory _loggerFactory;
 
         // constructors
         public ServerFactory(
@@ -47,7 +50,8 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             IConnectionPoolFactory connectionPoolFactory,
             IServerMonitorFactory serverMonitoryFactory,
             IEventSubscriber eventSubscriber,
-            ServerApi serverApi)
+            ServerApi serverApi,
+            ILoggerFactory loggerFactory)
         {
             ClusterConnectionModeHelper.EnsureConnectionModeValuesAreValid(clusterConnectionMode, connectionModeSwitch, directConnection);
 
@@ -59,6 +63,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
             _serverMonitorFactory = Ensure.IsNotNull(serverMonitoryFactory, nameof(serverMonitoryFactory));
             _eventSubscriber = Ensure.IsNotNull(eventSubscriber, nameof(eventSubscriber));
             _serverApi = serverApi; // can be null
+            _loggerFactory = loggerFactory;
         }
 
         // methods
@@ -73,8 +78,8 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                         _settings,
                         endPoint,
                         _connectionPoolFactory,
-                        _eventSubscriber,
-                        _serverApi),
+                        _serverApi,
+                        _loggerFactory.CreateEventLogger<LogCategories.SDAM>(_eventSubscriber)),
 
                 _ =>
                     new DefaultServer(
@@ -87,8 +92,8 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                         endPoint,
                         _connectionPoolFactory,
                         _serverMonitorFactory,
-                        _eventSubscriber,
-                        _serverApi)
+                        _serverApi,
+                        _loggerFactory.CreateEventLogger<LogCategories.SDAM>(_eventSubscriber))
             };
     }
 }

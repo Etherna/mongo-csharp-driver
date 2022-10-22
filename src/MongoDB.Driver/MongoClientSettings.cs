@@ -53,6 +53,7 @@ namespace Etherna.MongoDB.Driver
         private LinqProvider _linqProvider;
         private bool _loadBalanced;
         private TimeSpan _localThreshold;
+        private LoggingSettings _loggingSettings;
         private int _maxConnecting;
         private TimeSpan _maxConnectionIdleTime;
         private TimeSpan _maxConnectionLifeTime;
@@ -449,6 +450,19 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Gets or sets the logging settings
+        /// </summary>
+        public LoggingSettings LoggingSettings
+        {
+            get { return _loggingSettings; }
+            set
+            {
+                if (_isFrozen) { throw new InvalidOperationException("MongoClientSettings is frozen."); }
+                _loggingSettings = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the maximum concurrently connecting connections.
         /// </summary>
         public int MaxConnecting
@@ -614,6 +628,7 @@ namespace Etherna.MongoDB.Driver
         /// <summary>
         /// Gets or set the name of the SDAM log file. Null turns logging off. stdout will log to console.
         /// </summary>
+        [Obsolete("Use LoggerFactory instead.")]
         public string SdamLogFilename
         {
             get { return _sdamLogFilename; }
@@ -1002,6 +1017,7 @@ namespace Etherna.MongoDB.Driver
             clone._linqProvider = _linqProvider;
             clone._loadBalanced = _loadBalanced;
             clone._localThreshold = _localThreshold;
+            clone._loggingSettings = _loggingSettings;
             clone._maxConnecting = _maxConnecting;
             clone._maxConnectionIdleTime = _maxConnectionIdleTime;
             clone._maxConnectionLifeTime = _maxConnectionLifeTime;
@@ -1070,6 +1086,7 @@ namespace Etherna.MongoDB.Driver
                 _linqProvider == rhs._linqProvider &&
                 _loadBalanced == rhs._loadBalanced &&
                 _localThreshold == rhs._localThreshold &&
+                _loggingSettings == rhs._loggingSettings &&
                 _maxConnecting == rhs._maxConnecting &&
                 _maxConnectionIdleTime == rhs._maxConnectionIdleTime &&
                 _maxConnectionLifeTime == rhs._maxConnectionLifeTime &&
@@ -1291,6 +1308,7 @@ namespace Etherna.MongoDB.Driver
                 _ipv6,
                 _loadBalanced,
                 _localThreshold,
+                _loggingSettings,
                 _maxConnecting,
                 _maxConnectionIdleTime,
                 _maxConnectionLifeTime,
