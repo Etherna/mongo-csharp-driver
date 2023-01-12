@@ -24,7 +24,8 @@ using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver
 {
-    internal static class FieldValueSerializerHelper
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public static class FieldValueSerializerHelper
     {
         public static IBsonSerializer GetSerializerForValueType(IBsonSerializer fieldSerializer, IBsonSerializerRegistry serializerRegistry, Type valueType)
         {
@@ -320,4 +321,5 @@ namespace Etherna.MongoDB.Driver
             }
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }
