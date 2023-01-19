@@ -505,6 +505,16 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Creates an element match filter for an array field.
+        /// </summary>
+        /// <param name="filter">The filter.</param>
+        /// <returns>An element match filter.</returns>
+        public FilterDefinition<TDocument> ElemMatch<TItem>(FilterDefinition<TItem> filter)
+        {
+            return new ElementMatchFilterDefinition<TDocument, TItem>(filter);
+        }
+
+        /// <summary>
         /// Creates an equality filter.
         /// </summary>
         /// <typeparam name="TField">The type of the field.</typeparam>
@@ -1833,30 +1843,52 @@ namespace Etherna.MongoDB.Driver
             _filter = filter;
         }
 
+        public ElementMatchFilterDefinition(FilterDefinition<TItem> filter)
+        {
+            _filter = filter;
+        }
+
         public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
-
-            IBsonSerializer<TItem> itemSerializer;
-            if (renderedField.FieldSerializer != null)
+            if (_field != null)
             {
-                var arraySerializer = renderedField.FieldSerializer as IBsonArraySerializer;
-                BsonSerializationInfo itemSerializationInfo;
-                if (arraySerializer == null || !arraySerializer.TryGetItemSerializationInfo(out itemSerializationInfo))
+                var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+
+                IBsonSerializer<TItem> itemSerializer;
+                if (renderedField.FieldSerializer != null)
                 {
-                    var message = string.Format("The serializer for field '{0}' must implement IBsonArraySerializer and provide item serialization info.", renderedField.FieldName);
-                    throw new InvalidOperationException(message);
+                    var arraySerializer = renderedField.FieldSerializer as IBsonArraySerializer;
+                    BsonSerializationInfo itemSerializationInfo;
+                    if (arraySerializer == null || !arraySerializer.TryGetItemSerializationInfo(out itemSerializationInfo))
+                    {
+                        var message = string.Format("The serializer for field '{0}' must implement IBsonArraySerializer and provide item serialization info.", renderedField.FieldName);
+                        throw new InvalidOperationException(message);
+                    }
+                    itemSerializer = (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
                 }
-                itemSerializer = (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
+                else
+                {
+                    itemSerializer = serializerRegistry.GetSerializer<TItem>();
+                }
+
+                var renderedFilter = _filter.Render(itemSerializer, serializerRegistry, linqProvider);
+
+                return new BsonDocument(renderedField.FieldName, new BsonDocument("$elemMatch", renderedFilter));
             }
             else
             {
-                itemSerializer = serializerRegistry.GetSerializer<TItem>();
+                if (documentSerializer is not IBsonArraySerializer arraySerializer ||
+                    !arraySerializer.TryGetItemSerializationInfo(out var itemSerializationInfo))
+                {
+                    var message = "The serializer must implement IBsonArraySerializer and provide item serialization info.";
+                    throw new InvalidOperationException(message);
+                }
+                var itemSerializer = (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
+
+                var renderedFilter = _filter.Render(itemSerializer, serializerRegistry, linqProvider);
+
+                return new BsonDocument("$elemMatch", renderedFilter);
             }
-
-            var renderedFilter = _filter.Render(itemSerializer, serializerRegistry, linqProvider);
-
-            return new BsonDocument(renderedField.FieldName, new BsonDocument("$elemMatch", renderedFilter));
         }
     }
 
