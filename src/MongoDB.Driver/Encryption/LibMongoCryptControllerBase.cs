@@ -24,7 +24,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.IO;
-using Etherna.MongoDB.Driver.Core.Authentication;
 using Etherna.MongoDB.Driver.Core.Authentication.External;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Connections;
@@ -61,6 +60,9 @@ namespace Etherna.MongoDB.Driver.Encryption
             _networkStreamFactory = new NetworkStreamFactory();
             _tlsOptions = Ensure.IsNotNull(encryptionOptions.TlsOptions, nameof(encryptionOptions.TlsOptions));
         }
+
+        // public properties
+        public IMongoClient KeyVaultClient => _keyVaultClient;
 
         // protected methods
         protected void FeedResult(CryptContext context, BsonDocument document)
@@ -271,6 +273,7 @@ namespace Etherna.MongoDB.Driver.Encryption
                 IExternalCredentials credentialsBody = kmsProvider.Key switch
                 {
                     "aws"  => await ExternalCredentialsAuthenticators.Instance.Aws.CreateCredentialsFromExternalSourceAsync(cancellationToken).ConfigureAwait(false),
+                    "azure" => await ExternalCredentialsAuthenticators.Instance.Azure.CreateCredentialsFromExternalSourceAsync(cancellationToken).ConfigureAwait(false),
                     "gcp" => await ExternalCredentialsAuthenticators.Instance.Gcp.CreateCredentialsFromExternalSourceAsync(cancellationToken).ConfigureAwait(false),
                     _ => null,
                 };

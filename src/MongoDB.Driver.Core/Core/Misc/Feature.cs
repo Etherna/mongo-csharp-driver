@@ -57,6 +57,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __createIndexCommitQuorum = new Feature("CreateIndexCommitQuorum", WireVersion.Server44);
         private static readonly Feature __createIndexesCommand = new Feature("CreateIndexesCommand", WireVersion.Server26);
         private static readonly Feature __createIndexesUsingInsertOperations = new Feature("CreateIndexesUsingInsertOperations", WireVersion.Zero, WireVersion.Server42);
+        private static readonly Feature __csfleRangeAlgorithm = new Feature("CsfleRangeAlgorithm", WireVersion.Server62);
         private static readonly Feature __csfle2 = new Feature("Csfle2", WireVersion.Server60);
         private static readonly Feature __currentOpCommand = new Feature("CurrentOpCommand", WireVersion.Server32);
         private static readonly Feature __dateOperatorsNewIn50 = new Feature("DateOperatorsNewIn50", WireVersion.Server50);
@@ -74,6 +75,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __findAllowDiskUse = new Feature("FindAllowDiskUse", WireVersion.Server44);
         private static readonly Feature __findAndModifyWriteConcern = new Feature("FindAndModifyWriteConcern", WireVersion.Server32);
         private static readonly Feature __findCommand = new Feature("FindCommand", WireVersion.Server32);
+        private static readonly Feature __findProjectionExpressions = new Feature("FindProjectionExpressions", WireVersion.Server44);
         private static readonly Feature __geoNearCommand = new Feature("GeoNearCommand", WireVersion.Zero, WireVersion.Server42);
         private static readonly Feature __getField = new Feature("GetField", WireVersion.Server50);
         private static readonly Feature __getMoreComment = new Feature("GetMoreComment", WireVersion.Server44);
@@ -116,6 +118,8 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __speculativeAuthentication = new Feature("SpeculativeAuthentication", WireVersion.Server44);
         private static readonly Feature __streamingHello = new Feature("StreamingHello", WireVersion.Server44);
         private static readonly Feature __tailableCursor = new Feature("TailableCursor", WireVersion.Server32);
+        private static readonly Feature __toConversionOperators = new Feature("ToConversionOperators", WireVersion.Server40);
+        private static readonly Feature __trigOperators = new Feature("TrigOperators", WireVersion.Server42);
         private static readonly Feature __transactions = new Feature("Transactions", WireVersion.Server40);
         private static readonly Feature __updateWithAggregationPipeline = new Feature("UpdateWithAggregationPipeline", WireVersion.Server42);
         private static readonly Feature __userManagementCommands = new Feature("UserManagementCommands", WireVersion.Server26);
@@ -315,6 +319,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         public static Feature CreateIndexesUsingInsertOperations => __createIndexesUsingInsertOperations;
 
         /// <summary>
+        /// Gets the csfle range algorithm feature.
+        /// </summary>
+        public static Feature CsfleRangeAlgorithm => __csfleRangeAlgorithm;
+
+        /// <summary>
         /// Gets the client side field level encryption 2 feature.
         /// </summary>
         public static Feature Csfle2 => __csfle2;
@@ -406,6 +415,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// </summary>
         [Obsolete("This property will be removed in a later release.")]
         public static Feature FindCommand => __findCommand;
+
+        /// <summary>
+        /// Gets the find projection expressions feature.
+        /// </summary>
+        public static Feature FindProjectionExpressions => __findProjectionExpressions;
 
         /// <summary>
         /// Gets the geoNear command feature.
@@ -648,9 +662,19 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         public static Feature TailableCursor => __tailableCursor;
 
         /// <summary>
+        /// Gets the $toXyz conversion operators feature ($toDouble etc.).
+        /// </summary>
+        public static Feature ToConversionOperators => __toConversionOperators;
+
+        /// <summary>
         /// Gets the transactions feature.
         /// </summary>
         public static Feature Transactions => __transactions;
+
+        /// <summary>
+        /// Gets the trig operators feature.
+        /// </summary>
+        public static Feature TrigOperators => __trigOperators;
 
         /// <summary>
         /// Gets the user management commands feature.

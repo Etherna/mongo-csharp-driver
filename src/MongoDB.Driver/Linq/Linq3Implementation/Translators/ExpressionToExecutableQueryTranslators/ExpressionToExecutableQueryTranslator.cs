@@ -16,9 +16,7 @@
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
-using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers.KnownSerializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToPipelineTranslators;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators
@@ -30,12 +28,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         {
             expression = PartialEvaluator.EvaluatePartially(expression);
 
-            var context = TranslationContext.Create(expression, provider.CollectionDocumentSerializer);
+            var context = TranslationContext.Create(expression, provider.PipelineInputSerializer);
             var pipeline = ExpressionToPipelineTranslator.Translate(context, expression);
 
             return ExecutableQuery.Create(
-                provider.Collection,
-                provider.Options,
+                provider,
                 pipeline,
                 IdentityFinalizer<TOutput>.Instance);
         }
@@ -44,7 +41,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         {
             expression = PartialEvaluator.EvaluatePartially(expression);
 
-            var context = TranslationContext.Create(expression, provider.CollectionDocumentSerializer);
+            var context = TranslationContext.Create(expression, provider.PipelineInputSerializer);
             var methodCallExpression = (MethodCallExpression)expression;
             switch (methodCallExpression.Method.Name)
             {

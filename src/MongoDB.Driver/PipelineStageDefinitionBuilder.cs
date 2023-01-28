@@ -22,9 +22,10 @@ using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq;
-using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators;
+using Etherna.MongoDB.Driver.Search;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -174,11 +175,7 @@ namespace Etherna.MongoDB.Driver
         {
             Ensure.IsNotNull(groupBy, nameof(groupBy));
             Ensure.IsNotNull(output, nameof(output));
-            return Bucket(
-                new ExpressionAggregateExpressionDefinition<TInput, TValue>(groupBy, translationOptions),
-                boundaries,
-                new ExpressionBucketOutputProjection<TInput, TValue, TOutput>(x => default(TValue), output, translationOptions),
-                options);
+            return new BucketWithOutputExpressionStageDefinition<TInput, TValue, TOutput>(groupBy, boundaries, output, options, translationOptions);
         }
 
         /// <summary>
@@ -296,7 +293,7 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
-        /// Creates a $bucketAuto stage.
+        /// Creates a $bucketAuto stage (this overload can only be used with LINQ3).
         /// </summary>
         /// <typeparam name="TInput">The type of the input documents.</typeparam>
         /// <typeparam name="TValue">The type of the output documents.</typeparam>
@@ -310,7 +307,31 @@ namespace Etherna.MongoDB.Driver
         public static PipelineStageDefinition<TInput, TOutput> BucketAuto<TInput, TValue, TOutput>(
             Expression<Func<TInput, TValue>> groupBy,
             int buckets,
-            Expression<Func<IGrouping<TValue, TInput>, TOutput>> output,
+            Expression<Func<IGrouping<AggregateBucketAutoResultId<TValue>, TInput>, TOutput>> output,
+            AggregateBucketAutoOptions options = null,
+            ExpressionTranslationOptions translationOptions = null)
+        {
+            Ensure.IsNotNull(groupBy, nameof(groupBy));
+            Ensure.IsNotNull(output, nameof(output));
+            return new BucketAutoWithOutputExpressionStageDefinition<TInput, TValue, TOutput>(groupBy, buckets, output, options);
+        }
+
+        /// <summary>
+        /// Creates a $bucketAuto stage (this method can only be used with LINQ2).
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input documents.</typeparam>
+        /// <typeparam name="TValue">The type of the output documents.</typeparam>
+        /// <typeparam name="TOutput">The type of the output documents.</typeparam>
+        /// <param name="groupBy">The group by expression.</param>
+        /// <param name="buckets">The number of buckets.</param>
+        /// <param name="output">The output projection.</param>
+        /// <param name="options">The options (optional).</param>
+        /// <param name="translationOptions">The translation options.</param>
+        /// <returns>The stage.</returns>
+        public static PipelineStageDefinition<TInput, TOutput> BucketAutoForLinq2<TInput, TValue, TOutput>(
+            Expression<Func<TInput, TValue>> groupBy,
+            int buckets,
+            Expression<Func<IGrouping<TValue, TInput>, TOutput>> output, // the IGrouping for BucketAuto has been wrong all along, only fixing it for LINQ3
             AggregateBucketAutoOptions options = null,
             ExpressionTranslationOptions translationOptions = null)
         {
@@ -866,29 +887,7 @@ namespace Etherna.MongoDB.Driver
         {
             Ensure.IsNotNull(value, nameof(value));
             Ensure.IsNotNull(group, nameof(group));
-            return Group(new GroupExpressionProjection<TInput, TValue, TOutput>(value, group, translationOptions));
-        }
-
-        /// <summary>
-        /// Creates a $group stage (this method can only be used with LINQ3).
-        /// </summary>
-        /// <typeparam name="TInput">The type of the input documents.</typeparam>
-        /// <typeparam name="TValue">The type of the values.</typeparam>
-        /// <typeparam name="TOutput">The type of the output documents.</typeparam>
-        /// <param name="value">The value field.</param>
-        /// <param name="group">The group projection.</param>
-        /// <param name="translationOptions">The translation options.</param>
-        /// <returns>The stage.</returns>
-        /// <remarks>This method can only be used with LINQ3 but that can't be verified until Render is called.</remarks>
-        public static GroupForLinq3Result<TInput, TValue, TOutput> GroupForLinq3<TInput, TValue, TOutput>(
-            Expression<Func<TInput, TValue>> value,
-            Expression<Func<IGrouping<TValue, TInput>, TOutput>> group,
-            ExpressionTranslationOptions translationOptions = null)
-        {
-            Ensure.IsNotNull(value, nameof(value));
-            Ensure.IsNotNull(group, nameof(group));
-            var stages = new Linq.Linq3Implementation.GroupExpressionStageDefinitions<TInput, TValue, TOutput>(value, group);
-            return new GroupForLinq3Result<TInput, TValue, TOutput>(stages.GroupStage, stages.ProjectStage);
+            return new GroupWithOutputExpressionStageDefinition<TInput, TValue, TOutput>(value, group);
         }
 
         /// <summary>
@@ -898,7 +897,7 @@ namespace Etherna.MongoDB.Driver
         /// <param name="limit">The limit.</param>
         /// <returns>The stage.</returns>
         public static PipelineStageDefinition<TInput, TInput> Limit<TInput>(
-            int limit)
+            long limit)
         {
             Ensure.IsGreaterThanZero(limit, nameof(limit));
             return new BsonDocumentPipelineStageDefinition<TInput, TInput>(new BsonDocument("$limit", limit));
@@ -1310,6 +1309,80 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Creates a $search stage.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input documents.</typeparam>
+        /// <param name="searchDefinition">The search definition.</param>
+        /// <param name="highlight">The highlight options.</param>
+        /// <param name="indexName">The index name.</param>
+        /// <param name="count">The count options.</param>
+        /// <param name="returnStoredSource">
+        /// Flag that specifies whether to perform a full document lookup on the backend database
+        /// or return only stored source fields directly from Atlas Search.
+        /// </param>
+        /// <returns>The stage.</returns>
+        public static PipelineStageDefinition<TInput, TInput> Search<TInput>(
+            SearchDefinition<TInput> searchDefinition,
+            SearchHighlightOptions<TInput> highlight = null,
+            string indexName = null,
+            SearchCountOptions count = null,
+            bool returnStoredSource = false)
+        {
+            Ensure.IsNotNull(searchDefinition, nameof(searchDefinition));
+
+            const string operatorName = "$search";
+            var stage = new DelegatedPipelineStageDefinition<TInput, TInput>(
+                operatorName,
+                (s, sr, linqProvider) =>
+                {
+                    var renderedSearchDefinition = searchDefinition.Render(s, sr);
+                    renderedSearchDefinition.Add("highlight", () => highlight.Render(s, sr), highlight != null);
+                    renderedSearchDefinition.Add("count", () => count.Render(), count != null);
+                    renderedSearchDefinition.Add("index", indexName, indexName != null);
+                    renderedSearchDefinition.Add("returnStoredSource", returnStoredSource, returnStoredSource);
+
+                    var document = new BsonDocument(operatorName, renderedSearchDefinition);
+                    return new RenderedPipelineStageDefinition<TInput>(operatorName, document, s);
+                });
+
+            return stage;
+        }
+
+        /// <summary>
+        /// Creates a $searchMeta stage.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input documents.</typeparam>
+        /// <param name="searchDefinition">The search definition.</param>
+        /// <param name="indexName">The index name.</param>
+        /// <param name="count">The count options.</param>
+        /// <returns>The stage.</returns>
+        public static PipelineStageDefinition<TInput, SearchMetaResult> SearchMeta<TInput>(
+            SearchDefinition<TInput> searchDefinition,
+            string indexName = null,
+            SearchCountOptions count = null)
+        {
+            Ensure.IsNotNull(searchDefinition, nameof(searchDefinition));
+
+            const string operatorName = "$searchMeta";
+            var stage = new DelegatedPipelineStageDefinition<TInput, SearchMetaResult>(
+                operatorName,
+                (s, sr, linqProvider) =>
+                {
+                    var renderedSearchDefinition = searchDefinition.Render(s, sr);
+                    renderedSearchDefinition.Add("count", () => count.Render(), count != null);
+                    renderedSearchDefinition.Add("index", indexName, indexName != null);
+
+                    var document = new BsonDocument(operatorName, renderedSearchDefinition);
+                    return new RenderedPipelineStageDefinition<SearchMetaResult>(
+                        operatorName,
+                        document,
+                        sr.GetSerializer<SearchMetaResult>());
+                });
+
+            return stage;
+        }
+
+        /// <summary>
         /// Creates a $replaceRoot stage.
         /// </summary>
         /// <typeparam name="TInput">The type of the input documents.</typeparam>
@@ -1579,7 +1652,7 @@ namespace Etherna.MongoDB.Driver
         /// <param name="skip">The skip.</param>
         /// <returns>The stage.</returns>
         public static PipelineStageDefinition<TInput, TInput> Skip<TInput>(
-            int skip)
+            long skip)
         {
             Ensure.IsGreaterThanOrEqualToZero(skip, nameof(skip));
             return new BsonDocumentPipelineStageDefinition<TInput, TInput>(new BsonDocument("$skip", skip));
@@ -1825,6 +1898,11 @@ namespace Etherna.MongoDB.Driver
 
         public override RenderedProjectionDefinition<TOutput> Render(IBsonSerializer<TInput> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
         {
+            if (linqProvider != LinqProvider.V2)
+            {
+                throw new InvalidOperationException("ExpressionBucketOutputProjection can only be used with LINQ2.");
+            }
+
             return linqProvider.GetAdapter().TranslateExpressionToBucketOutputProjection(_valueExpression, _outputExpression, documentSerializer, serializerRegistry, _translationOptions);
         }
     }

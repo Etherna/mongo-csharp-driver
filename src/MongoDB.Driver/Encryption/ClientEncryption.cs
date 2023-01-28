@@ -20,6 +20,7 @@ using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Misc;
 using MongoDB.Libmongocrypt;
 
 namespace Etherna.MongoDB.Driver.Encryption
@@ -77,6 +78,90 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <returns>Returns the previous version of the key document.</returns>
         public Task<BsonDocument> AddAlternateKeyNameAsync(Guid id, string alternateKeyName, CancellationToken cancellationToken = default) =>
             _libMongoCryptController.AddAlternateKeyNameAsync(id, alternateKeyName, cancellationToken);
+
+        /// <summary>
+        /// Create encrypted collection.
+        /// </summary>
+        /// <param name="database">The database.</param>
+        /// <param name="collectionName">The collection name.</param>
+        /// <param name="createCollectionOptions">The create collection options.</param>
+        /// <param name="kmsProvider">The kms provider.</param>
+        /// <param name="dataKeyOptions">The datakey options.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The operation result.</returns>
+        /// <remarks>
+        /// if EncryptionFields contains a keyId with a null value, a data key will be automatically generated and assigned to keyId value.
+        /// </remarks>
+        public CreateEncryptedCollectionResult CreateEncryptedCollection(IMongoDatabase database, string collectionName, CreateCollectionOptions createCollectionOptions, string kmsProvider, DataKeyOptions dataKeyOptions, CancellationToken cancellationToken = default)
+        {
+            Ensure.IsNotNull(database, nameof(database));
+            Ensure.IsNotNull(collectionName, nameof(collectionName));
+            Ensure.IsNotNull(createCollectionOptions, nameof(createCollectionOptions));
+            Ensure.IsNotNull(dataKeyOptions, nameof(dataKeyOptions));
+            Ensure.IsNotNull(kmsProvider, nameof(kmsProvider));
+
+            var encryptedFields = createCollectionOptions.EncryptedFields?.DeepClone()?.AsBsonDocument;
+            try
+            {
+                foreach (var fieldDocument in EncryptedCollectionHelper.IterateEmptyKeyIds(new CollectionNamespace(database.DatabaseNamespace.DatabaseName, collectionName), encryptedFields))
+                {
+                    var dataKey = CreateDataKey(kmsProvider, dataKeyOptions, cancellationToken);
+                    EncryptedCollectionHelper.ModifyEncryptedFields(fieldDocument, dataKey);
+                }
+
+                var effectiveCreateEncryptionOptions = createCollectionOptions.Clone();
+                effectiveCreateEncryptionOptions.EncryptedFields = encryptedFields;
+                database.CreateCollection(collectionName, effectiveCreateEncryptionOptions, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                throw new MongoEncryptionCreateCollectionException(ex, encryptedFields);
+            }
+
+            return new CreateEncryptedCollectionResult(encryptedFields);
+        }
+
+        /// <summary>
+        /// Create encrypted collection.
+        /// </summary>
+        /// <param name="database">The database.</param>
+        /// <param name="collectionName">The collection name.</param>
+        /// <param name="createCollectionOptions">The create collection options.</param>
+        /// <param name="kmsProvider">The kms provider.</param>
+        /// <param name="dataKeyOptions">The datakey options.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The operation result.</returns>
+        /// <remarks>
+        /// if EncryptionFields contains a keyId with a null value, a data key will be automatically generated and assigned to keyId value.
+        /// </remarks>
+        public async Task<CreateEncryptedCollectionResult> CreateEncryptedCollectionAsync(IMongoDatabase database, string collectionName, CreateCollectionOptions createCollectionOptions, string kmsProvider, DataKeyOptions dataKeyOptions, CancellationToken cancellationToken = default)
+        {
+            Ensure.IsNotNull(database, nameof(database));
+            Ensure.IsNotNull(collectionName, nameof(collectionName));
+            Ensure.IsNotNull(createCollectionOptions, nameof(createCollectionOptions));
+            Ensure.IsNotNull(dataKeyOptions, nameof(dataKeyOptions));
+            Ensure.IsNotNull(kmsProvider, nameof(kmsProvider));
+
+            var encryptedFields = createCollectionOptions.EncryptedFields?.DeepClone()?.AsBsonDocument;
+            try
+            {
+                foreach (var fieldDocument in EncryptedCollectionHelper.IterateEmptyKeyIds(new CollectionNamespace(database.DatabaseNamespace.DatabaseName, collectionName), encryptedFields))
+                {
+                    var dataKey = await CreateDataKeyAsync(kmsProvider, dataKeyOptions, cancellationToken).ConfigureAwait(false);
+                    EncryptedCollectionHelper.ModifyEncryptedFields(fieldDocument, dataKey);
+                }
+
+                var effectiveCreateEncryptionOptions = createCollectionOptions.Clone();
+                effectiveCreateEncryptionOptions.EncryptedFields = encryptedFields;
+                await database.CreateCollectionAsync(collectionName, effectiveCreateEncryptionOptions, cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw new MongoEncryptionCreateCollectionException(ex, encryptedFields);
+            }
+
+            return new CreateEncryptedCollectionResult(encryptedFields);
+        }
 
         /// <summary>
         /// An alias function equivalent to createKey.
@@ -155,7 +240,8 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <param name="encryptOptions">The encrypt options.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The encrypted value.</returns>
-        public BsonBinaryData Encrypt(BsonValue value, EncryptOptions encryptOptions, CancellationToken cancellationToken = default) => _libMongoCryptController.EncryptField(value, encryptOptions, cancellationToken);
+        public BsonBinaryData Encrypt(BsonValue value, EncryptOptions encryptOptions, CancellationToken cancellationToken = default) =>
+            EnsureEncryptedData<BsonBinaryData>(_libMongoCryptController.EncryptField(value, encryptOptions, isExpressionMode: false, cancellationToken));
 
         /// <summary>
         /// Encrypts the specified value.
@@ -164,7 +250,48 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <param name="encryptOptions">The encrypt options.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The encrypted value.</returns>
-        public Task<BsonBinaryData> EncryptAsync(BsonValue value, EncryptOptions encryptOptions, CancellationToken cancellationToken = default) => _libMongoCryptController.EncryptFieldAsync(value, encryptOptions, cancellationToken);
+        public async Task<BsonBinaryData> EncryptAsync(BsonValue value, EncryptOptions encryptOptions, CancellationToken cancellationToken = default) =>
+            EnsureEncryptedData<BsonBinaryData>(await _libMongoCryptController.EncryptFieldAsync(value, encryptOptions, isExpressionMode: false, cancellationToken).ConfigureAwait(false));
+
+        /// <summary>
+        /// Encrypts a Match Expression or Aggregate Expression to query a range index.
+        /// </summary>
+        /// <param name="expression">The expression that is expected to be a BSON document of one of the following forms:
+        /// 1. A Match Expression of this form:
+        ///   {$and: [{"field": {$gt: "value1"}}, {"field": {$lt: "value2" }}]}
+        /// 2. An Aggregate Expression of this form:
+        ///   {$and: [{$gt: ["fieldpath", "value1"]}, {$lt: ["fieldpath", "value2"]}]
+        /// $gt may also be $gte. $lt may also be $lte.
+        /// </param>
+        /// <param name="encryptOptions">The encryption options.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The encrypted expression.</returns>
+        /// <remarks>
+        /// Only supported for queryType "rangePreview"
+        /// The Range algorithm is experimental only. It is not intended for public use. It is subject to breaking changes.
+        /// </remarks>
+        public BsonDocument EncryptExpression(BsonDocument expression, EncryptOptions encryptOptions, CancellationToken cancellationToken = default) =>
+            EnsureEncryptedData<BsonDocument>(_libMongoCryptController.EncryptField(expression, encryptOptions, isExpressionMode: true, cancellationToken));
+
+        /// <summary>
+        /// Encrypts a Match Expression or Aggregate Expression to query a range index.
+        /// </summary>
+        /// <param name="expression">The expression that is expected to be a BSON document of one of the following forms:
+        /// 1. A Match Expression of this form:
+        ///   {$and: [{"field": {$gt: "value1"}}, {"field": {$lt: "value2" }}]}
+        /// 2. An Aggregate Expression of this form:
+        ///   {$and: [{$gt: ["fieldpath", "value1"]}, {$lt: ["fieldpath", "value2"]}]
+        /// $gt may also be $gte. $lt may also be $lte.
+        /// </param>
+        /// <param name="encryptOptions">The encryption options.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>the encrypted expression.</returns>
+        /// <remarks>
+        /// Only supported for queryType "rangePreview"
+        /// The Range algorithm is experimental only. It is not intended for public use. It is subject to breaking changes.
+        /// </remarks>
+        public async Task<BsonDocument> EncryptExpressionAsync(BsonDocument expression, EncryptOptions encryptOptions, CancellationToken cancellationToken = default) =>
+            EnsureEncryptedData<BsonDocument>(await _libMongoCryptController.EncryptFieldAsync(expression, encryptOptions, isExpressionMode: true, cancellationToken).ConfigureAwait(false));
 
         /// <summary>
         /// Finds a single key document with the given UUID (BSON binary subtype 0x04).
@@ -257,5 +384,19 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <returns>The result.</returns>
         public Task<RewrapManyDataKeyResult> RewrapManyDataKeyAsync(FilterDefinition<BsonDocument> filter, RewrapManyDataKeyOptions options, CancellationToken cancellationToken = default) =>
             _libMongoCryptController.RewrapManyDataKeyAsync(filter, options, cancellationToken);
+
+        // private methods
+        private TEncryptedValue EnsureEncryptedData<TEncryptedValue>(BsonValue encryptedValue) where TEncryptedValue : BsonValue
+        {
+            if (encryptedValue is TEncryptedValue convertedValue)
+            {
+                return convertedValue;
+            }
+            else
+            {
+                // should not be reached
+                throw new InvalidOperationException($"The encrypted data must be {typeof(TEncryptedValue).Name}, but was {encryptedValue?.GetType()?.Name ?? "null"}.");
+            }
+        }
     }
 }

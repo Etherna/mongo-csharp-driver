@@ -86,7 +86,7 @@ namespace Etherna.MongoDB.Driver
         /// <returns>A <see cref="RenderedPipelineDefinition{TOutput}"/></returns>
         public virtual RenderedPipelineDefinition<TOutput> Render(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry)
         {
-            return Render(inputSerializer, serializerRegistry, LinqProvider.V2);
+            return Render(inputSerializer, serializerRegistry, LinqProvider.V3);
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc/>
         public override string ToString()
         {
-            return ToString(LinqProvider.V2);
+            return ToString(LinqProvider.V3);
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Etherna.MongoDB.Driver
         /// </returns>
         public string ToString(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry)
         {
-            return ToString(inputSerializer, serializerRegistry, LinqProvider.V2);
+            return ToString(inputSerializer, serializerRegistry, LinqProvider.V3);
         }
 
         /// <summary>
@@ -358,9 +358,12 @@ namespace Etherna.MongoDB.Driver
             {
                 var renderedStage = stage.Render(currentSerializer, serializerRegistry, linqProvider);
                 currentSerializer = renderedStage.OutputSerializer;
-                if (renderedStage.Document.ElementCount > 0)
+                foreach (var document in renderedStage.Documents)
                 {
-                    pipeline.Add(renderedStage.Document);
+                    if (document.ElementCount > 0)
+                    {
+                        pipeline.Add(document);
+                    }
                 }
             }
 

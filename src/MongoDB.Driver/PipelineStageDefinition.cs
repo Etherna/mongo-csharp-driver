@@ -14,6 +14,8 @@
 */
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
@@ -40,6 +42,11 @@ namespace Etherna.MongoDB.Driver
         BsonDocument Document { get; }
 
         /// <summary>
+        /// Gets the documents (usually one but could be more).
+        /// </summary>
+        IReadOnlyList<BsonDocument> Documents { get; }
+
+        /// <summary>
         /// Gets the output serializer.
         /// </summary>
         IBsonSerializer OutputSerializer { get; }
@@ -52,7 +59,7 @@ namespace Etherna.MongoDB.Driver
     public class RenderedPipelineStageDefinition<TOutput> : IRenderedPipelineStageDefinition
     {
         private string _operatorName;
-        private BsonDocument _document;
+        private IReadOnlyList<BsonDocument> _documents;
         private IBsonSerializer<TOutput> _outputSerializer;
 
         /// <summary>
@@ -62,16 +69,33 @@ namespace Etherna.MongoDB.Driver
         /// <param name="document">The document.</param>
         /// <param name="outputSerializer">The output serializer.</param>
         public RenderedPipelineStageDefinition(string operatorName, BsonDocument document, IBsonSerializer<TOutput> outputSerializer)
+            : this(operatorName, new List<BsonDocument> { document }, outputSerializer)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RenderedPipelineStageDefinition{TOutput}"/> class.
+        /// </summary>
+        /// <param name="operatorName">Name of the pipeline operator.</param>
+        /// <param name="documents">The documents.</param>
+        /// <param name="outputSerializer">The output serializer.</param>
+        public RenderedPipelineStageDefinition(string operatorName, IEnumerable<BsonDocument> documents, IBsonSerializer<TOutput> outputSerializer)
         {
             _operatorName = Ensure.IsNotNull(operatorName, nameof(operatorName));
-            _document = Ensure.IsNotNull(document, nameof(document));
+            _documents = Ensure.IsNotNull(documents, nameof(documents)).ToArray();
             _outputSerializer = Ensure.IsNotNull(outputSerializer, nameof(outputSerializer));
         }
 
         /// <inheritdoc />
         public BsonDocument Document
         {
-            get { return _document; }
+            get { return _documents.Single(); }
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyList<BsonDocument> Documents
+        {
+            get { return _documents; }
         }
 
         /// <summary>
@@ -188,7 +212,7 @@ namespace Etherna.MongoDB.Driver
         /// <returns>A <see cref="RenderedPipelineStageDefinition{TOutput}" /></returns>
         public virtual RenderedPipelineStageDefinition<TOutput> Render(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry)
         {
-            return Render(inputSerializer, serializerRegistry, LinqProvider.V2);
+            return Render(inputSerializer, serializerRegistry, LinqProvider.V3);
         }
 
         /// <summary>
@@ -218,7 +242,7 @@ namespace Etherna.MongoDB.Driver
         /// </returns>
         public string ToString(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry)
         {
-            return ToString(inputSerializer, serializerRegistry, LinqProvider.V2);
+            return ToString(inputSerializer, serializerRegistry, LinqProvider.V3);
         }
 
         /// <summary>
@@ -233,7 +257,15 @@ namespace Etherna.MongoDB.Driver
         public string ToString(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
         {
             var renderedStage = Render(inputSerializer, serializerRegistry, linqProvider);
-            return renderedStage.Document.ToJson();
+            var documents = renderedStage.Documents;
+            if (documents.Count == 1)
+            {
+                return documents[0].ToJson();
+            }
+            else
+            {
+                return new BsonArray(documents).ToJson();
+            }
         }
 
         string IPipelineStageDefinition.ToString(IBsonSerializer inputSerializer, IBsonSerializerRegistry serializerRegistry)
@@ -283,7 +315,7 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc />
         IRenderedPipelineStageDefinition IPipelineStageDefinition.Render(IBsonSerializer inputSerializer, IBsonSerializerRegistry serializerRegistry)
         {
-            return Render((IBsonSerializer<TInput>)inputSerializer, serializerRegistry, LinqProvider.V2);
+            return Render((IBsonSerializer<TInput>)inputSerializer, serializerRegistry, LinqProvider.V3);
         }
 
         /// <inheritdoc />

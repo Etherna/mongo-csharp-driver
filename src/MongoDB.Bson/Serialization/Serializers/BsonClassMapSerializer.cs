@@ -29,7 +29,9 @@ namespace Etherna.MongoDB.Bson.Serialization
     public class BsonClassMapSerializer<TClass> : SerializerBase<TClass>, IBsonIdProvider, IBsonDocumentSerializer, IBsonPolymorphicSerializer
     {
         // private fields
-        private BsonClassMap _classMap;
+        private readonly BsonClassMap _classMap;
+        private readonly bool _isReferenceType;
+        private readonly bool _isValueType;
 
         // constructors
         /// <summary>
@@ -53,6 +55,8 @@ namespace Etherna.MongoDB.Bson.Serialization
             }
 
             _classMap = classMap;
+            _isValueType = _classMap.ClassType.IsValueType;
+            _isReferenceType = !_isValueType;
         }
 
         // public properties
@@ -77,12 +81,6 @@ namespace Etherna.MongoDB.Bson.Serialization
         public override TClass Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
             var bsonReader = context.Reader;
-
-            if (_classMap.ClassType.GetTypeInfo().IsValueType)
-            {
-                var message = string.Format("Value class {0} cannot be deserialized.", _classMap.ClassType.FullName);
-                throw new BsonSerializationException(message);
-            }
 
             if (bsonReader.GetCurrentBsonType() == Bson.BsonType.Null)
             {
@@ -137,6 +135,12 @@ namespace Etherna.MongoDB.Bson.Serialization
             else
             {
                 // for mutable classes we deserialize the values directly into the result object
+                if (_isValueType)
+                {
+                    var message = string.Format("Value class {0} cannot be deserialized without a constructor.", _classMap.ClassType.FullName);
+                    throw new BsonSerializationException(message);
+                }
+
                 document = (TClass)_classMap.CreateInstance();
 
                 if (document == null)
@@ -169,7 +173,7 @@ namespace Etherna.MongoDB.Bson.Serialization
                     var memberMap = allMemberMaps[memberMapIndex];
                     if (memberMapIndex != extraElementsMemberMapIndex)
                     {
-                        if (document != null)
+                        if (_isReferenceType && document != null)
                         {
                             if (memberMap.IsReadOnly)
                             {
@@ -189,7 +193,7 @@ namespace Etherna.MongoDB.Bson.Serialization
                     }
                     else
                     {
-                        if (document != null)
+                        if (_isReferenceType && document != null)
                         {
                             DeserializeExtraElementMember(context, document, elementName, memberMap);
                         }
@@ -211,7 +215,7 @@ namespace Etherna.MongoDB.Bson.Serialization
                     if (extraElementsMemberMapIndex >= 0)
                     {
                         var extraElementsMemberMap = _classMap.ExtraElementsMemberMap;
-                        if (document != null)
+                        if (_isReferenceType && document != null)
                         {
                             DeserializeExtraElementMember(context, document, elementName, extraElementsMemberMap);
                         }
@@ -263,7 +267,7 @@ namespace Etherna.MongoDB.Bson.Serialization
                             throw new FormatException(message);
                         }
 
-                        if (document != null)
+                        if (_isReferenceType && document != null)
                         {
                             memberMap.ApplyDefaultValue(document);
                         }
@@ -285,7 +289,7 @@ namespace Etherna.MongoDB.Bson.Serialization
                 }
             }
 
-            if (document != null)
+            if (_isReferenceType && document != null)
             {
                 if (supportsInitialization != null)
                 {
@@ -430,6 +434,12 @@ namespace Etherna.MongoDB.Bson.Serialization
         {
             var creatorMap = ChooseBestCreator(values);
             var document = creatorMap.CreateInstance(values); // removes values consumed
+
+            if (values.Count > 0 && _isValueType)
+            {
+                var message = string.Format("Value class {0} cannot be deserialized unless all values can be passed to a constructor.", _classMap.ClassType.FullName);
+                throw new BsonSerializationException(message);
+            }
 
             var supportsInitialization = document as ISupportInitialize;
             if (supportsInitialization != null)
@@ -641,13 +651,23 @@ namespace Etherna.MongoDB.Bson.Serialization
 
         private void SerializeMember(BsonSerializationContext context, object obj, BsonMemberMap memberMap)
         {
-            if (memberMap != _classMap.ExtraElementsMemberMap)
+            try
             {
-                SerializeNormalMember(context, obj, memberMap);
+                if (memberMap != _classMap.ExtraElementsMemberMap)
+                {
+                    SerializeNormalMember(context, obj, memberMap);
+                }
+                else
+                {
+                    SerializeExtraElements(context, obj, memberMap);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                SerializeExtraElements(context, obj, memberMap);
+                var message = string.Format(
+                    "An error occurred while serializing the {0} {1} of class {2}: {3}", // terminating period provided by nested message
+                    memberMap.MemberName, (memberMap.MemberInfo is FieldInfo) ? "field" : "property", memberMap.ClassMap.ClassType.FullName, ex.Message);
+                throw new BsonSerializationException(message, ex);
             }
         }
 

@@ -24,32 +24,42 @@ using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 {
-    internal class AstGroupPipelineOptimizer
+    internal class AstGroupingPipelineOptimizer
     {
         #region static
         public static AstPipeline Optimize(AstPipeline pipeline)
         {
-            var optimizer = new AstGroupPipelineOptimizer();
+            var optimizer = new AstGroupingPipelineOptimizer();
             for (var i = 0; i < pipeline.Stages.Count; i++)
             {
                 var stage = pipeline.Stages[i];
-                if (stage is AstGroupStage groupStage)
+                if (IsGroupingStage(stage))
                 {
-                    pipeline = optimizer.OptimizeGroupStage(pipeline, i, groupStage);
+                    pipeline = optimizer.OptimizeGroupingStage(pipeline, i, stage);
                 }
             }
 
             return pipeline;
+
+            static bool IsGroupingStage(AstStage stage)
+            {
+                return stage.NodeType switch
+                {
+                    AstNodeType.GroupStage or AstNodeType.BucketStage or AstNodeType.BucketAutoStage => true,
+                    _ => false
+                };
+            }
         }
         #endregion
 
         private readonly AccumulatorSet _accumulators = new AccumulatorSet();
+        private AstExpression _element; // normally either "$$ROOT" or "$_v"
 
-        private AstPipeline OptimizeGroupStage(AstPipeline pipeline, int i, AstGroupStage groupStage)
+        private AstPipeline OptimizeGroupingStage(AstPipeline pipeline, int i, AstStage groupingStage)
         {
             try
             {
-                if (IsOptimizableGroupStage(groupStage))
+                if (IsOptimizableGroupingStage(groupingStage, out _element))
                 {
                     var followingStages = GetFollowingStagesToOptimize(pipeline, i + 1);
                     if (followingStages == null)
@@ -57,7 +67,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
                         return pipeline;
                     }
 
-                    var mappings = OptimizeGroupAndFollowingStages(groupStage, followingStages);
+                    var mappings = OptimizeGroupingAndFollowingStages(groupingStage, followingStages);
                     if (mappings.Length > 0)
                     {
                         return (AstPipeline)AstNodeReplacer.Replace(pipeline, mappings);
@@ -71,23 +81,57 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 
             return pipeline;
 
-            static bool IsOptimizableGroupStage(AstGroupStage groupStage)
+            static bool IsOptimizableGroupingStage(AstStage groupingStage, out AstExpression element)
             {
-                // { $group : { _id : ?, _elements : { $push : "$$ROOT" } } }
-                if (groupStage.Fields.Count == 1)
+                if (groupingStage is AstGroupStage groupStage)
                 {
-                    var field = groupStage.Fields[0];
-                    if (field.Path == "_elements" &&
-                        field.Value is AstUnaryAccumulatorExpression unaryAccumulatorExpression &&
-                        unaryAccumulatorExpression.Operator == AstUnaryAccumulatorOperator.Push &&
-                        unaryAccumulatorExpression.Arg is AstVarExpression varExpression &&
-                        varExpression.Name == "ROOT")
+                    // { $group : { _id : ?, _elements : { $push : element } } }
+                    if (groupStage.Fields.Count == 1)
                     {
-                        return true;
+                        var field = groupStage.Fields[0];
+                        return IsElementsPush(field, out element);
                     }
                 }
 
+                if (groupingStage is AstBucketStage bucketStage)
+                {
+                    // { $bucket : { groupBy : ?, boundaries : ?, default : ?, output : { _elements : { $push : element } } } }
+                    if (bucketStage.Output.Count == 1)
+                    {
+                        var output = bucketStage.Output[0];
+                        return IsElementsPush(output, out element);
+                    }
+                }
+
+                if (groupingStage is AstBucketAutoStage bucketAutoStage)
+                {
+                    // { $bucketAuto : { groupBy : ?, buckets : ?, granularity : ?, output : { _elements : { $push : element } } } }
+                    if (bucketAutoStage.Output.Count == 1)
+                    {
+                        var output = bucketAutoStage.Output[0];
+                        return IsElementsPush(output, out element);
+                    }
+                }
+
+                element = null;
                 return false;
+
+                static bool IsElementsPush(AstAccumulatorField field, out AstExpression element)
+                {
+                    if (
+                        field.Path == "_elements" &&
+                        field.Value is AstUnaryAccumulatorExpression unaryAccumulatorExpression &&
+                        unaryAccumulatorExpression.Operator == AstUnaryAccumulatorOperator.Push)
+                    {
+                        element = unaryAccumulatorExpression.Arg;
+                        return true;
+                    }
+                    else
+                    {
+                        element = null;
+                        return false;
+                    }
+                }
             }
 
             static List<AstStage> GetFollowingStagesToOptimize(AstPipeline pipeline, int from)
@@ -134,7 +178,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
             }
         }
 
-        private (AstNode, AstNode)[] OptimizeGroupAndFollowingStages(AstGroupStage groupStage, List<AstStage> followingStages)
+        private (AstNode, AstNode)[] OptimizeGroupingAndFollowingStages(AstStage groupingStage, List<AstStage> followingStages)
         {
             var mappings = new List<(AstNode, AstNode)>();
 
@@ -147,10 +191,21 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
                 }
             }
 
-            var newGroupStage = AstStage.Group(groupStage.Id, _accumulators);
-            mappings.Add((groupStage, newGroupStage));
+            var newGroupingStage = CreateNewGroupingStage(groupingStage, _accumulators);
+            mappings.Add((groupingStage, newGroupingStage));
 
             return mappings.ToArray();
+
+            static AstStage CreateNewGroupingStage(AstStage groupingStage, AccumulatorSet accumulators)
+            {
+                return groupingStage switch
+                {
+                    AstGroupStage groupStage => AstStage.Group(groupStage.Id, accumulators),
+                    AstBucketStage bucketStage => AstStage.Bucket(bucketStage.GroupBy, bucketStage.Boundaries, bucketStage.Default, accumulators),
+                    AstBucketAutoStage bucketAutoStage => AstStage.BucketAuto(bucketAutoStage.GroupBy, bucketAutoStage.Buckets, bucketAutoStage.Granularity, accumulators),
+                    _ => throw new Exception($"Unexpected {nameof(groupingStage)} node type: {groupingStage.NodeType}.")
+                };
+            }
         }
 
         private AstStage OptimizeFollowingStage(AstStage stage)
@@ -173,7 +228,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 
         private AstStage OptimizeMatchStage(AstMatchStage stage)
         {
-            var optimizedFilter = AccumulatorMover.MoveAccumulators(_accumulators, stage.Filter);
+            var optimizedFilter = AccumulatorMover.MoveAccumulators(_accumulators, _element, stage.Filter);
             return stage.Update(optimizedFilter);
         }
 
@@ -201,7 +256,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 
         private AstProjectStageSpecification OptimizeProjectStageSetFieldSpecification(AstProjectStageSetFieldSpecification specification)
         {
-            var optimizedValue = AccumulatorMover.MoveAccumulators(_accumulators, specification.Value);
+            var optimizedValue = AccumulatorMover.MoveAccumulators(_accumulators, _element, specification.Value);
             return specification.Update(optimizedValue);
         }
 
@@ -249,27 +304,29 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
         private class AccumulatorMover : AstNodeVisitor
         {
             #region static
-            public static TNode MoveAccumulators<TNode>(AccumulatorSet accumulators, TNode node)
+            public static TNode MoveAccumulators<TNode>(AccumulatorSet accumulators, AstExpression element, TNode node)
                 where TNode : AstNode
             {
-                var mover = new AccumulatorMover(accumulators);
+                var mover = new AccumulatorMover(accumulators, element);
                 return mover.VisitAndConvert(node);
             }
             #endregion
 
             private readonly AccumulatorSet _accumulators;
+            private readonly AstExpression _element;
 
-            private AccumulatorMover(AccumulatorSet accumulator)
+            private AccumulatorMover(AccumulatorSet accumulator, AstExpression element)
             {
                 _accumulators = accumulator;
+                _element = element;
             }
 
             public override AstNode VisitFilterField(AstFilterField node)
             {
-                // "_elements.0.X" => { __agg0 : { $first : "$$ROOT" } } + "__agg0.X"
+                // "_elements.0.X" => { __agg0 : { $first : element } } + "__agg0.X"
                 if (node.Path.StartsWith("_elements.0."))
                 {
-                    var accumulatorExpression = AstExpression.UnaryAccumulator(AstUnaryAccumulatorOperator.First, AstExpression.Var("ROOT"));
+                    var accumulatorExpression = AstExpression.UnaryAccumulator(AstUnaryAccumulatorOperator.First, _element);
                     var accumulatorFieldName = _accumulators.AddAccumulatorExpression(accumulatorExpression);
                     var restOfPath = node.Path.Substring("_elements.0.".Length);
                     var rewrittenPath = $"{accumulatorFieldName}.{restOfPath}";
@@ -288,9 +345,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
             {
                 if (node.FieldName is AstConstantExpression constantFieldName &&
                     constantFieldName.Value.IsString &&
-                    constantFieldName.Value.AsString == "_elements" &&
-                    node.Input is AstVarExpression varExpression &&
-                    varExpression.Name == "ROOT")
+                    constantFieldName.Value.AsString == "_elements")
                 {
                     throw new UnableToRemoveReferenceToElementsException();
                 }
@@ -300,7 +355,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 
             public override AstNode VisitMapExpression(AstMapExpression node)
             {
-                // { $map : { input : { $getField : { input : "$$ROOT", field : "_elements" } }, as : "x", in : f(x) } } => { __agg0 : { $push : f(x => root) } } + "$__agg0"
+                // { $map : { input : { $getField : { input : "$$ROOT", field : "_elements" } }, as : "x", in : f(x) } } => { __agg0 : { $push : f(x => element) } } + "$__agg0"
                 if (node.Input is AstGetFieldExpression mapInputGetFieldExpression &&
                     mapInputGetFieldExpression.FieldName is AstConstantExpression mapInputconstantFieldExpression &&
                     mapInputconstantFieldExpression.Value.IsString &&
@@ -308,10 +363,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
                     mapInputGetFieldExpression.Input is AstVarExpression mapInputGetFieldVarExpression &&
                     mapInputGetFieldVarExpression.Name == "ROOT")
                 {
-                    var root = AstExpression.Var("ROOT", isCurrent: true);
-                    var rewrittenArg = (AstExpression)AstNodeReplacer.Replace(node.In, (node.As, root));
+                    var rewrittenArg = (AstExpression)AstNodeReplacer.Replace(node.In, (node.As, _element));
                     var accumulatorExpression = AstExpression.UnaryAccumulator(AstUnaryAccumulatorOperator.Push, rewrittenArg);
                     var accumulatorFieldName = _accumulators.AddAccumulatorExpression(accumulatorExpression);
+                    var root = AstExpression.Var("ROOT", isCurrent: true);
                     return AstExpression.GetField(root, accumulatorFieldName);
                 }
 
@@ -321,7 +376,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
             public override AstNode VisitPickExpression(AstPickExpression node)
             {
                 // { $pickOperator : { source : { $getField : { input : "$$ROOT", field : "_elements" } }, as : "x", sortBy : s, selector : f(x) } }
-                // => { __agg0 : { $pickAccumulatorOperator : { sortBy : s, selector : f(x => root) } } } + "$__agg0"
+                // => { __agg0 : { $pickAccumulatorOperator : { sortBy : s, selector : f(x => element) } } } + "$__agg0"
                 if (node.Source is AstGetFieldExpression getFieldExpression &&
                     getFieldExpression.Input is AstVarExpression varExpression &&
                     varExpression.Name == "ROOT" &&
@@ -330,10 +385,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
                     constantFieldNameExpression.Value.AsString == "_elements")
                 {
                     var @operator = node.Operator.ToAccumulatorOperator();
-                    var root = AstExpression.Var("ROOT", isCurrent: true);
-                    var rewrittenSelector = (AstExpression)AstNodeReplacer.Replace(node.Selector, (node.As, root));
+                    var rewrittenSelector = (AstExpression)AstNodeReplacer.Replace(node.Selector, (node.As, _element));
                     var accumulatorExpression = new AstPickAccumulatorExpression(@operator, node.SortBy, rewrittenSelector, node.N);
                     var accumulatorFieldName = _accumulators.AddAccumulatorExpression(accumulatorExpression);
+                    var root = AstExpression.Var("ROOT", isCurrent: true);
                     return AstExpression.GetField(root, accumulatorFieldName);
                 }
 
@@ -384,7 +439,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 
                 bool TryOptimizeAccumulatorOfElements(out AstExpression optimizedExpression)
                 {
-                    // { $accumulator : { $getField : { input : "$$ROOT", field : "_elements" } } } => { __agg0 : { $accumulator : "$$ROOT" } } + "$__agg0"
+                    // { $accumulator : { $getField : { input : "$$ROOT", field : "_elements" } } } => { __agg0 : { $accumulator : element } } + "$__agg0"
                     if (node.Operator.IsAccumulator(out var accumulatorOperator) &&
                         node.Arg is AstGetFieldExpression getFieldExpression &&
                         getFieldExpression.FieldName is AstConstantExpression getFieldConstantFieldNameExpression &&
@@ -393,7 +448,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
                         getFieldExpression.Input is AstVarExpression getFieldInputVarExpression &&
                         getFieldInputVarExpression.Name == "ROOT")
                     {
-                        var accumulatorExpression = AstExpression.UnaryAccumulator(accumulatorOperator, root);
+                        var accumulatorExpression = AstExpression.UnaryAccumulator(accumulatorOperator, _element);
                         var accumulatorFieldName = _accumulators.AddAccumulatorExpression(accumulatorExpression);
                         optimizedExpression = AstExpression.GetField(root, accumulatorFieldName);
                         return true;
@@ -406,7 +461,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
 
                 bool TryOptimizeAccumulatorOfMappedElements(out AstExpression optimizedExpression)
                 {
-                    // { $accumulator : { $map : { input : { $getField : { input : "$$ROOT", field : "_elements" } }, as : "x", in : f(x) } } } => { __agg0 : { $accumulator : f(x => root) } } + "$__agg0"
+                    // { $accumulator : { $map : { input : { $getField : { input : "$$ROOT", field : "_elements" } }, as : "x", in : f(x) } } } => { __agg0 : { $accumulator : f(x => element) } } + "$__agg0"
                     if (node.Operator.IsAccumulator(out var accumulatorOperator) &&
                         node.Arg is AstMapExpression mapExpression &&
                         mapExpression.Input is AstGetFieldExpression mapInputGetFieldExpression &&
@@ -416,7 +471,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
                         mapInputGetFieldExpression.Input is AstVarExpression mapInputGetFieldVarExpression &&
                         mapInputGetFieldVarExpression.Name == "ROOT")
                     {
-                        var rewrittenArg = (AstExpression)AstNodeReplacer.Replace(mapExpression.In, (mapExpression.As, root));
+                        var rewrittenArg = (AstExpression)AstNodeReplacer.Replace(mapExpression.In, (mapExpression.As, _element));
                         var accumulatorExpression = AstExpression.UnaryAccumulator(accumulatorOperator, rewrittenArg);
                         var accumulatorFieldName = _accumulators.AddAccumulatorExpression(accumulatorExpression);
                         optimizedExpression = AstExpression.GetField(root, accumulatorFieldName);

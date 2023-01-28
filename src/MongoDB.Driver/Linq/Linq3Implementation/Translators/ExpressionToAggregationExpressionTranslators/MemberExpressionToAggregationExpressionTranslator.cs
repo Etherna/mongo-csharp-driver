@@ -25,7 +25,6 @@ using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators.PropertyTranslators;
-using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
 {
@@ -50,10 +49,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             if (containerTranslation.Serializer is IWrappedValueSerializer wrappedValueSerializer)
             {
                 var unwrappedValueAst = AstExpression.GetField(containerTranslation.Ast, wrappedValueSerializer.FieldName);
-                containerTranslation = new AggregationExpression(expression, unwrappedValueAst, wrappedValueSerializer.ValueSerializer);
+                containerTranslation = new AggregationExpression(containerExpression, unwrappedValueAst, wrappedValueSerializer.ValueSerializer);
             }
 
-            if (!DocumentSerializerHelper.HasFieldInfo(containerTranslation.Serializer, member.Name))
+            if (!DocumentSerializerHelper.HasMemberSerializationInfo(containerTranslation.Serializer, member.Name))
             {
                 if (member is PropertyInfo propertyInfo  && propertyInfo.Name == "Length")
                 {
@@ -71,9 +70,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 }
             }
 
-            var fieldInfo = DocumentSerializerHelper.GetFieldInfo(containerTranslation.Serializer, member.Name);
-            var ast = AstExpression.GetField(containerTranslation.Ast, fieldInfo.ElementName);
-            return new AggregationExpression(expression, ast, fieldInfo.Serializer);
+            var serializationInfo = DocumentSerializerHelper.GetMemberSerializationInfo(containerTranslation.Serializer, member.Name);
+            var ast = AstExpression.GetField(containerTranslation.Ast, serializationInfo.ElementName);
+            return new AggregationExpression(expression, ast, serializationInfo.Serializer);
         }
 
         private static bool TryTranslateCollectionCountProperty(MemberExpression expression, AggregationExpression container, MemberInfo memberInfo, out AggregationExpression result)
@@ -124,7 +123,6 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                         case "Minute": datePart = AstDatePart.Minute; break;
                         case "Month": datePart = AstDatePart.Month; break;
                         case "Second": datePart = AstDatePart.Second; break;
-                        case "Week": datePart = AstDatePart.Week; break;
                         case "Year": datePart = AstDatePart.Year; break;
                         default: return false;
                     }

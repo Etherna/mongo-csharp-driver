@@ -21,7 +21,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Linq;
 using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors;
 using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Pipeline;
 using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Translators;
@@ -44,7 +43,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
 
         public CollectionNamespace CollectionNamespace => _collection.CollectionNamespace;
 
-        public IBsonSerializer CollectionDocumentSerializer => _collection.DocumentSerializer;
+        public IBsonSerializer PipelineInputSerializer => _collection.DocumentSerializer;
 
         public IQueryable<TElement> CreateQuery<TElement>(Expression expression)
         {

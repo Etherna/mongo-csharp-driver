@@ -15,7 +15,6 @@
 
 using System;
 using System.Runtime.Serialization;
-using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver.Encryption
 {

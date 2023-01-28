@@ -49,7 +49,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var pipeline = ExpressionToPipelineTranslator.Translate(context, sourceExpression);
 
                 var predicateLambda = ExpressionHelper.UnquoteLambda(arguments[1]);
-                var predicateFilter = ExpressionToFilterTranslator.TranslateLambda(context, predicateLambda, parameterSerializer: pipeline.OutputSerializer);
+                var predicateFilter = ExpressionToFilterTranslator.TranslateLambda(context, predicateLambda, parameterSerializer: pipeline.OutputSerializer, asRoot: true);
 
                 pipeline = pipeline.AddStages(
                     __outputSerializer,
@@ -60,8 +60,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                         AstProject.Set("_v", BsonNull.Value)));
 
                 return ExecutableQuery.Create(
-                    provider.Collection,
-                    provider.Options,
+                    provider,
                     pipeline,
                     __finalizer);
             }

@@ -14,6 +14,7 @@
 */
 
 using System;
+using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
@@ -36,6 +37,25 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
             else
             {
                 throw new InvalidOperationException($"{serializer.GetType().FullName} must implement IBsonArraySerializer to be used with LINQ.");
+            }
+        }
+
+        public static IBsonSerializer GetItemSerializer(Expression expression, IBsonSerializer serializer)
+        {
+            if (serializer is IBsonArraySerializer arraySerializer)
+            {
+                if (arraySerializer.TryGetItemSerializationInfo(out var itemSerializationInfo))
+                {
+                    return itemSerializationInfo.Serializer;
+                }
+                else
+                {
+                    throw new ExpressionNotSupportedException(expression, because: $"{serializer.GetType().FullName}.TryGetItemSerializationInfo returned false");
+                }
+            }
+            else
+            {
+                throw new ExpressionNotSupportedException(expression, because: $"{serializer.GetType().FullName} must implement IBsonArraySerializer to be used with LINQ");
             }
         }
     }

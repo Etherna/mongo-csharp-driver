@@ -28,7 +28,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 var query = (IQueryable)((ConstantExpression)expression).Value;
                 var provider = (IMongoQueryProvider)query.Provider;
-                return AstPipeline.Empty(provider.CollectionDocumentSerializer);
+                return AstPipeline.Empty(provider.PipelineInputSerializer);
             }
 
             var methodCallExpression = (MethodCallExpression)expression;
@@ -40,6 +40,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     return DensifyMethodToPipelineTranslator.Translate(context, methodCallExpression);
                 case "Distinct":
                     return DistinctMethodToPipelineTranslator.Translate(context, methodCallExpression);
+                case "Documents":
+                    return DocumentsMethodToPipelineTranslator.Translate(context, methodCallExpression);
                 case "GroupBy":
                     return GroupByMethodToPipelineTranslator.Translate(context, methodCallExpression);
                 case "GroupJoin":

@@ -18,9 +18,11 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators;
+using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
 {
@@ -40,9 +42,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
         }
 
         // public properties
-        public abstract IBsonSerializer CollectionDocumentSerializer { get; }
         public abstract CollectionNamespace CollectionNamespace { get; }
         public AggregateOptions Options => _options;
+        public abstract IBsonSerializer PipelineInputSerializer { get; }
         public IClientSessionHandle Session => _session;
 
         // public methods
@@ -52,12 +54,15 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
         public abstract object Execute(Expression expression);
         public abstract TResult Execute<TResult>(Expression expression);
         public abstract Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken);
+        public abstract BsonDocument[] GetMostRecentPipelineStages();
     }
 
     internal sealed class MongoQueryProvider<TDocument> : MongoQueryProvider
     {
         // private fields
         private readonly IMongoCollection<TDocument> _collection;
+        private readonly IMongoDatabase _database;
+        private ExecutableQuery<TDocument> _mostRecentExecutableQuery;
 
         // constructors
         public MongoQueryProvider(
@@ -66,18 +71,30 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
             AggregateOptions options)
             : base(session, options)
         {
-            _collection = collection;
+            _collection = Ensure.IsNotNull(collection, nameof(collection));
+        }
+
+        public MongoQueryProvider(
+            IMongoDatabase database,
+            IClientSessionHandle session,
+            AggregateOptions options)
+            : base(session, options)
+        {
+            _database = Ensure.IsNotNull(database, nameof(database));
         }
 
         // public properties
         public IMongoCollection<TDocument> Collection => _collection;
-        public override CollectionNamespace CollectionNamespace => _collection.CollectionNamespace;
-        public override IBsonSerializer CollectionDocumentSerializer => _collection.DocumentSerializer;
+        public override CollectionNamespace CollectionNamespace => _collection == null ? null : _collection.CollectionNamespace;
+        public IMongoDatabase Database => _database;
+        public override IBsonSerializer PipelineInputSerializer => _collection == null ? NoPipelineInputSerializer.Instance : _collection.DocumentSerializer;
 
         // public methods
         public override IQueryable CreateQuery(Expression expression)
         {
-            throw new NotImplementedException();
+            var outputType = expression.Type.GetSequenceElementType();
+            var queryType = typeof(MongoQuery<,>).MakeGenericType(typeof(TDocument), outputType);
+            return (IQueryable)Activator.CreateInstance(queryType, new object[] { this, expression });
         }
 
         public override IQueryable<TOutput> CreateQuery<TOutput>(Expression expression)
@@ -98,13 +115,22 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
         public override TResult Execute<TResult>(Expression expression)
         {
             var executableQuery = ExpressionToExecutableQueryTranslator.TranslateScalar<TDocument, TResult>(this, expression);
+            _mostRecentExecutableQuery = executableQuery;
             return executableQuery.Execute(_session, CancellationToken.None);
         }
 
         public override Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
         {
             var executableQuery = ExpressionToExecutableQueryTranslator.TranslateScalar<TDocument, TResult>(this, expression);
+            _mostRecentExecutableQuery = executableQuery;
             return executableQuery.ExecuteAsync(_session, cancellationToken);
+        }
+
+        public override BsonDocument[] GetMostRecentPipelineStages()
+        {
+            var pipeline = _mostRecentExecutableQuery.Pipeline;
+            var renderedPipeline = (BsonArray)pipeline.Render();
+            return renderedPipeline.Cast<BsonDocument>().ToArray();
         }
     }
 }
