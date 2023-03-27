@@ -75,6 +75,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast
         GetFieldExpression,
         GraphLookupStage,
         GroupStage,
+        ImpliedOperationFilterOperation,
         IndexOfArrayExpression,
         IndexOfBytesExpression,
         IndexOfCPExpression,

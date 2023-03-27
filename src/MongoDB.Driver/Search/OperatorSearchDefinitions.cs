@@ -64,8 +64,9 @@ namespace Etherna.MongoDB.Driver.Search
             List<SearchDefinition<TDocument>> mustNot,
             List<SearchDefinition<TDocument>> should,
             List<SearchDefinition<TDocument>> filter,
-            int minimumShouldMatch)
-                : base(OperatorType.Compound)
+            int minimumShouldMatch,
+            SearchScoreDefinition<TDocument> score)
+                : base(OperatorType.Compound, score)
         {
             // This constructor should always be called from the compound search definition builder that ensures the arguments are valid.
             _must = must;
@@ -91,18 +92,37 @@ namespace Etherna.MongoDB.Driver.Search
         }
     }
 
-    internal sealed class EqualsSearchDefinition<TDocument> : OperatorSearchDefinition<TDocument>
+    internal sealed class EqualsSearchDefinition<TDocument, TField> : OperatorSearchDefinition<TDocument>
     {
         private readonly BsonValue _value;
 
-        public EqualsSearchDefinition(FieldDefinition<TDocument> path, BsonValue value, SearchScoreDefinition<TDocument> score)
+        public EqualsSearchDefinition(FieldDefinition<TDocument> path, TField value, SearchScoreDefinition<TDocument> score)
             : base(OperatorType.Equals, path, score)
         {
-            _value = value;
+            _value = ToBsonValue(value);
         }
 
         private protected override BsonDocument RenderArguments(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry) =>
             new("value", _value);
+
+        private static BsonValue ToBsonValue(TField value) =>
+            value switch
+            {
+                bool v => (BsonBoolean)v,
+                sbyte v => (BsonInt32)v,
+                byte v => (BsonInt32)v,
+                short v => (BsonInt32)v,
+                ushort v => (BsonInt32)v,
+                int v => (BsonInt32)v,
+                uint v => (BsonInt64)v,
+                long v => (BsonInt64)v,
+                float v => (BsonDouble)v,
+                double v => (BsonDouble)v,
+                DateTime v => (BsonDateTime)v,
+                DateTimeOffset v => (BsonDateTime)v.UtcDateTime,
+                ObjectId v => (BsonObjectId)v,
+                _ => throw new InvalidCastException()
+            };
     }
 
     internal sealed class ExistsSearchDefinition<TDocument> : OperatorSearchDefinition<TDocument>
@@ -271,6 +291,8 @@ namespace Etherna.MongoDB.Driver.Search
         where TField : struct, IComparable<TField>
     {
         private readonly SearchRange<TField> _range;
+        private readonly BsonValue _min;
+        private readonly BsonValue _max;
 
         public RangeSearchDefinition(
             SearchPathDefinition<TDocument> path,
@@ -279,16 +301,18 @@ namespace Etherna.MongoDB.Driver.Search
                 : base(OperatorType.Range, path, score)
         {
             _range = range;
+            _min = ToBsonValue(_range.Min);
+            _max = ToBsonValue(_range.Max);
         }
 
         private protected override BsonDocument RenderArguments(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry) =>
             new()
             {
-                { _range.IsMinInclusive ? "gte" : "gt", () => ToBsonValue(_range.Min.Value), _range.Min != null },
-                { _range.IsMaxInclusive ? "lte" : "lt", () => ToBsonValue(_range.Max.Value), _range.Max != null },
+                { _range.IsMinInclusive ? "gte" : "gt", _min, _min != null },
+                { _range.IsMaxInclusive ? "lte" : "lt", _max, _max != null },
             };
 
-        private static BsonValue ToBsonValue(TField value) =>
+        private static BsonValue ToBsonValue(TField? value) =>
             value switch
             {
                 sbyte v => (BsonInt32)v,
@@ -296,11 +320,13 @@ namespace Etherna.MongoDB.Driver.Search
                 short v => (BsonInt32)v,
                 ushort v => (BsonInt32)v,
                 int v => (BsonInt32)v,
-                uint v => (BsonInt32)v,
+                uint v => (BsonInt64)v,
                 long v => (BsonInt64)v,
                 float v => (BsonDouble)v,
                 double v => (BsonDouble)v,
                 DateTime v => (BsonDateTime)v,
+                DateTimeOffset v => (BsonDateTime)v.UtcDateTime,
+                null => null,
                 _ => throw new InvalidCastException()
             };
     }

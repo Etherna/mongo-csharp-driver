@@ -191,6 +191,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
             return new AstComputedArrayExpression(items);
         }
 
+        public static AstExpression ComputedArray(params AstExpression[] items)
+        {
+            return ComputedArray((IEnumerable<AstExpression>)items);
+        }
+
         public static AstExpression ComputedDocument(IEnumerable<AstComputedField> fields)
         {
             return new AstComputedDocumentExpression(fields);
@@ -845,6 +850,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
         public static AstExpression Trunc(AstExpression arg)
         {
             return new AstUnaryExpression(AstUnaryOperator.Trunc, arg);
+        }
+
+        public static AstExpression Type(AstExpression arg)
+        {
+            return new AstUnaryExpression(AstUnaryOperator.Type, arg);
         }
 
         public static AstExpression Unary(AstUnaryOperator @operator, AstExpression arg)

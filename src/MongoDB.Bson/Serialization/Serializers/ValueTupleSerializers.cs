@@ -16,113 +16,74 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
+using Etherna.MongoDB.Bson.IO;
 
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>
-    /// An interface implemented by tuple serializers.
+    /// A factory class for ValueTupleSerializers.
     /// </summary>
-    public interface IBsonTupleSerializer
+    public static class ValueTupleSerializer
     {
         /// <summary>
-        /// Gets ths serializer for an item.
-        /// </summary>
-        /// <param name="itemNumber">The item number.</param>
-        /// <returns>The serializer for the item.</returns>
-        IBsonSerializer GetItemSerializer(int itemNumber);
-    }
-
-    /// <summary>
-    /// A factory class for TupleSerializers.
-    /// </summary>
-    public static class TupleSerializer
-    {
-        /// <summary>
-        /// Creates a TupleSerializer.
+        /// Creates a ValueTupleSerializer.
         /// </summary>
         /// <param name="itemSerializers">The item serializers.</param>
-        /// <returns>A TupleSerializer.</returns>
+        /// <returns>A ValueTupleSerializer.</returns>
         public static IBsonSerializer Create(IEnumerable<IBsonSerializer> itemSerializers)
         {
             var itemSerializersArray = itemSerializers.ToArray();
-            var tupleSerializerType = CreateTupleSerializerType(itemSerializersArray);
-            return (IBsonSerializer)Activator.CreateInstance(tupleSerializerType, itemSerializersArray);
+            var valueTupleSerializerType = CreateValueTupleSerializerType(itemSerializersArray);
+            return (IBsonSerializer)Activator.CreateInstance(valueTupleSerializerType, itemSerializersArray);
 
-            static Type CreateTupleSerializerType(IBsonSerializer[] itemSerializersArray)
+            static Type CreateValueTupleSerializerType(IBsonSerializer[] itemSerializersArray)
             {
                 var itemTypes = itemSerializersArray.Select(s => s.ValueType).ToArray();
-                var tupleSerializerTypeDefinition = CreateTupleSerializerTypeDefinition(itemTypes.Length);
-                return tupleSerializerTypeDefinition.MakeGenericType(itemTypes);
+                var valueTupleSerializerTypeDefinition = CreateValueTupleSerializerTypeDefinition(itemTypes.Length);
+                return valueTupleSerializerTypeDefinition.MakeGenericType(itemTypes);
             }
 
-            static Type CreateTupleSerializerTypeDefinition(int itemCount)
+            static Type CreateValueTupleSerializerTypeDefinition(int itemCount)
             {
                 return itemCount switch
                 {
-                    1 => typeof(TupleSerializer<>),
-                    2 => typeof(TupleSerializer<,>),
-                    3 => typeof(TupleSerializer<,,>),
-                    4 => typeof(TupleSerializer<,,,>),
-                    5 => typeof(TupleSerializer<,,,,>),
-                    6 => typeof(TupleSerializer<,,,,,>),
-                    7 => typeof(TupleSerializer<,,,,,,>),
-                    8 => typeof(TupleSerializer<,,,,,,,>),
-                    _ => throw new Exception($"Invalid number of Tuple items : {itemCount}.")
+                    1 => typeof(ValueTupleSerializer<>),
+                    2 => typeof(ValueTupleSerializer<,>),
+                    3 => typeof(ValueTupleSerializer<,,>),
+                    4 => typeof(ValueTupleSerializer<,,,>),
+                    5 => typeof(ValueTupleSerializer<,,,,>),
+                    6 => typeof(ValueTupleSerializer<,,,,,>),
+                    7 => typeof(ValueTupleSerializer<,,,,,,>),
+                    8 => typeof(ValueTupleSerializer<,,,,,,,>),
+                    _ => throw new Exception($"Invalid number of ValueTuple items : {itemCount}.")
                 };
             }
-        }
-
-        /// <summary>
-        /// Tries to parse an item name to an item number.
-        /// </summary>
-        /// <param name="itemName">The item name.</param>
-        /// <param name="itemNumber">The item number.</param>
-        /// <returns>True if the item name was valid.</returns>
-        public static bool TryParseItemName(string itemName, out int itemNumber)
-        {
-            if (itemName == "Rest")
-            {
-                itemNumber = 8;
-                return true;
-            }
-
-            var match = Regex.Match(itemName, @"^Item(\d+)$");
-            if (match.Success)
-            {
-                var itemNumberString = match.Groups[1].Value;
-                itemNumber = int.Parse(itemNumberString);
-                return true;
-            }
-
-            itemNumber = default;
-            return false;
         }
     }
 
     /// <summary>
-    /// Represents a serializer for a <see cref="Tuple{T1}"/>.
+    /// Represents a serializer for a <see cref="ValueTuple{T1}"/>.
     /// </summary>
     /// <typeparam name="T1">The type of item 1.</typeparam>
-    public class TupleSerializer<T1> : SealedClassSerializerBase<Tuple<T1>>, IBsonTupleSerializer
+    public sealed class ValueTupleSerializer<T1> : StructSerializerBase<ValueTuple<T1>>, IBsonTupleSerializer
     {
         // private fields
         private readonly Lazy<IBsonSerializer<T1>> _lazyItem1Serializer;
 
         // constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1}"/> class.
         /// </summary>
-        public TupleSerializer()
+        public ValueTupleSerializer()
             : this(BsonSerializer.SerializerRegistry)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1}"/> class.
         /// </summary>
         /// <param name="item1Serializer">The Item1 serializer.</param>
-        public TupleSerializer(
+        public ValueTupleSerializer(
             IBsonSerializer<T1> item1Serializer)
         {
             if (item1Serializer == null) { throw new ArgumentNullException(nameof(item1Serializer)); }
@@ -131,10 +92,10 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1}" /> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1}" /> class.
         /// </summary>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        public TupleSerializer(IBsonSerializerRegistry serializerRegistry)
+        public ValueTupleSerializer(IBsonSerializerRegistry serializerRegistry)
         {
             if (serializerRegistry == null) { throw new ArgumentNullException(nameof(serializerRegistry)); }
 
@@ -149,13 +110,38 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // public methods
         /// <inheritdoc/>
-        protected override Tuple<T1> DeserializeValue(BsonDeserializationContext context, BsonDeserializationArgs args)
+        public override ValueTuple<T1> Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            context.Reader.ReadStartArray();
-            var item1 = _lazyItem1Serializer.Value.Deserialize(context);
-            context.Reader.ReadEndArray();
+            var reader = context.Reader;
 
-            return new Tuple<T1>(item1);
+            T1 item1 = default;
+            switch (reader.GetCurrentBsonType())
+            {
+                case BsonType.Array:
+                    reader.ReadStartArray();
+                    item1 = _lazyItem1Serializer.Value.Deserialize(context);
+                    reader.ReadEndArray();
+                    break;
+
+                case BsonType.Document:
+                    reader.ReadStartDocument();
+                    while (reader.ReadBsonType() != BsonType.EndOfDocument)
+                    {
+                        var name = reader.ReadName();
+                        switch (name)
+                        {
+                            case "Item1": item1 = _lazyItem1Serializer.Value.Deserialize(context); break;
+                            default: throw new BsonSerializationException($"Invalid element {name} found while deserializing a ValueTuple.");
+                        }
+                    }
+                    reader.ReadEndDocument();
+                    break;
+
+                default:
+                    throw new BsonSerializationException($"Cannot deserialize a ValueTuple when BsonType is: {reader.CurrentBsonType}.");
+            }
+
+            return new ValueTuple<T1>(item1);
         }
 
         /// <inheritdoc/>
@@ -169,7 +155,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <inheritdoc/>
-        protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, Tuple<T1> value)
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, ValueTuple<T1> value)
         {
             context.Writer.WriteStartArray();
             _lazyItem1Serializer.Value.Serialize(context, value.Item1);
@@ -178,11 +164,11 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     }
 
     /// <summary>
-    /// Represents a serializer for a <see cref="Tuple{T1, T2}"/>.
+    /// Represents a serializer for a <see cref="ValueTuple{T1, T2}"/>.
     /// </summary>
     /// <typeparam name="T1">The type of item 1.</typeparam>
     /// <typeparam name="T2">The type of item 2.</typeparam>
-    public class TupleSerializer<T1, T2> : SealedClassSerializerBase<Tuple<T1, T2>>, IBsonTupleSerializer
+    public sealed class ValueTupleSerializer<T1, T2> : StructSerializerBase<ValueTuple<T1, T2>>, IBsonTupleSerializer
     {
         // private fields
         private readonly Lazy<IBsonSerializer<T1>> _lazyItem1Serializer;
@@ -190,19 +176,19 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2}"/> class.
         /// </summary>
-        public TupleSerializer()
+        public ValueTupleSerializer()
             : this(BsonSerializer.SerializerRegistry)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2}"/> class.
         /// </summary>
         /// <param name="item1Serializer">The Item1 serializer.</param>
         /// <param name="item2Serializer">The Item2 serializer.</param>
-        public TupleSerializer(
+        public ValueTupleSerializer(
             IBsonSerializer<T1> item1Serializer,
             IBsonSerializer<T2> item2Serializer)
         {
@@ -214,12 +200,12 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2}" /> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2}" /> class.
         /// </summary>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        public TupleSerializer(IBsonSerializerRegistry serializerRegistry)
+        public ValueTupleSerializer(IBsonSerializerRegistry serializerRegistry)
         {
-            if (serializerRegistry == null) { throw new ArgumentNullException("serializerRegistry"); }
+            if (serializerRegistry == null) { throw new ArgumentNullException(nameof(serializerRegistry)); }
 
             _lazyItem1Serializer = new Lazy<IBsonSerializer<T1>>(() => serializerRegistry.GetSerializer<T1>());
             _lazyItem2Serializer = new Lazy<IBsonSerializer<T2>>(() => serializerRegistry.GetSerializer<T2>());
@@ -238,14 +224,41 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // public methods
         /// <inheritdoc/>
-        protected override Tuple<T1, T2> DeserializeValue(BsonDeserializationContext context, BsonDeserializationArgs args)
+        public override ValueTuple<T1, T2> Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            context.Reader.ReadStartArray();
-            var item1 = _lazyItem1Serializer.Value.Deserialize(context);
-            var item2 = _lazyItem2Serializer.Value.Deserialize(context);
-            context.Reader.ReadEndArray();
+            var reader = context.Reader;
 
-            return new Tuple<T1, T2>(item1, item2);
+            T1 item1 = default;
+            T2 item2 = default;
+            switch (reader.GetCurrentBsonType())
+            {
+                case BsonType.Array:
+                    reader.ReadStartArray();
+                    item1 = _lazyItem1Serializer.Value.Deserialize(context);
+                    item2 = _lazyItem2Serializer.Value.Deserialize(context);
+                    reader.ReadEndArray();
+                    break;
+
+                case BsonType.Document:
+                    reader.ReadStartDocument();
+                    while (reader.ReadBsonType() != BsonType.EndOfDocument)
+                    {
+                        var name = reader.ReadName();
+                        switch (name)
+                        {
+                            case "Item1": item1 = _lazyItem1Serializer.Value.Deserialize(context); break;
+                            case "Item2": item2 = _lazyItem2Serializer.Value.Deserialize(context); break;
+                            default: throw new BsonSerializationException($"Invalid element {name} found while deserializing a ValueTuple.");
+                        }
+                    }
+                    reader.ReadEndDocument();
+                    break;
+
+                default:
+                    throw new BsonSerializationException($"Cannot deserialize a ValueTuple when BsonType is: {reader.CurrentBsonType}.");
+            }
+
+            return new ValueTuple<T1, T2>(item1, item2);
         }
 
         /// <inheritdoc/>
@@ -260,7 +273,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <inheritdoc/>
-        protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, Tuple<T1, T2> value)
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, ValueTuple<T1, T2> value)
         {
             context.Writer.WriteStartArray();
             _lazyItem1Serializer.Value.Serialize(context, value.Item1);
@@ -270,12 +283,12 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     }
 
     /// <summary>
-    /// Represents a serializer for a <see cref="Tuple{T1, T2, T3}"/>.
+    /// Represents a serializer for a <see cref="ValueTuple{T1, T2, T3}"/>.
     /// </summary>
     /// <typeparam name="T1">The type of item 1.</typeparam>
     /// <typeparam name="T2">The type of item 2.</typeparam>
     /// <typeparam name="T3">The type of item 3.</typeparam>
-    public class TupleSerializer<T1, T2, T3> : SealedClassSerializerBase<Tuple<T1, T2, T3>>, IBsonTupleSerializer
+    public sealed class ValueTupleSerializer<T1, T2, T3> : StructSerializerBase<ValueTuple<T1, T2, T3>>, IBsonTupleSerializer
     {
         // private fields
         private readonly Lazy<IBsonSerializer<T1>> _lazyItem1Serializer;
@@ -284,20 +297,20 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3}"/> class.
         /// </summary>
-        public TupleSerializer()
+        public ValueTupleSerializer()
             : this(BsonSerializer.SerializerRegistry)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3}"/> class.
         /// </summary>
         /// <param name="item1Serializer">The Item1 serializer.</param>
         /// <param name="item2Serializer">The Item2 serializer.</param>
         /// <param name="item3Serializer">The Item3 serializer.</param>
-        public TupleSerializer(
+        public ValueTupleSerializer(
             IBsonSerializer<T1> item1Serializer,
             IBsonSerializer<T2> item2Serializer,
             IBsonSerializer<T3> item3Serializer)
@@ -312,10 +325,10 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3}" /> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3}" /> class.
         /// </summary>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        public TupleSerializer(IBsonSerializerRegistry serializerRegistry)
+        public ValueTupleSerializer(IBsonSerializerRegistry serializerRegistry)
         {
             if (serializerRegistry == null) { throw new ArgumentNullException(nameof(serializerRegistry)); }
 
@@ -342,15 +355,44 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // public methods
         /// <inheritdoc/>
-        protected override Tuple<T1, T2, T3> DeserializeValue(BsonDeserializationContext context, BsonDeserializationArgs args)
+        public override ValueTuple<T1, T2, T3> Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            context.Reader.ReadStartArray();
-            var item1 = _lazyItem1Serializer.Value.Deserialize(context);
-            var item2 = _lazyItem2Serializer.Value.Deserialize(context);
-            var item3 = _lazyItem3Serializer.Value.Deserialize(context);
-            context.Reader.ReadEndArray();
+            var reader = context.Reader;
 
-            return new Tuple<T1, T2, T3>(item1, item2, item3);
+            T1 item1 = default;
+            T2 item2 = default;
+            T3 item3 = default;
+            switch (reader.GetCurrentBsonType())
+            {
+                case BsonType.Array:
+                    reader.ReadStartArray();
+                    item1 = _lazyItem1Serializer.Value.Deserialize(context);
+                    item2 = _lazyItem2Serializer.Value.Deserialize(context);
+                    item3 = _lazyItem3Serializer.Value.Deserialize(context);
+                    reader.ReadEndArray();
+                    break;
+
+                case BsonType.Document:
+                    reader.ReadStartDocument();
+                    while (reader.ReadBsonType() != BsonType.EndOfDocument)
+                    {
+                        var name = reader.ReadName();
+                        switch (name)
+                        {
+                            case "Item1": item1 = _lazyItem1Serializer.Value.Deserialize(context); break;
+                            case "Item2": item2 = _lazyItem2Serializer.Value.Deserialize(context); break;
+                            case "Item3": item3 = _lazyItem3Serializer.Value.Deserialize(context); break;
+                            default: throw new BsonSerializationException($"Invalid element {name} found while deserializing a ValueTuple.");
+                        }
+                    }
+                    reader.ReadEndDocument();
+                    break;
+
+                default:
+                    throw new BsonSerializationException($"Cannot deserialize a ValueTuple when BsonType is: {reader.CurrentBsonType}.");
+            }
+
+            return new ValueTuple<T1, T2, T3>(item1, item2, item3);
         }
 
         /// <inheritdoc/>
@@ -366,7 +408,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <inheritdoc/>
-        protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, Tuple<T1, T2, T3> value)
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, ValueTuple<T1, T2, T3> value)
         {
             context.Writer.WriteStartArray();
             _lazyItem1Serializer.Value.Serialize(context, value.Item1);
@@ -377,13 +419,13 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     }
 
     /// <summary>
-    /// Represents a serializer for a <see cref="Tuple{T1, T2, T3, T4}"/>.
+    /// Represents a serializer for a <see cref="ValueTuple{T1, T2, T3, T4}"/>.
     /// </summary>
     /// <typeparam name="T1">The type of item 1.</typeparam>
     /// <typeparam name="T2">The type of item 2.</typeparam>
     /// <typeparam name="T3">The type of item 3.</typeparam>
     /// <typeparam name="T4">The type of item 4.</typeparam>
-    public class TupleSerializer<T1, T2, T3, T4> : SealedClassSerializerBase<Tuple<T1, T2, T3, T4>>, IBsonTupleSerializer
+    public sealed class ValueTupleSerializer<T1, T2, T3, T4> : StructSerializerBase<ValueTuple<T1, T2, T3, T4>>, IBsonTupleSerializer
     {
         // private fields
         private readonly Lazy<IBsonSerializer<T1>> _lazyItem1Serializer;
@@ -393,21 +435,21 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4}"/> class.
         /// </summary>
-        public TupleSerializer()
+        public ValueTupleSerializer()
             : this(BsonSerializer.SerializerRegistry)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4}"/> class.
         /// </summary>
         /// <param name="item1Serializer">The Item1 serializer.</param>
         /// <param name="item2Serializer">The Item2 serializer.</param>
         /// <param name="item3Serializer">The Item3 serializer.</param>
         /// <param name="item4Serializer">The Item4 serializer.</param>
-        public TupleSerializer(
+        public ValueTupleSerializer(
             IBsonSerializer<T1> item1Serializer,
             IBsonSerializer<T2> item2Serializer,
             IBsonSerializer<T3> item3Serializer,
@@ -425,10 +467,10 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4}" /> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4}" /> class.
         /// </summary>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        public TupleSerializer(IBsonSerializerRegistry serializerRegistry)
+        public ValueTupleSerializer(IBsonSerializerRegistry serializerRegistry)
         {
             if (serializerRegistry == null) { throw new ArgumentNullException(nameof(serializerRegistry)); }
 
@@ -461,16 +503,47 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // public methods
         /// <inheritdoc/>
-        protected override Tuple<T1, T2, T3, T4> DeserializeValue(BsonDeserializationContext context, BsonDeserializationArgs args)
+        public override ValueTuple<T1, T2, T3, T4> Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            context.Reader.ReadStartArray();
-            var item1 = _lazyItem1Serializer.Value.Deserialize(context);
-            var item2 = _lazyItem2Serializer.Value.Deserialize(context);
-            var item3 = _lazyItem3Serializer.Value.Deserialize(context);
-            var item4 = _lazyItem4Serializer.Value.Deserialize(context);
-            context.Reader.ReadEndArray();
+            var reader = context.Reader;
 
-            return new Tuple<T1, T2, T3, T4>(item1, item2, item3, item4);
+            T1 item1 = default;
+            T2 item2 = default;
+            T3 item3 = default;
+            T4 item4 = default;
+            switch (reader.GetCurrentBsonType())
+            {
+                case BsonType.Array:
+                    reader.ReadStartArray();
+                    item1 = _lazyItem1Serializer.Value.Deserialize(context);
+                    item2 = _lazyItem2Serializer.Value.Deserialize(context);
+                    item3 = _lazyItem3Serializer.Value.Deserialize(context);
+                    item4 = _lazyItem4Serializer.Value.Deserialize(context);
+                    reader.ReadEndArray();
+                    break;
+
+                case BsonType.Document:
+                    reader.ReadStartDocument();
+                    while (reader.ReadBsonType() != BsonType.EndOfDocument)
+                    {
+                        var name = reader.ReadName();
+                        switch (name)
+                        {
+                            case "Item1": item1 = _lazyItem1Serializer.Value.Deserialize(context); break;
+                            case "Item2": item2 = _lazyItem2Serializer.Value.Deserialize(context); break;
+                            case "Item3": item3 = _lazyItem3Serializer.Value.Deserialize(context); break;
+                            case "Item4": item4 = _lazyItem4Serializer.Value.Deserialize(context); break;
+                            default: throw new BsonSerializationException($"Invalid element {name} found while deserializing a ValueTuple.");
+                        }
+                    }
+                    reader.ReadEndDocument();
+                    break;
+
+                default:
+                    throw new BsonSerializationException($"Cannot deserialize a ValueTuple when BsonType is: {reader.CurrentBsonType}.");
+            }
+
+            return new ValueTuple<T1, T2, T3, T4>(item1, item2, item3, item4);
         }
 
         /// <inheritdoc/>
@@ -487,7 +560,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <inheritdoc/>
-        protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, Tuple<T1, T2, T3, T4> value)
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, ValueTuple<T1, T2, T3, T4> value)
         {
             context.Writer.WriteStartArray();
             _lazyItem1Serializer.Value.Serialize(context, value.Item1);
@@ -499,14 +572,14 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     }
 
     /// <summary>
-    /// Represents a serializer for a <see cref="Tuple{T1, T2, T3, T4, T5}"/>.
+    /// Represents a serializer for a <see cref="ValueTuple{T1, T2, T3, T4, T5}"/>.
     /// </summary>
     /// <typeparam name="T1">The type of item 1.</typeparam>
     /// <typeparam name="T2">The type of item 2.</typeparam>
     /// <typeparam name="T3">The type of item 3.</typeparam>
     /// <typeparam name="T4">The type of item 4.</typeparam>
     /// <typeparam name="T5">The type of item 5.</typeparam>
-    public class TupleSerializer<T1, T2, T3, T4, T5> : SealedClassSerializerBase<Tuple<T1, T2, T3, T4, T5>>, IBsonTupleSerializer
+    public sealed class ValueTupleSerializer<T1, T2, T3, T4, T5> : StructSerializerBase<ValueTuple<T1, T2, T3, T4, T5>>, IBsonTupleSerializer
     {
         // private fields
         private readonly Lazy<IBsonSerializer<T1>> _lazyItem1Serializer;
@@ -517,22 +590,22 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5}"/> class.
         /// </summary>
-        public TupleSerializer()
+        public ValueTupleSerializer()
             : this(BsonSerializer.SerializerRegistry)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5}"/> class.
         /// </summary>
         /// <param name="item1Serializer">The Item1 serializer.</param>
         /// <param name="item2Serializer">The Item2 serializer.</param>
         /// <param name="item3Serializer">The Item3 serializer.</param>
         /// <param name="item4Serializer">The Item4 serializer.</param>
         /// <param name="item5Serializer">The Item5 serializer.</param>
-        public TupleSerializer(
+        public ValueTupleSerializer(
             IBsonSerializer<T1> item1Serializer,
             IBsonSerializer<T2> item2Serializer,
             IBsonSerializer<T3> item3Serializer,
@@ -553,10 +626,10 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5}" /> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5}" /> class.
         /// </summary>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        public TupleSerializer(IBsonSerializerRegistry serializerRegistry)
+        public ValueTupleSerializer(IBsonSerializerRegistry serializerRegistry)
         {
             if (serializerRegistry == null) { throw new ArgumentNullException(nameof(serializerRegistry)); }
 
@@ -595,17 +668,50 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // public methods
         /// <inheritdoc/>
-        protected override Tuple<T1, T2, T3, T4, T5> DeserializeValue(BsonDeserializationContext context, BsonDeserializationArgs args)
+        public override ValueTuple<T1, T2, T3, T4, T5> Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            context.Reader.ReadStartArray();
-            var item1 = _lazyItem1Serializer.Value.Deserialize(context);
-            var item2 = _lazyItem2Serializer.Value.Deserialize(context);
-            var item3 = _lazyItem3Serializer.Value.Deserialize(context);
-            var item4 = _lazyItem4Serializer.Value.Deserialize(context);
-            var item5 = _lazyItem5Serializer.Value.Deserialize(context);
-            context.Reader.ReadEndArray();
+            var reader = context.Reader;
 
-            return new Tuple<T1, T2, T3, T4, T5>(item1, item2, item3, item4, item5);
+            T1 item1 = default;
+            T2 item2 = default;
+            T3 item3 = default;
+            T4 item4 = default;
+            T5 item5 = default;
+            switch (reader.GetCurrentBsonType())
+            {
+                case BsonType.Array:
+                    reader.ReadStartArray();
+                    item1 = _lazyItem1Serializer.Value.Deserialize(context);
+                    item2 = _lazyItem2Serializer.Value.Deserialize(context);
+                    item3 = _lazyItem3Serializer.Value.Deserialize(context);
+                    item4 = _lazyItem4Serializer.Value.Deserialize(context);
+                    item5 = _lazyItem5Serializer.Value.Deserialize(context);
+                    reader.ReadEndArray();
+                    break;
+
+                case BsonType.Document:
+                    reader.ReadStartDocument();
+                    while (reader.ReadBsonType() != BsonType.EndOfDocument)
+                    {
+                        var name = reader.ReadName();
+                        switch (name)
+                        {
+                            case "Item1": item1 = _lazyItem1Serializer.Value.Deserialize(context); break;
+                            case "Item2": item2 = _lazyItem2Serializer.Value.Deserialize(context); break;
+                            case "Item3": item3 = _lazyItem3Serializer.Value.Deserialize(context); break;
+                            case "Item4": item4 = _lazyItem4Serializer.Value.Deserialize(context); break;
+                            case "Item5": item5 = _lazyItem5Serializer.Value.Deserialize(context); break;
+                            default: throw new BsonSerializationException($"Invalid element {name} found while deserializing a ValueTuple.");
+                        }
+                    }
+                    reader.ReadEndDocument();
+                    break;
+
+                default:
+                    throw new BsonSerializationException($"Cannot deserialize a ValueTuple when BsonType is: {reader.CurrentBsonType}.");
+            }
+
+            return new ValueTuple<T1, T2, T3, T4, T5>(item1, item2, item3, item4, item5);
         }
 
         /// <inheritdoc/>
@@ -623,7 +729,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <inheritdoc/>
-        protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, Tuple<T1, T2, T3, T4, T5> value)
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, ValueTuple<T1, T2, T3, T4, T5> value)
         {
             context.Writer.WriteStartArray();
             _lazyItem1Serializer.Value.Serialize(context, value.Item1);
@@ -636,7 +742,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     }
 
     /// <summary>
-    /// Represents a serializer for a <see cref="Tuple{T1, T2, T3, T4, T5, T6}"/>.
+    /// Represents a serializer for a <see cref="ValueTuple{T1, T2, T3, T4, T5, T6}"/>.
     /// </summary>
     /// <typeparam name="T1">The type of item 1.</typeparam>
     /// <typeparam name="T2">The type of item 2.</typeparam>
@@ -644,7 +750,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     /// <typeparam name="T4">The type of item 4.</typeparam>
     /// <typeparam name="T5">The type of item 5.</typeparam>
     /// <typeparam name="T6">The type of item 6.</typeparam>
-    public class TupleSerializer<T1, T2, T3, T4, T5, T6> : SealedClassSerializerBase<Tuple<T1, T2, T3, T4, T5, T6>>, IBsonTupleSerializer
+    public sealed class ValueTupleSerializer<T1, T2, T3, T4, T5, T6> : StructSerializerBase<ValueTuple<T1, T2, T3, T4, T5, T6>>, IBsonTupleSerializer
     {
         // private fields
         private readonly Lazy<IBsonSerializer<T1>> _lazyItem1Serializer;
@@ -656,15 +762,15 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5, T6}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5, T6}"/> class.
         /// </summary>
-        public TupleSerializer()
+        public ValueTupleSerializer()
             : this(BsonSerializer.SerializerRegistry)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5, T6}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5, T6}"/> class.
         /// </summary>
         /// <param name="item1Serializer">The Item1 serializer.</param>
         /// <param name="item2Serializer">The Item2 serializer.</param>
@@ -672,7 +778,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// <param name="item4Serializer">The Item4 serializer.</param>
         /// <param name="item5Serializer">The Item5 serializer.</param>
         /// <param name="item6Serializer">The Item6 serializer.</param>
-        public TupleSerializer(
+        public ValueTupleSerializer(
             IBsonSerializer<T1> item1Serializer,
             IBsonSerializer<T2> item2Serializer,
             IBsonSerializer<T3> item3Serializer,
@@ -696,12 +802,12 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5, T6}" /> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5, T6}" /> class.
         /// </summary>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        public TupleSerializer(IBsonSerializerRegistry serializerRegistry)
+        public ValueTupleSerializer(IBsonSerializerRegistry serializerRegistry)
         {
-            if (serializerRegistry == null) { throw new ArgumentNullException("serializerRegistry"); }
+            if (serializerRegistry == null) { throw new ArgumentNullException(nameof(serializerRegistry)); }
 
             _lazyItem1Serializer = new Lazy<IBsonSerializer<T1>>(() => serializerRegistry.GetSerializer<T1>());
             _lazyItem2Serializer = new Lazy<IBsonSerializer<T2>>(() => serializerRegistry.GetSerializer<T2>());
@@ -744,18 +850,53 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // public methods
         /// <inheritdoc/>
-        protected override Tuple<T1, T2, T3, T4, T5, T6> DeserializeValue(BsonDeserializationContext context, BsonDeserializationArgs args)
+        public override ValueTuple<T1, T2, T3, T4, T5, T6> Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            context.Reader.ReadStartArray();
-            var item1 = _lazyItem1Serializer.Value.Deserialize(context);
-            var item2 = _lazyItem2Serializer.Value.Deserialize(context);
-            var item3 = _lazyItem3Serializer.Value.Deserialize(context);
-            var item4 = _lazyItem4Serializer.Value.Deserialize(context);
-            var item5 = _lazyItem5Serializer.Value.Deserialize(context);
-            var item6 = _lazyItem6Serializer.Value.Deserialize(context);
-            context.Reader.ReadEndArray();
+            var reader = context.Reader;
 
-            return new Tuple<T1, T2, T3, T4, T5, T6>(item1, item2, item3, item4, item5, item6);
+            T1 item1 = default;
+            T2 item2 = default;
+            T3 item3 = default;
+            T4 item4 = default;
+            T5 item5 = default;
+            T6 item6 = default;
+            switch (reader.GetCurrentBsonType())
+            {
+                case BsonType.Array:
+                    reader.ReadStartArray();
+                    item1 = _lazyItem1Serializer.Value.Deserialize(context);
+                    item2 = _lazyItem2Serializer.Value.Deserialize(context);
+                    item3 = _lazyItem3Serializer.Value.Deserialize(context);
+                    item4 = _lazyItem4Serializer.Value.Deserialize(context);
+                    item5 = _lazyItem5Serializer.Value.Deserialize(context);
+                    item6 = _lazyItem6Serializer.Value.Deserialize(context);
+                    reader.ReadEndArray();
+                    break;
+
+                case BsonType.Document:
+                    reader.ReadStartDocument();
+                    while (reader.ReadBsonType() != BsonType.EndOfDocument)
+                    {
+                        var name = reader.ReadName();
+                        switch (name)
+                        {
+                            case "Item1": item1 = _lazyItem1Serializer.Value.Deserialize(context); break;
+                            case "Item2": item2 = _lazyItem2Serializer.Value.Deserialize(context); break;
+                            case "Item3": item3 = _lazyItem3Serializer.Value.Deserialize(context); break;
+                            case "Item4": item4 = _lazyItem4Serializer.Value.Deserialize(context); break;
+                            case "Item5": item5 = _lazyItem5Serializer.Value.Deserialize(context); break;
+                            case "Item6": item6 = _lazyItem6Serializer.Value.Deserialize(context); break;
+                            default: throw new BsonSerializationException($"Invalid element {name} found while deserializing a ValueTuple.");
+                        }
+                    }
+                    reader.ReadEndDocument();
+                    break;
+
+                default:
+                    throw new BsonSerializationException($"Cannot deserialize a ValueTuple when BsonType is: {reader.CurrentBsonType}.");
+            }
+
+            return new ValueTuple<T1, T2, T3, T4, T5, T6>(item1, item2, item3, item4, item5, item6);
         }
 
         /// <inheritdoc/>
@@ -774,7 +915,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <inheritdoc/>
-        protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, Tuple<T1, T2, T3, T4, T5, T6> value)
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, ValueTuple<T1, T2, T3, T4, T5, T6> value)
         {
             context.Writer.WriteStartArray();
             _lazyItem1Serializer.Value.Serialize(context, value.Item1);
@@ -788,7 +929,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     }
 
     /// <summary>
-    /// Represents a serializer for a <see cref="Tuple{T1, T2, T3, T4, T5, T6, T7}"/>.
+    /// Represents a serializer for a <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7}"/>.
     /// </summary>
     /// <typeparam name="T1">The type of item 1.</typeparam>
     /// <typeparam name="T2">The type of item 2.</typeparam>
@@ -797,7 +938,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     /// <typeparam name="T5">The type of item 5.</typeparam>
     /// <typeparam name="T6">The type of item 6.</typeparam>
     /// <typeparam name="T7">The type of item 7.</typeparam>
-    public class TupleSerializer<T1, T2, T3, T4, T5, T6, T7> : SealedClassSerializerBase<Tuple<T1, T2, T3, T4, T5, T6, T7>>, IBsonTupleSerializer
+    public sealed class ValueTupleSerializer<T1, T2, T3, T4, T5, T6, T7> : StructSerializerBase<ValueTuple<T1, T2, T3, T4, T5, T6, T7>>, IBsonTupleSerializer
     {
         // private fields
         private readonly Lazy<IBsonSerializer<T1>> _lazyItem1Serializer;
@@ -810,15 +951,15 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5, T6, T7}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5, T6, T7}"/> class.
         /// </summary>
-        public TupleSerializer()
+        public ValueTupleSerializer()
             : this(BsonSerializer.SerializerRegistry)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5, T6, T7}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5, T6, T7}"/> class.
         /// </summary>
         /// <param name="item1Serializer">The Item1 serializer.</param>
         /// <param name="item2Serializer">The Item2 serializer.</param>
@@ -827,7 +968,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// <param name="item5Serializer">The Item5 serializer.</param>
         /// <param name="item6Serializer">The Item6 serializer.</param>
         /// <param name="item7Serializer">The Item7 serializer.</param>
-        public TupleSerializer(
+        public ValueTupleSerializer(
             IBsonSerializer<T1> item1Serializer,
             IBsonSerializer<T2> item2Serializer,
             IBsonSerializer<T3> item3Serializer,
@@ -854,10 +995,10 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5, T6, T7}" /> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5, T6, T7}" /> class.
         /// </summary>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        public TupleSerializer(IBsonSerializerRegistry serializerRegistry)
+        public ValueTupleSerializer(IBsonSerializerRegistry serializerRegistry)
         {
             if (serializerRegistry == null) { throw new ArgumentNullException(nameof(serializerRegistry)); }
 
@@ -908,19 +1049,56 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // public methods
         /// <inheritdoc/>
-        protected override Tuple<T1, T2, T3, T4, T5, T6, T7> DeserializeValue(BsonDeserializationContext context, BsonDeserializationArgs args)
+        public override ValueTuple<T1, T2, T3, T4, T5, T6, T7> Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            context.Reader.ReadStartArray();
-            var item1 = _lazyItem1Serializer.Value.Deserialize(context);
-            var item2 = _lazyItem2Serializer.Value.Deserialize(context);
-            var item3 = _lazyItem3Serializer.Value.Deserialize(context);
-            var item4 = _lazyItem4Serializer.Value.Deserialize(context);
-            var item5 = _lazyItem5Serializer.Value.Deserialize(context);
-            var item6 = _lazyItem6Serializer.Value.Deserialize(context);
-            var item7 = _lazyItem7Serializer.Value.Deserialize(context);
-            context.Reader.ReadEndArray();
+            var reader = context.Reader;
 
-            return new Tuple<T1, T2, T3, T4, T5, T6, T7>(item1, item2, item3, item4, item5, item6, item7);
+            T1 item1 = default;
+            T2 item2 = default;
+            T3 item3 = default;
+            T4 item4 = default;
+            T5 item5 = default;
+            T6 item6 = default;
+            T7 item7 = default;
+            switch (reader.GetCurrentBsonType())
+            {
+                case BsonType.Array:
+                    reader.ReadStartArray();
+                    item1 = _lazyItem1Serializer.Value.Deserialize(context);
+                    item2 = _lazyItem2Serializer.Value.Deserialize(context);
+                    item3 = _lazyItem3Serializer.Value.Deserialize(context);
+                    item4 = _lazyItem4Serializer.Value.Deserialize(context);
+                    item5 = _lazyItem5Serializer.Value.Deserialize(context);
+                    item6 = _lazyItem6Serializer.Value.Deserialize(context);
+                    item7 = _lazyItem7Serializer.Value.Deserialize(context);
+                    reader.ReadEndArray();
+                    break;
+
+                case BsonType.Document:
+                    reader.ReadStartDocument();
+                    while (reader.ReadBsonType() != BsonType.EndOfDocument)
+                    {
+                        var name = reader.ReadName();
+                        switch (name)
+                        {
+                            case "Item1": item1 = _lazyItem1Serializer.Value.Deserialize(context); break;
+                            case "Item2": item2 = _lazyItem2Serializer.Value.Deserialize(context); break;
+                            case "Item3": item3 = _lazyItem3Serializer.Value.Deserialize(context); break;
+                            case "Item4": item4 = _lazyItem4Serializer.Value.Deserialize(context); break;
+                            case "Item5": item5 = _lazyItem5Serializer.Value.Deserialize(context); break;
+                            case "Item6": item6 = _lazyItem6Serializer.Value.Deserialize(context); break;
+                            case "Item7": item7 = _lazyItem7Serializer.Value.Deserialize(context); break;
+                            default: throw new BsonSerializationException($"Invalid element {name} found while deserializing a ValueTuple.");
+                        }
+                    }
+                    reader.ReadEndDocument();
+                    break;
+
+                default:
+                    throw new BsonSerializationException($"Cannot deserialize a ValueTuple when BsonType is: {reader.CurrentBsonType}.");
+            }
+
+            return new ValueTuple<T1, T2, T3, T4, T5, T6, T7>(item1, item2, item3, item4, item5, item6, item7);
         }
 
         /// <inheritdoc/>
@@ -940,7 +1118,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <inheritdoc/>
-        protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, Tuple<T1, T2, T3, T4, T5, T6, T7> value)
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, ValueTuple<T1, T2, T3, T4, T5, T6, T7> value)
         {
             context.Writer.WriteStartArray();
             _lazyItem1Serializer.Value.Serialize(context, value.Item1);
@@ -955,7 +1133,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     }
 
     /// <summary>
-    /// Represents a serializer for a <see cref="Tuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/>.
+    /// Represents a serializer for a <see cref="ValueTuple{T1, T2, T3, T4, T5, T6, T7, TRest}"/>.
     /// </summary>
     /// <typeparam name="T1">The type of item 1.</typeparam>
     /// <typeparam name="T2">The type of item 2.</typeparam>
@@ -965,7 +1143,8 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     /// <typeparam name="T6">The type of item 6.</typeparam>
     /// <typeparam name="T7">The type of item 7.</typeparam>
     /// <typeparam name="TRest">The type of the rest item.</typeparam>
-    public class TupleSerializer<T1, T2, T3, T4, T5, T6, T7, TRest> : SealedClassSerializerBase<Tuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, IBsonTupleSerializer
+    public sealed class ValueTupleSerializer<T1, T2, T3, T4, T5, T6, T7, TRest> : StructSerializerBase<ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>>, IBsonTupleSerializer
+        where TRest : struct
     {
         // private fields
         private readonly Lazy<IBsonSerializer<T1>> _lazyItem1Serializer;
@@ -979,15 +1158,15 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // constructors
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5, T6, T7, TRest}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5, T6, T7, TRest}"/> class.
         /// </summary>
-        public TupleSerializer()
+        public ValueTupleSerializer()
             : this(BsonSerializer.SerializerRegistry)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5, T6, T7, TRest}"/> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5, T6, T7, TRest}"/> class.
         /// </summary>
         /// <param name="item1Serializer">The Item1 serializer.</param>
         /// <param name="item2Serializer">The Item2 serializer.</param>
@@ -997,7 +1176,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// <param name="item6Serializer">The Item6 serializer.</param>
         /// <param name="item7Serializer">The Item7 serializer.</param>
         /// <param name="restSerializer">The Rest serializer.</param>
-        public TupleSerializer(
+        public ValueTupleSerializer(
             IBsonSerializer<T1> item1Serializer,
             IBsonSerializer<T2> item2Serializer,
             IBsonSerializer<T3> item3Serializer,
@@ -1027,10 +1206,10 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TupleSerializer{T1, T2, T3, T4, T5, T6, T7, TRest}" /> class.
+        /// Initializes a new instance of the <see cref="ValueTupleSerializer{T1, T2, T3, T4, T5, T6, T7, TRest}" /> class.
         /// </summary>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        public TupleSerializer(IBsonSerializerRegistry serializerRegistry)
+        public ValueTupleSerializer(IBsonSerializerRegistry serializerRegistry)
         {
             if (serializerRegistry == null) { throw new ArgumentNullException(nameof(serializerRegistry)); }
 
@@ -1087,20 +1266,59 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
         // public methods
         /// <inheritdoc/>
-        protected override Tuple<T1, T2, T3, T4, T5, T6, T7, TRest> DeserializeValue(BsonDeserializationContext context, BsonDeserializationArgs args)
+        public override ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> Deserialize(BsonDeserializationContext context, BsonDeserializationArgs args)
         {
-            context.Reader.ReadStartArray();
-            var item1 = _lazyItem1Serializer.Value.Deserialize(context);
-            var item2 = _lazyItem2Serializer.Value.Deserialize(context);
-            var item3 = _lazyItem3Serializer.Value.Deserialize(context);
-            var item4 = _lazyItem4Serializer.Value.Deserialize(context);
-            var item5 = _lazyItem5Serializer.Value.Deserialize(context);
-            var item6 = _lazyItem6Serializer.Value.Deserialize(context);
-            var item7 = _lazyItem7Serializer.Value.Deserialize(context);
-            var rest = _lazyRestSerializer.Value.Deserialize(context);
-            context.Reader.ReadEndArray();
+            var reader = context.Reader;
 
-            return new Tuple<T1, T2, T3, T4, T5, T6, T7, TRest>(item1, item2, item3, item4, item5, item6, item7, rest);
+            T1 item1 = default;
+            T2 item2 = default;
+            T3 item3 = default;
+            T4 item4 = default;
+            T5 item5 = default;
+            T6 item6 = default;
+            T7 item7 = default;
+            TRest rest = default;
+            switch (reader.GetCurrentBsonType())
+            {
+                case BsonType.Array:
+                    reader.ReadStartArray();
+                    item1 = _lazyItem1Serializer.Value.Deserialize(context);
+                    item2 = _lazyItem2Serializer.Value.Deserialize(context);
+                    item3 = _lazyItem3Serializer.Value.Deserialize(context);
+                    item4 = _lazyItem4Serializer.Value.Deserialize(context);
+                    item5 = _lazyItem5Serializer.Value.Deserialize(context);
+                    item6 = _lazyItem6Serializer.Value.Deserialize(context);
+                    item7 = _lazyItem7Serializer.Value.Deserialize(context);
+                    rest = _lazyRestSerializer.Value.Deserialize(context);
+                    reader.ReadEndArray();
+                    break;
+
+                case BsonType.Document:
+                    reader.ReadStartDocument();
+                    while (reader.ReadBsonType() != BsonType.EndOfDocument)
+                    {
+                        var name = reader.ReadName();
+                        switch (name)
+                        {
+                            case "Item1": item1 = _lazyItem1Serializer.Value.Deserialize(context); break;
+                            case "Item2": item2 = _lazyItem2Serializer.Value.Deserialize(context); break;
+                            case "Item3": item3 = _lazyItem3Serializer.Value.Deserialize(context); break;
+                            case "Item4": item4 = _lazyItem4Serializer.Value.Deserialize(context); break;
+                            case "Item5": item5 = _lazyItem5Serializer.Value.Deserialize(context); break;
+                            case "Item6": item6 = _lazyItem6Serializer.Value.Deserialize(context); break;
+                            case "Item7": item7 = _lazyItem7Serializer.Value.Deserialize(context); break;
+                            case "Rest": rest = _lazyRestSerializer.Value.Deserialize(context); break;
+                            default: throw new BsonSerializationException($"Invalid element {name} found while deserializing a ValueTuple.");
+                        }
+                    }
+                    reader.ReadEndDocument();
+                    break;
+
+                default:
+                    throw new BsonSerializationException($"Cannot deserialize a ValueTuple when BsonType is: {reader.CurrentBsonType}.");
+            }
+
+            return new ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest>(item1, item2, item3, item4, item5, item6, item7, rest);
         }
 
         /// <inheritdoc/>
@@ -1121,7 +1339,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         }
 
         /// <inheritdoc/>
-        protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, Tuple<T1, T2, T3, T4, T5, T6, T7, TRest> value)
+        public override void Serialize(BsonSerializationContext context, BsonSerializationArgs args, ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> value)
         {
             context.Writer.WriteStartArray();
             _lazyItem1Serializer.Value.Serialize(context, value.Item1);

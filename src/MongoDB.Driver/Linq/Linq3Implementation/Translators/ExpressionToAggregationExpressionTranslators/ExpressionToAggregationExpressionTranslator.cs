@@ -31,8 +31,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             switch (expression.NodeType)
             {
                 case ExpressionType.Convert:
+                case ExpressionType.TypeAs:
+                    return ConvertExpressionToAggregationExpressionTranslator.Translate(context, (UnaryExpression)expression);
+
                 case ExpressionType.Not:
-                    return UnaryExpressionToAggregationExpressionTranslator.Translate(context, (UnaryExpression)expression);
+                    return NotExpressionToAggregationExpressionTranslator.Translate(context, (UnaryExpression)expression);
 
                 case ExpressionType.Add:
                 case ExpressionType.And:

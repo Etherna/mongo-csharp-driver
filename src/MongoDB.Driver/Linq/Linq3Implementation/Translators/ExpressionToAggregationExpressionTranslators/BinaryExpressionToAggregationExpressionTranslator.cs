@@ -37,6 +37,12 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
             var leftExpression = expression.Left;
             var rightExpression = expression.Right;
+
+            if (!AreOperandTypesCompatible(expression, leftExpression, rightExpression))
+            {
+                throw new ExpressionNotSupportedException(expression, because: "operand types are not compatible with each other");
+            }
+
             if (IsArithmeticExpression(expression))
             {
                 leftExpression = ConvertHelper.RemoveWideningConvert(leftExpression);
@@ -48,8 +54,22 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 return TranslateEnumExpression(context, expression);
             }
 
-            var leftTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, leftExpression);
-            var rightTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, rightExpression);
+            AggregationExpression leftTranslation, rightTranslation;
+            if (leftExpression is ConstantExpression leftConstantExpresion)
+            {
+                rightTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, rightExpression);
+                leftTranslation = TranslateConstant(expression, leftConstantExpresion, rightTranslation.Serializer);
+            }
+            else if (rightExpression is ConstantExpression rightConstantExpression)
+            {
+                leftTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, leftExpression);
+                rightTranslation = TranslateConstant(expression, rightConstantExpression, leftTranslation.Serializer);
+            }
+            else
+            {
+                leftTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, leftExpression);
+                rightTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, rightExpression);
+            }
 
             var ast = expression.NodeType switch
             {
@@ -94,6 +114,29 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             };
 
             return new AggregationExpression(expression, ast, serializer);
+        }
+
+        public static bool AreOperandTypesCompatible(Expression expression, Expression leftExpression, Expression rightExpression)
+        {
+            if (leftExpression is ConstantExpression leftConstantExpression &&
+                leftConstantExpression.Value == null)
+            {
+                return true;
+            }
+
+            if (rightExpression is ConstantExpression rightConstantExpression &&
+                rightConstantExpression.Value == null)
+            {
+                return true;
+            }
+
+            if (leftExpression.Type.IsAssignableFrom(rightExpression.Type) ||
+                rightExpression.Type.IsAssignableFrom(leftExpression.Type))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private static bool IsAddOrSubtractExpression(Expression expression)
@@ -188,6 +231,13 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 ExpressionType.Subtract => AstBinaryOperator.Subtract,
                 _ => throw new Exception($"Unexpected expression type: {nodeType}.")
             };
+        }
+
+        private static AggregationExpression TranslateConstant(BinaryExpression containingExpression, ConstantExpression constantExpression, IBsonSerializer otherSerializer)
+        {
+            var serializedValue = SerializationHelper.SerializeValue(otherSerializer, constantExpression, containingExpression);
+            var ast = AstExpression.Constant(serializedValue);
+            return new AggregationExpression(constantExpression, ast, otherSerializer);
         }
 
         private static AggregationExpression TranslateEnumExpression(TranslationContext context, BinaryExpression expression)
