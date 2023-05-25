@@ -110,6 +110,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 case ExpressionType.TypeIs:
                     return TypeIsExpressionToFilterTranslator.Translate(context, (TypeBinaryExpression)expression);
+
+                case ExpressionType.Constant:
+                    return ConstantExpressionToFilterTranslator.Translate(context, (ConstantExpression)expression);
             }
 
             if (expression.Type == typeof(bool))

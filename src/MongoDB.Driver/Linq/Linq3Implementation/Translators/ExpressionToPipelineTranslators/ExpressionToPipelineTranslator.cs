@@ -65,6 +65,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     return SkipMethodToPipelineTranslator.Translate(context, methodCallExpression);
                 case "Take":
                     return TakeMethodToPipelineTranslator.Translate(context, methodCallExpression);
+                case "Union":
+                    return UnionMethodToPipelineTranslator.Translate(context, methodCallExpression);
                 case "Where":
                     return WhereMethodToPipelineTranslator.Translate(context, methodCallExpression);
             }

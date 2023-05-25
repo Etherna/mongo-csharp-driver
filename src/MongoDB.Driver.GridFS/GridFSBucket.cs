@@ -17,11 +17,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
@@ -643,7 +641,7 @@ namespace Etherna.MongoDB.Driver.GridFS
                 Filter = renderedFilter,
                 Limit = options.Limit,
                 MaxTime = options.MaxTime,
-                NoCursorTimeout = options.NoCursorTimeout ?? false,
+                NoCursorTimeout = options.NoCursorTimeout,
                 ReadConcern = GetReadConcern(),
                 RetryRequested = _database.Client.Settings.RetryReads,
                 Skip = options.Skip,

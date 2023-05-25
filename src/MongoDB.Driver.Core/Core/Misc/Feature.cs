@@ -47,6 +47,8 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __arrayFilters = new Feature("ArrayFilters", WireVersion.Server36);
         private static readonly Feature __bypassDocumentValidation = new Feature("BypassDocumentValidation", WireVersion.Server32);
         private static readonly Feature __changeStreamStage = new Feature("ChangeStreamStage", WireVersion.Server36);
+        private static readonly Feature __changeStreamAllChangesForCluster = new Feature("ChangeStreamAllChangesForCluster", WireVersion.Server40);
+        private static readonly Feature __changeStreamForDatabase = new Feature("ChangeStreamForDatabase", WireVersion.Server40);
         private static readonly Feature __changeStreamPostBatchResumeToken = new Feature("ChangeStreamPostBatchResumeToken", WireVersion.Server40);
         private static readonly Feature __changeStreamPrePostImages = new Feature("ChangeStreamPrePostImages", WireVersion.Server60);
         private static readonly Feature __clientSideEncryption = new Feature("ClientSideEncryption", WireVersion.Server42);
@@ -116,6 +118,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __snapshotReads = new Feature("SnapshotReads", WireVersion.Server50, notSupportedMessage: "Snapshot reads require MongoDB 5.0 or later");
         private static readonly Feature __sortArrayOperator = new Feature("SortArrayOperator", WireVersion.Server52);
         private static readonly Feature __speculativeAuthentication = new Feature("SpeculativeAuthentication", WireVersion.Server44);
+        private static readonly Feature __stableApi = new Feature("StableAPI", WireVersion.Server50);
         private static readonly Feature __streamingHello = new Feature("StreamingHello", WireVersion.Server44);
         private static readonly Feature __tailableCursor = new Feature("TailableCursor", WireVersion.Server32);
         private static readonly Feature __toConversionOperators = new Feature("ToConversionOperators", WireVersion.Server40);
@@ -262,6 +265,16 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// </summary>
         [Obsolete("This property will be removed in a later release.")]
         public static Feature ChangeStreamStage => __changeStreamStage;
+
+        /// <summary>
+        /// Gets the change stream all changes for cluster feature.
+        /// </summary>
+        public static Feature ChangeStreamAllChangesForCluster => __changeStreamAllChangesForCluster;
+
+        /// <summary>
+        /// Gets the change stream for database feature.
+        /// </summary>
+        public static Feature ChangeStreamForDatabase => __changeStreamForDatabase;
 
         /// <summary>
         /// Gets the change stream post batch resume token feature.
@@ -643,6 +656,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// Gets the speculative authentication feature.
         /// </summary>
         public static Feature SpeculativeAuthentication => __speculativeAuthentication;
+
+        /// <summary>
+        /// Gets the speculative authentication feature.
+        /// </summary>
+        public static Feature StableApi => __stableApi;
 
         /// <summary>
         /// Gets the streaming hello feature.

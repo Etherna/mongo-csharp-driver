@@ -116,7 +116,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 
             protected override Expression VisitConditional(ConditionalExpression node)
             {
-                var test = base.Visit(node.Test);
+                var test = Visit(node.Test);
                 if (test is ConstantExpression constantTestExpression)
                 {
                     var value = (bool)constantTestExpression.Value;
@@ -190,21 +190,17 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
             protected override Expression VisitMemberInit(MemberInitExpression node)
             {
                 // Bindings must be visited before NewExpression
-                foreach (var binding in node.Bindings)
+                Visit(node.Bindings, VisitMemberBinding);
+
+                if (_cannotBeEvaluated)
                 {
-                    switch (binding.BindingType)
-                    {
-                        case MemberBindingType.Assignment:
-                            var memberAssignment = (MemberAssignment)binding;
-                            base.Visit(memberAssignment.Expression);
-                            break;
-
-                        default:
-                            throw new InvalidOperationException($"Unexpected binding type: {binding.BindingType}.");
-                    }
+                    // visit only the arguments if any MemberBindings cannot be partially evaluated
+                    Visit(node.NewExpression.Arguments);
                 }
-
-                base.Visit(node.NewExpression);
+                else
+                {
+                    Visit(node.NewExpression);
+                }
 
                 return node;
             }

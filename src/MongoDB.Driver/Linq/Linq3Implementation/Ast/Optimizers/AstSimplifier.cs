@@ -307,21 +307,6 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
             }
         }
 
-        public override AstNode VisitMatchStage(AstMatchStage node)
-        {
-            node = (AstMatchStage)base.VisitMatchStage(node);
-
-            if (node.Filter is AstExprFilter exprFilter &&
-                exprFilter.Expression is AstConstantExpression constantExpression &&
-                constantExpression.Value is BsonBoolean booleanValue)
-            {
-                var simpleFilter = booleanValue.Value ? AstFilter.MatchesEverything() : AstFilter.MatchesNothing();
-                return AstStage.Match(simpleFilter);
-            }
-
-            return node;
-        }
-
         public override AstNode VisitUnaryExpression(AstUnaryExpression node)
         {
             // { $first : <arg> } => { $arrayElemAt : [<arg>, 0] } (or -1 for $last)

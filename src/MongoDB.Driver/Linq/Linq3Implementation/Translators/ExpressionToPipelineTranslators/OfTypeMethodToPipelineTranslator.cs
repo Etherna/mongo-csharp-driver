@@ -13,6 +13,7 @@
 * limitations under the License.
 */
 
+using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
@@ -50,6 +51,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 }
                 var discriminatorField = AstFilter.Field(discriminatorElementName, BsonValueSerializer.Instance);
                 var discriminatorValue = discriminatorConvention.GetDiscriminator(nominalType, actualType);
+                if (discriminatorValue.IsBsonArray)
+                {
+                    discriminatorValue = discriminatorValue.AsBsonArray.Last();
+                }
+
                 var filter = AstFilter.Eq(discriminatorField, discriminatorValue); // note: OfType only works with hierarchical discriminators
                 var actualSerializer = context.KnownSerializersRegistry.GetSerializer(expression);
                 if (wrappedValueOutputSerializer != null)

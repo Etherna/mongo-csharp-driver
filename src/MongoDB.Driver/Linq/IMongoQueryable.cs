@@ -14,7 +14,6 @@
 */
 
 using System.Linq;
-using Etherna.MongoDB.Bson.Serialization;
 
 namespace Etherna.MongoDB.Driver.Linq
 {
