@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 using Etherna.MongoDB.Driver.Encryption;
@@ -40,7 +41,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             var mainOperation = new CreateCollectionOperation(
                 collectionNamespace,
-                messageEncoderSettings)
+                messageEncoderSettings,
+                encryptedFields != null ? Feature.Csfle2QEv2 : null)
             {
                 EncryptedFields = encryptedFields
             };
@@ -51,7 +53,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             {
                 return new CompositeWriteOperation<BsonDocument>(
                     (CreateInnerCollectionOperation(EncryptedCollectionHelper.GetAdditionalCollectionName(encryptedFields, collectionNamespace, HelperCollectionForEncryption.Esc)), IsMainOperation: false),
-                    (CreateInnerCollectionOperation(EncryptedCollectionHelper.GetAdditionalCollectionName(encryptedFields, collectionNamespace, HelperCollectionForEncryption.Ecc)), IsMainOperation: false),
                     (CreateInnerCollectionOperation(EncryptedCollectionHelper.GetAdditionalCollectionName(encryptedFields, collectionNamespace, HelperCollectionForEncryption.Ecos)), IsMainOperation: false),
                     (mainOperation, IsMainOperation: true),
                     (new CreateIndexesOperation(collectionNamespace, new[] { new CreateIndexRequest(EncryptedCollectionHelper.AdditionalCreateIndexDocument) }, messageEncoderSettings), IsMainOperation: false));
@@ -62,7 +63,10 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             }
 
             CreateCollectionOperation CreateInnerCollectionOperation(string collectionName)
-                => new CreateCollectionOperation(new CollectionNamespace(collectionNamespace.DatabaseNamespace.DatabaseName, collectionName), messageEncoderSettings) { ClusteredIndex = new BsonDocument { { "key", new BsonDocument("_id", 1) }, { "unique", true } } };
+                => new(new CollectionNamespace(collectionNamespace.DatabaseNamespace.DatabaseName, collectionName), messageEncoderSettings, Feature.Csfle2QEv2)
+                   {
+                      ClusteredIndex = new BsonDocument { { "key", new BsonDocument("_id", 1) }, { "unique", true } }
+                   };
         }
         #endregion
 
@@ -89,6 +93,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         private BsonDocument _validator;
         private WriteConcern _writeConcern;
 
+        private readonly Feature _supportedFeature;
+
         // constructors
         /// <summary>
         /// Initializes a new instance of the <see cref="CreateCollectionOperation"/> class.
@@ -98,9 +104,18 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public CreateCollectionOperation(
             CollectionNamespace collectionNamespace,
             MessageEncoderSettings messageEncoderSettings)
+            : this(collectionNamespace, messageEncoderSettings, supportedFeature: null)
+        {
+        }
+
+        private CreateCollectionOperation(
+            CollectionNamespace collectionNamespace,
+            MessageEncoderSettings messageEncoderSettings,
+            Feature supportedFeature)
         {
             _collectionNamespace = Ensure.IsNotNull(collectionNamespace, nameof(collectionNamespace));
             _messageEncoderSettings = messageEncoderSettings;
+            _supportedFeature = supportedFeature;
         }
 
         // properties
@@ -405,12 +420,16 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
+            using (BeginOperation())
             using (var channelSource = binding.GetWriteChannelSource(cancellationToken))
             using (var channel = channelSource.GetChannel(cancellationToken))
-            using (var channelBinding = new ChannelReadWriteBinding(channelSource.Server, channel, binding.Session.Fork()))
             {
-                var operation = CreateOperation(channelBinding.Session);
-                return operation.Execute(channelBinding, cancellationToken);
+                EnsureServerIsValid(channel.ConnectionDescription.MaxWireVersion);
+                using (var channelBinding = new ChannelReadWriteBinding(channelSource.Server, channel, binding.Session.Fork()))
+                {
+                    var operation = CreateOperation(channelBinding.Session);
+                    return operation.Execute(channelBinding, cancellationToken);
+                }
             }
         }
 
@@ -419,19 +438,31 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
+            using (BeginOperation())
             using (var channelSource = await binding.GetWriteChannelSourceAsync(cancellationToken).ConfigureAwait(false))
             using (var channel = await channelSource.GetChannelAsync(cancellationToken).ConfigureAwait(false))
-            using (var channelBinding = new ChannelReadWriteBinding(channelSource.Server, channel, binding.Session.Fork()))
             {
-                var operation = CreateOperation(channelBinding.Session);
-                return await operation.ExecuteAsync(channelBinding, cancellationToken).ConfigureAwait(false);
+                EnsureServerIsValid(channel.ConnectionDescription.MaxWireVersion);
+                using (var channelBinding = new ChannelReadWriteBinding(channelSource.Server, channel, binding.Session.Fork()))
+                {
+                    var operation = CreateOperation(channelBinding.Session);
+                    return await operation.ExecuteAsync(channelBinding, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
+
+        // private methods
+        private IDisposable BeginOperation() => EventContext.BeginOperation("create");
 
         private WriteCommandOperation<BsonDocument> CreateOperation(ICoreSessionHandle session)
         {
             var command = CreateCommand(session);
             return new WriteCommandOperation<BsonDocument>(_collectionNamespace.DatabaseNamespace, command, BsonDocumentSerializer.Instance, _messageEncoderSettings);
+        }
+
+        private void EnsureServerIsValid(int maxWireVersion)
+        {
+            _supportedFeature?.ThrowIfNotSupported(maxWireVersion);
         }
 
         [Flags]

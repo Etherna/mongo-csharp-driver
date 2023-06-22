@@ -21,8 +21,8 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Driver.Search;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Search;
 
 namespace Etherna.MongoDB.Driver.Linq
 {
@@ -97,6 +97,31 @@ namespace Etherna.MongoDB.Driver.Linq
                     GetMethodInfo(AppendStage, source, stage, resultSerializer),
                     Expression.Convert(source.Expression, typeof(IMongoQueryable<TSource>)),
                     Expression.Constant(stage),
+                    Expression.Constant(resultSerializer, typeof(IBsonSerializer<TResult>))));
+        }
+
+        /// <summary>
+        /// Allows the results to be interpreted as a different type. It is up to the caller
+        /// to determine that the new result type is compatible with the actual results.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+        /// <typeparam name="TResult">The new result type for the results.</typeparam>
+        /// <param name="source">A sequence of values.</param>
+        /// <param name="resultSerializer">The new serializer (optional, will be looked up if null).</param>
+        /// <returns>
+        /// A new IMongoQueryable with a new result type.
+        /// </returns>
+        public static IMongoQueryable<TResult> As<TSource, TResult>(
+            this IMongoQueryable<TSource> source,
+            IBsonSerializer<TResult> resultSerializer = null)
+        {
+            Ensure.IsNotNull(source, nameof(source));
+
+            return (IMongoQueryable<TResult>)source.Provider.CreateQuery<TResult>(
+                Expression.Call(
+                    null,
+                    GetMethodInfo(As, source, resultSerializer),
+                    Expression.Convert(source.Expression, typeof(IMongoQueryable<TSource>)),
                     Expression.Constant(resultSerializer, typeof(IBsonSerializer<TResult>))));
         }
 

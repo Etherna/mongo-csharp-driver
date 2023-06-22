@@ -22,9 +22,9 @@ using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -183,6 +183,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
+            using (BeginOperation())
             using (var context = RetryableReadContext.Create(binding, _retryRequested, cancellationToken))
             {
                 var operation = CreateOperation(context);
@@ -199,6 +200,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
+            using (BeginOperation())
             using (var context = await RetryableReadContext.CreateAsync(binding, _retryRequested, cancellationToken).ConfigureAwait(false))
             {
                 var operation = CreateOperation(context);
@@ -225,6 +227,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 { "readConcern", readConcern, readConcern != null }
             };
         }
+
+        private IDisposable BeginOperation() => EventContext.BeginOperation("distinct");
 
         private ReadCommandOperation<DistinctResult> CreateOperation(RetryableReadContext context)
         {

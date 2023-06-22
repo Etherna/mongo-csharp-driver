@@ -1,4 +1,4 @@
-next-version: 2.19.1
+next-version: 2.20.0
 tag-prefix: '(v|V|eth-v)'
 branches:
   main:

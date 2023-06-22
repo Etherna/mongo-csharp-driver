@@ -18,6 +18,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 
@@ -100,6 +101,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
+            using (BeginOperation())
             using (var context = RetryableReadContext.Create(binding, _retryRequested, cancellationToken))
             {
                 var operation = CreateCountOperation();
@@ -113,6 +115,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         {
             Ensure.IsNotNull(binding, nameof(binding));
 
+            using (BeginOperation())
             using (var context = RetryableReadContext.Create(binding, _retryRequested, cancellationToken))
             {
                 var operation = CreateCountOperation();
@@ -122,6 +125,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         }
 
         // private methods
+        private IDisposable BeginOperation() => EventContext.BeginOperation("count");
+
         private IExecutableInRetryableReadContext<long> CreateCountOperation()
         {
             var countOperation = new CountOperation(_collectionNamespace, _messageEncoderSettings)

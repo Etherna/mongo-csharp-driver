@@ -36,6 +36,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 case "AppendStage":
                     return AppendStageMethodToPipelineTranslator.Translate(context, methodCallExpression);
+                case "As":
+                    return AsMethodToPipelineTranslator.Translate(context, methodCallExpression);
                 case "Densify":
                     return DensifyMethodToPipelineTranslator.Translate(context, methodCallExpression);
                 case "Distinct":

@@ -18,7 +18,9 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Misc;
 using MongoDB.Libmongocrypt;
@@ -90,22 +92,43 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The operation result.</returns>
         /// <remarks>
-        /// if EncryptionFields contains a keyId with a null value, a data key will be automatically generated and assigned to keyId value.
+        /// If EncryptionFields contains a keyId with a null value, a data key will be automatically generated and returned in <see cref="CreateEncryptedCollectionResult.EncryptedFields"/>.
         /// </remarks>
+        [Obsolete("Use the overload with masterKey instead.")]
         public CreateEncryptedCollectionResult CreateEncryptedCollection(IMongoDatabase database, string collectionName, CreateCollectionOptions createCollectionOptions, string kmsProvider, DataKeyOptions dataKeyOptions, CancellationToken cancellationToken = default)
+        {
+            Ensure.That(dataKeyOptions?.AlternateKeyNames == null && dataKeyOptions?.KeyMaterial == null, $"{nameof(CreateEncryptedCollection)} supports only {nameof(dataKeyOptions.MasterKey)} in {nameof(DataKeyOptions)}.");
+
+            return CreateEncryptedCollection(database, collectionName, createCollectionOptions, kmsProvider, dataKeyOptions?.MasterKey, cancellationToken);
+        }
+
+        /// <summary>
+        /// Create encrypted collection.
+        /// </summary>
+        /// <param name="database">The database.</param>
+        /// <param name="collectionName">The collection name.</param>
+        /// <param name="createCollectionOptions">The create collection options.</param>
+        /// <param name="kmsProvider">The kms provider.</param>
+        /// <param name="masterKey">The master key.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The operation result.</returns>
+        /// <remarks>
+        /// If EncryptionFields contains a keyId with a null value, a data key will be automatically generated and returned in <see cref="CreateEncryptedCollectionResult.EncryptedFields"/>.
+        /// </remarks>
+        public CreateEncryptedCollectionResult CreateEncryptedCollection(IMongoDatabase database, string collectionName, CreateCollectionOptions createCollectionOptions, string kmsProvider, BsonDocument masterKey, CancellationToken cancellationToken = default)
         {
             Ensure.IsNotNull(database, nameof(database));
             Ensure.IsNotNull(collectionName, nameof(collectionName));
             Ensure.IsNotNull(createCollectionOptions, nameof(createCollectionOptions));
-            Ensure.IsNotNull(dataKeyOptions, nameof(dataKeyOptions));
             Ensure.IsNotNull(kmsProvider, nameof(kmsProvider));
+            EnsureFeatureSupported(database.Client.Cluster, Feature.Csfle2QEv2, cancellationToken);
 
             var encryptedFields = createCollectionOptions.EncryptedFields?.DeepClone()?.AsBsonDocument;
             try
             {
                 foreach (var fieldDocument in EncryptedCollectionHelper.IterateEmptyKeyIds(new CollectionNamespace(database.DatabaseNamespace.DatabaseName, collectionName), encryptedFields))
                 {
-                    var dataKey = CreateDataKey(kmsProvider, dataKeyOptions, cancellationToken);
+                    var dataKey = CreateDataKey(kmsProvider, new DataKeyOptions(masterKey: masterKey), cancellationToken);
                     EncryptedCollectionHelper.ModifyEncryptedFields(fieldDocument, dataKey);
                 }
 
@@ -132,22 +155,43 @@ namespace Etherna.MongoDB.Driver.Encryption
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The operation result.</returns>
         /// <remarks>
-        /// if EncryptionFields contains a keyId with a null value, a data key will be automatically generated and assigned to keyId value.
+        /// If EncryptionFields contains a keyId with a null value, a data key will be automatically generated and returned in <see cref="CreateEncryptedCollectionResult.EncryptedFields"/>.
         /// </remarks>
-        public async Task<CreateEncryptedCollectionResult> CreateEncryptedCollectionAsync(IMongoDatabase database, string collectionName, CreateCollectionOptions createCollectionOptions, string kmsProvider, DataKeyOptions dataKeyOptions, CancellationToken cancellationToken = default)
+        [Obsolete("Use the overload with masterKey instead.")]
+        public Task<CreateEncryptedCollectionResult> CreateEncryptedCollectionAsync(IMongoDatabase database, string collectionName, CreateCollectionOptions createCollectionOptions, string kmsProvider, DataKeyOptions dataKeyOptions, CancellationToken cancellationToken = default)
+        {
+            Ensure.That(dataKeyOptions?.AlternateKeyNames == null && dataKeyOptions?.KeyMaterial == null, $"{nameof(CreateEncryptedCollection)} supports only {nameof(dataKeyOptions.MasterKey)} in {nameof(DataKeyOptions)}.");
+
+            return CreateEncryptedCollectionAsync(database, collectionName, createCollectionOptions, kmsProvider, dataKeyOptions?.MasterKey, cancellationToken);
+        }
+
+        /// <summary>
+        /// Create encrypted collection.
+        /// </summary>
+        /// <param name="database">The database.</param>
+        /// <param name="collectionName">The collection name.</param>
+        /// <param name="createCollectionOptions">The create collection options.</param>
+        /// <param name="kmsProvider">The kms provider.</param>
+        /// <param name="masterKey">The master key.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The operation result.</returns>
+        /// <remarks>
+        /// If EncryptionFields contains a keyId with a null value, a data key will be automatically generated and returned in <see cref="CreateEncryptedCollectionResult.EncryptedFields"/>.
+        /// </remarks>
+        public async Task<CreateEncryptedCollectionResult> CreateEncryptedCollectionAsync(IMongoDatabase database, string collectionName, CreateCollectionOptions createCollectionOptions, string kmsProvider, BsonDocument masterKey, CancellationToken cancellationToken = default)
         {
             Ensure.IsNotNull(database, nameof(database));
             Ensure.IsNotNull(collectionName, nameof(collectionName));
             Ensure.IsNotNull(createCollectionOptions, nameof(createCollectionOptions));
-            Ensure.IsNotNull(dataKeyOptions, nameof(dataKeyOptions));
             Ensure.IsNotNull(kmsProvider, nameof(kmsProvider));
+            await EnsureFeatureSupportedAsync(database.Client.Cluster, Feature.Csfle2QEv2, cancellationToken).ConfigureAwait(false);
 
             var encryptedFields = createCollectionOptions.EncryptedFields?.DeepClone()?.AsBsonDocument;
             try
             {
                 foreach (var fieldDocument in EncryptedCollectionHelper.IterateEmptyKeyIds(new CollectionNamespace(database.DatabaseNamespace.DatabaseName, collectionName), encryptedFields))
                 {
-                    var dataKey = await CreateDataKeyAsync(kmsProvider, dataKeyOptions, cancellationToken).ConfigureAwait(false);
+                    var dataKey = await CreateDataKeyAsync(kmsProvider, new DataKeyOptions(masterKey: masterKey), cancellationToken).ConfigureAwait(false);
                     EncryptedCollectionHelper.ModifyEncryptedFields(fieldDocument, dataKey);
                 }
 
@@ -396,6 +440,28 @@ namespace Etherna.MongoDB.Driver.Encryption
             {
                 // should not be reached
                 throw new InvalidOperationException($"The encrypted data must be {typeof(TEncryptedValue).Name}, but was {encryptedValue?.GetType()?.Name ?? "null"}.");
+            }
+        }
+
+        private void EnsureFeatureSupported(ICluster cluster, Feature feature, CancellationToken cancellationToken)
+        {
+            using (var binding = new ReadWriteBindingHandle(new WritableServerBinding(cluster, NoCoreSession.NewHandle())))
+            using (var channelSource = binding.GetWriteChannelSource(cancellationToken))
+            using (var channel = channelSource.GetChannel(cancellationToken))
+            {
+                // Use WireVersion from a connection since server level value may be null
+                feature.ThrowIfNotSupported(channel.ConnectionDescription.MaxWireVersion);
+            }
+        }
+
+        private async Task EnsureFeatureSupportedAsync(ICluster cluster, Feature feature, CancellationToken cancellationToken)
+        {
+            using (var binding = new ReadWriteBindingHandle(new WritableServerBinding(cluster, NoCoreSession.NewHandle())))
+            using (var channelSource = await binding.GetWriteChannelSourceAsync(cancellationToken).ConfigureAwait(false))
+            using (var channel = await channelSource.GetChannelAsync(cancellationToken).ConfigureAwait(false))
+            {
+                // Use WireVersion from a connection since server level value may be null
+                feature.ThrowIfNotSupported(channel.ConnectionDescription.MaxWireVersion);
             }
         }
     }

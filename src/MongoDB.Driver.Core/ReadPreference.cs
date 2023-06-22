@@ -115,6 +115,7 @@ namespace Etherna.MongoDB.Driver
                         break;
 
                     case "tags":
+                    case "tagSets":
                         tagSets = new List<TagSet>();
                         foreach (var tagsDocument in element.Value.AsBsonArray.Cast<BsonDocument>())
                         {

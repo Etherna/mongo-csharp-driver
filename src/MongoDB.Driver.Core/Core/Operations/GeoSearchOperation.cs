@@ -20,6 +20,7 @@ using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Connections;
+using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 using Etherna.MongoDB.Shared;
@@ -139,6 +140,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public TResult Execute(IReadBinding binding, CancellationToken cancellationToken)
         {
             Ensure.IsNotNull(binding, nameof(binding));
+
+            using (BeginOperation())
             using (var channelSource = binding.GetReadChannelSource(cancellationToken))
             using (var channel = channelSource.GetChannel(cancellationToken))
             using (var channelBinding = new ChannelReadBinding(channelSource.Server, channel, binding.ReadPreference, binding.Session.Fork()))
@@ -152,6 +155,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public async Task<TResult> ExecuteAsync(IReadBinding binding, CancellationToken cancellationToken)
         {
             Ensure.IsNotNull(binding, nameof(binding));
+
+            using (BeginOperation())
             using (var channelSource = await binding.GetReadChannelSourceAsync(cancellationToken).ConfigureAwait(false))
             using (var channel = await channelSource.GetChannelAsync(cancellationToken).ConfigureAwait(false))
             using (var channelBinding = new ChannelReadBinding(channelSource.Server, channel, binding.ReadPreference, binding.Session.Fork()))
@@ -175,6 +180,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 { "readConcern", readConcern, readConcern != null }
             };
         }
+
+        private IDisposable BeginOperation() => EventContext.BeginOperation("geoSearch");
 
         private ReadCommandOperation<TResult> CreateOperation(IChannel channel, IBinding binding)
         {
