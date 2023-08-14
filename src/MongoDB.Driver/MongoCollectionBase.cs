@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Search;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -41,6 +42,9 @@ namespace Etherna.MongoDB.Driver
 
         /// <inheritdoc />
         public abstract IMongoIndexManager<TDocument> Indexes { get; }
+
+        /// <inheritdoc />
+        public abstract IMongoSearchIndexManager SearchIndexes { get; }
 
         /// <inheritdoc />
         public abstract MongoCollectionSettings Settings { get; }

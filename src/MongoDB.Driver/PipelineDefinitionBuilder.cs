@@ -1179,6 +1179,10 @@ namespace Etherna.MongoDB.Driver
         /// Flag that specifies whether to perform a full document lookup on the backend database
         /// or return only stored source fields directly from Atlas Search.
         /// </param>
+        /// <param name="scoreDetails">
+        /// Flag that specifies whether to return a detailed breakdown
+        /// of the score for each document in the result. 
+        /// </param>
         /// <returns>
         /// A new pipeline with an additional stage.
         /// </returns>
@@ -1188,10 +1192,31 @@ namespace Etherna.MongoDB.Driver
             SearchHighlightOptions<TOutput> highlight = null,
             string indexName = null,
             SearchCountOptions count = null,
-            bool returnStoredSource = false)
+            bool returnStoredSource = false,
+            bool scoreDetails = false)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Search(searchDefinition, highlight, indexName, count, returnStoredSource));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Search(searchDefinition, highlight, indexName, count, returnStoredSource, scoreDetails));
+        }
+
+        /// <summary>
+        /// Appends a $search stage to the pipeline.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input documents.</typeparam>
+        /// <typeparam name="TOutput">The type of the output documents.</typeparam>
+        /// <param name="pipeline">The pipeline.</param>
+        /// <param name="searchDefinition">The search definition.</param>
+        /// <param name="searchOptions">The search options.</param>
+        /// <returns>
+        /// A new pipeline with an additional stage.
+        /// </returns>
+        public static PipelineDefinition<TInput, TOutput> Search<TInput, TOutput>(
+            this PipelineDefinition<TInput, TOutput> pipeline,
+            SearchDefinition<TOutput> searchDefinition,
+            SearchOptions<TOutput> searchOptions)
+        {
+            Ensure.IsNotNull(pipeline, nameof(pipeline));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Search(searchDefinition, searchOptions));
         }
 
         /// <summary>

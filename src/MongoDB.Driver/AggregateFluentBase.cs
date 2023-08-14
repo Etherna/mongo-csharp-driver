@@ -222,7 +222,16 @@ namespace Etherna.MongoDB.Driver
             SearchHighlightOptions<TResult> highlight = null,
             string indexName = null,
             SearchCountOptions count = null,
-            bool returnStoredSource = false)
+            bool returnStoredSource = false,
+            bool scoreDetails = false)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public virtual IAggregateFluent<TResult> Search(
+            SearchDefinition<TResult> searchDefinition,
+            SearchOptions<TResult> searchOptions)
         {
             throw new NotImplementedException();
         }

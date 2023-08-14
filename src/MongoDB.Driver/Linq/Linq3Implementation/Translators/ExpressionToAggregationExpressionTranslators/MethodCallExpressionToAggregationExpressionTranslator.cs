@@ -53,7 +53,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case "get_Item": return GetItemMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Integral": return IntegralMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Intersect": return IntersectMethodToAggregationExpressionTranslator.Translate(context, expression);
+                case "IsMatch": return IsMatchMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "IsNullOrEmpty": return IsNullOrEmptyMethodToAggregationExpressionTranslator.Translate(context, expression);
+                case "IsNullOrWhiteSpace": return IsNullOrWhiteSpaceMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "IsSubsetOf": return IsSubsetOfMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Locf": return LocfMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Parse": return ParseMethodToAggregationExpressionTranslator.Translate(context, expression);
@@ -62,6 +64,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case "Range": return RangeMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Rank": return RankMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Reverse": return ReverseMethodToAggregationExpressionTranslator.Translate(context, expression);
+                case "Round": return RoundMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Select": return SelectMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "SetEquals": return SetEqualsMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Shift": return ShiftMethodToAggregationExpressionTranslator.Translate(context, expression);

@@ -20,6 +20,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Search;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -60,6 +61,11 @@ namespace Etherna.MongoDB.Driver
         public override IMongoIndexManager<TDocument> Indexes
         {
             get { return _wrappedCollection.Indexes; }
+        }
+
+        public override IMongoSearchIndexManager SearchIndexes
+        {
+            get { return _wrappedCollection.SearchIndexes; }
         }
 
         public override MongoCollectionSettings Settings

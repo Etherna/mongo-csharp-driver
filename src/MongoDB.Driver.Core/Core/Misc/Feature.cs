@@ -107,8 +107,10 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __partialIndexes = new Feature("PartialIndexes", WireVersion.Server32);
         private static readonly Feature __pickAccumulatorsNewIn52 = new Feature("PickAccumulatorsNewIn52", WireVersion.Server52);
         private static readonly Feature __readConcern = new Feature("ReadConcern", WireVersion.Server32);
+        private static readonly Feature __regexMatch = new Feature("RegexMatch", WireVersion.Server42);
         private static readonly Feature __retryableReads = new Feature("RetryableReads", WireVersion.Server36);
         private static readonly Feature __retryableWrites = new Feature("RetryableWrites", WireVersion.Server36);
+        private static readonly Feature __round = new Feature("Round", WireVersion.Server42);
         private static readonly Feature __scramSha1Authentication = new Feature("ScramSha1Authentication", WireVersion.Server30);
         private static readonly Feature __scramSha256Authentication = new Feature("ScramSha256Authentication", WireVersion.Server40);
         private static readonly Feature __serverExtractsUsernameFromX509Certificate = new Feature("ServerExtractsUsernameFromX509Certificate", WireVersion.Server34);
@@ -125,6 +127,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __tailableCursor = new Feature("TailableCursor", WireVersion.Server32);
         private static readonly Feature __toConversionOperators = new Feature("ToConversionOperators", WireVersion.Server40);
         private static readonly Feature __trigOperators = new Feature("TrigOperators", WireVersion.Server42);
+        private static readonly Feature __trimOperator = new Feature("TrimOperator", WireVersion.Server40);
         private static readonly Feature __transactions = new Feature("Transactions", WireVersion.Server40);
         private static readonly Feature __updateWithAggregationPipeline = new Feature("UpdateWithAggregationPipeline", WireVersion.Server42);
         private static readonly Feature __userManagementCommands = new Feature("UserManagementCommands", WireVersion.Server26);
@@ -599,6 +602,12 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         [Obsolete("This property will be removed in a later release.")]
         public static Feature ReadConcern => __readConcern;
 
+
+        /// <summary>
+        /// Gets the regex match feature.
+        /// </summary>
+        public static Feature RegexMatch => __regexMatch;
+
         /// <summary>
         /// Gets the retryable reads feature.
         /// </summary>
@@ -610,6 +619,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// </summary>
         [Obsolete("This property will be removed in a later release.")]
         public static Feature RetryableWrites => __retryableWrites;
+
+        /// <summary>
+        /// Gets the $round feature.
+        /// </summary>
+        public static Feature Round => __round;
 
         /// <summary>
         /// Gets the scram sha1 authentication feature.
@@ -704,6 +718,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// Gets the trig operators feature.
         /// </summary>
         public static Feature TrigOperators => __trigOperators;
+
+        /// <summary>
+        /// Gets the trim operator feature.
+        /// </summary>
+        public static Feature TrimOperator => __trimOperator;
 
         /// <summary>
         /// Gets the user management commands feature.

@@ -14,11 +14,13 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators;
@@ -139,7 +141,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
             Expression<Func<TSource, TProjection>> expression,
             IBsonSerializer<TSource> sourceSerializer,
             IBsonSerializerRegistry serializerRegistry)
-            => TranslateExpressionToProjectionInternal(expression, sourceSerializer, new AstFindProjectionSimplifier());
+            => TranslateExpressionToProjection(expression, sourceSerializer, ProjectionHelper.CreateFindProjection, new AstFindProjectionSimplifier());
 
         internal override RenderedProjectionDefinition<TOutput> TranslateExpressionToGroupProjection<TInput, TKey, TOutput>(
             Expression<Func<TInput, TKey>> idExpression,
@@ -156,20 +158,26 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
             IBsonSerializer<TInput> inputSerializer,
             IBsonSerializerRegistry serializerRegistry,
             ExpressionTranslationOptions translationOptions)
-            => TranslateExpressionToProjectionInternal(expression, inputSerializer, new AstSimplifier());
+            => TranslateExpressionToProjection(expression, inputSerializer, ProjectionHelper.CreateAggregationProjection, new AstSimplifier());
 
-        private RenderedProjectionDefinition<TOutput> TranslateExpressionToProjectionInternal<TInput, TOutput>(
+        private RenderedProjectionDefinition<TOutput> TranslateExpressionToProjection<TInput, TOutput>(
             Expression<Func<TInput, TOutput>> expression,
             IBsonSerializer<TInput> inputSerializer,
+            Func<AggregationExpression, (IReadOnlyList<AstProjectStageSpecification>, IBsonSerializer)> projectionCreator,
             AstSimplifier simplifier)
         {
+            if (expression.Parameters.Count == 1 && expression.Body == expression.Parameters[0])
+            {
+                // handle x => x as a special case
+                return new RenderedProjectionDefinition<TOutput>(null, (IBsonSerializer<TOutput>)inputSerializer);
+            }
+
             expression = (Expression<Func<TInput, TOutput>>)PartialEvaluator.EvaluatePartially(expression);
             var context = TranslationContext.Create(expression, inputSerializer);
             var translation = ExpressionToAggregationExpressionTranslator.TranslateLambdaBody(context, expression, inputSerializer, asRoot: true);
-            var (projectStage, projectionSerializer) = ProjectionHelper.CreateProjectStage(translation);
-            var simplifiedProjectStage =  simplifier.Visit(projectStage);
-            var renderedProjection = simplifiedProjectStage.Render().AsBsonDocument["$project"].AsBsonDocument;
-
+            var (specifications, projectionSerializer) = projectionCreator(translation);
+            specifications = simplifier.VisitAndConvert(specifications);
+            var renderedProjection = new BsonDocument(specifications.Select(specification => specification.RenderAsElement()));
             return new RenderedProjectionDefinition<TOutput>(renderedProjection, (IBsonSerializer<TOutput>)projectionSerializer);
         }
     }

@@ -453,6 +453,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
             return new AstIndexOfCPExpression(@string, value, start, end);
         }
 
+        public static AstExpression IsArray(AstExpression value)
+        {
+            return new AstUnaryExpression(AstUnaryOperator.IsArray, value);
+        }
+
         public static AstExpression Last(AstExpression array)
         {
             return new AstUnaryExpression(AstUnaryOperator.Last, array);
@@ -655,9 +660,22 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
             return new AstReduceExpression(input, initialValue, @in);
         }
 
+        public static AstExpression RegexMatch(AstExpression input, string pattern, string options)
+            => new AstRegexExpression(AstRegexOperator.Match, input, pattern, options);
+
         public static AstExpression ReverseArray(AstExpression array)
         {
             return new AstUnaryExpression(AstUnaryOperator.ReverseArray, array);
+        }
+
+        public static AstExpression Round(AstExpression arg)
+        {
+            return new AstUnaryExpression(AstUnaryOperator.Round, arg);
+        }
+
+        public static AstExpression Round(AstExpression arg, AstExpression place)
+        {
+            return new AstBinaryExpression(AstBinaryOperator.Round, arg, place);
         }
 
         public static AstExpression RTrim(AstExpression input, AstExpression chars = null)

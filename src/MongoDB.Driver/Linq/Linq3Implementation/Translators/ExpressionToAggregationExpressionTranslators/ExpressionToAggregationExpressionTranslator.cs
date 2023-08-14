@@ -19,7 +19,6 @@ using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
-using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
@@ -67,16 +66,22 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     return ConditionalExpressionToAggregationExpressionTranslator.Translate(context, (ConditionalExpression)expression);
                 case ExpressionType.Constant:
                     return ConstantExpressionToAggregationExpressionTranslator.Translate(context, (ConstantExpression)expression);
+                case ExpressionType.Index:
+                    return IndexExpressionToAggregationExpressionTranslator.Translate(context, (IndexExpression)expression);
                 case ExpressionType.MemberAccess:
                     return MemberExpressionToAggregationExpressionTranslator.Translate(context, (MemberExpression)expression);
                 case ExpressionType.MemberInit:
                     return MemberInitExpressionToAggregationExpressionTranslator.Translate(context, (MemberInitExpression)expression);
+                case ExpressionType.Negate:
+                    return NegateExpressionToAggregationExpressionTranslator.Translate(context, (UnaryExpression)expression);
                 case ExpressionType.New:
                     return NewExpressionToAggregationExpressionTranslator.Translate(context, (NewExpression)expression);
                 case ExpressionType.NewArrayInit:
                     return NewArrayInitExpressionToAggregationExpressionTranslator.Translate(context, (NewArrayExpression)expression);
                 case ExpressionType.Parameter:
                     return ParameterExpressionToAggregationExpressionTranslator.Translate(context, (ParameterExpression)expression);
+                case ExpressionType.TypeIs:
+                    return TypeIsExpressionToAggregationExpressionTranslator.Translate(context, (TypeBinaryExpression)expression);
             }
 
             throw new ExpressionNotSupportedException(expression);
@@ -121,7 +126,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             var lambdaReturnType = lambdaExpression.ReturnType;
             var bodySerializer = translatedBody.Serializer;
             var bodyType = bodySerializer.ValueType;
-            if (bodyType != lambdaReturnType)            
+            if (bodyType != lambdaReturnType)
             {
                 if (lambdaReturnType.IsAssignableFrom(bodyType))
                 {

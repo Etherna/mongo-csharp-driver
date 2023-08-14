@@ -1265,16 +1265,17 @@ namespace Etherna.MongoDB.Driver
                 (s, sr, linqProvider) =>
                 {
                     var renderedProjection = projection.Render(s, sr, linqProvider);
-                    BsonDocument document;
+                    IEnumerable<BsonDocument> documents;
                     if (renderedProjection.Document == null)
                     {
-                        document = new BsonDocument();
+                        // renderedProjection.Document will be null for x => x (and perhaps other cases also in the future)
+                        documents = Array.Empty<BsonDocument>();
                     }
                     else
                     {
-                        document = new BsonDocument(operatorName, renderedProjection.Document);
+                        documents = new[] { new BsonDocument(operatorName, renderedProjection.Document) };
                     }
-                    return new RenderedPipelineStageDefinition<TOutput>(operatorName, document, renderedProjection.ProjectionSerializer);
+                    return new RenderedPipelineStageDefinition<TOutput>(operatorName, documents, renderedProjection.ProjectionSerializer);
                 });
 
             return stage;
@@ -1320,13 +1321,41 @@ namespace Etherna.MongoDB.Driver
         /// Flag that specifies whether to perform a full document lookup on the backend database
         /// or return only stored source fields directly from Atlas Search.
         /// </param>
+        /// <param name="scoreDetails">
+        /// Flag that specifies whether to return a detailed breakdown
+        /// of the score for each document in the result. 
+        /// </param>
         /// <returns>The stage.</returns>
         public static PipelineStageDefinition<TInput, TInput> Search<TInput>(
             SearchDefinition<TInput> searchDefinition,
             SearchHighlightOptions<TInput> highlight = null,
             string indexName = null,
             SearchCountOptions count = null,
-            bool returnStoredSource = false)
+            bool returnStoredSource = false,
+            bool scoreDetails = false)
+        {
+            var searchOptions = new SearchOptions<TInput>()
+            {
+                CountOptions = count,
+                Highlight = highlight,
+                IndexName = indexName,
+                ReturnStoredSource = returnStoredSource,
+                ScoreDetails = scoreDetails
+            };
+
+            return Search(searchDefinition, searchOptions);
+        }
+
+        /// <summary>
+        /// Creates a $search stage.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input documents.</typeparam>
+        /// <param name="searchDefinition">The search definition.</param>
+        /// <param name="searchOptions">The search options.</param>
+        /// <returns>The stage.</returns>
+        public static PipelineStageDefinition<TInput, TInput> Search<TInput>(
+            SearchDefinition<TInput> searchDefinition,
+            SearchOptions<TInput> searchOptions)
         {
             Ensure.IsNotNull(searchDefinition, nameof(searchDefinition));
 
@@ -1335,11 +1364,15 @@ namespace Etherna.MongoDB.Driver
                 operatorName,
                 (s, sr, linqProvider) =>
                 {
-                    var renderedSearchDefinition = searchDefinition.Render(s, sr);
-                    renderedSearchDefinition.Add("highlight", () => highlight.Render(s, sr), highlight != null);
-                    renderedSearchDefinition.Add("count", () => count.Render(), count != null);
-                    renderedSearchDefinition.Add("index", indexName, indexName != null);
-                    renderedSearchDefinition.Add("returnStoredSource", returnStoredSource, returnStoredSource);
+                    var renderContext = new SearchDefinitionRenderContext<TInput>(s, sr);
+                    var renderedSearchDefinition = searchDefinition.Render(renderContext);
+                    renderedSearchDefinition.Add("highlight", () => searchOptions.Highlight.Render(renderContext), searchOptions.Highlight != null);
+                    renderedSearchDefinition.Add("count", () => searchOptions.CountOptions.Render(), searchOptions.CountOptions != null);
+                    renderedSearchDefinition.Add("sort", () => searchOptions.Sort.Render(s, sr), searchOptions.Sort != null);
+                    renderedSearchDefinition.Add("index", searchOptions.IndexName, searchOptions.IndexName != null);
+                    renderedSearchDefinition.Add("returnStoredSource", searchOptions.ReturnStoredSource, searchOptions.ReturnStoredSource);
+                    renderedSearchDefinition.Add("scoreDetails", searchOptions.ScoreDetails, searchOptions.ScoreDetails);
+                    renderedSearchDefinition.Add("tracking", () => searchOptions.Tracking.Render(), searchOptions.Tracking != null);
 
                     var document = new BsonDocument(operatorName, renderedSearchDefinition);
                     return new RenderedPipelineStageDefinition<TInput>(operatorName, document, s);
@@ -1368,7 +1401,7 @@ namespace Etherna.MongoDB.Driver
                 operatorName,
                 (s, sr, linqProvider) =>
                 {
-                    var renderedSearchDefinition = searchDefinition.Render(s, sr);
+                    var renderedSearchDefinition = searchDefinition.Render(new(s, sr));
                     renderedSearchDefinition.Add("count", () => count.Render(), count != null);
                     renderedSearchDefinition.Add("index", indexName, indexName != null);
 

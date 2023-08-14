@@ -78,8 +78,8 @@ Please see our [guidelines](CONTRIBUTING.md) for contributing to the driver.
 
 ### Maintainers:
 * Boris Dogadov             boris.dogadov@mongodb.com
-* Dmitry Lukyanov           dmitry.lukyanov@mongodb.com
 * James Kovacs              james.kovacs@mongodb.com
+* Oleksandr Poliakov        oleksandr.poliakov@mongodb.com
 * Robert Stam               robert@mongodb.com
 
 ### Contributors:
@@ -147,6 +147,7 @@ Please see our [guidelines](CONTRIBUTING.md) for contributing to the driver.
 * Andrew Rondeau            github@andrewrondeau.com
 * Ed Rooth                  edward.rooth@wallstreetjapan.com
 * Katie Sadoff              https://github.com/ksadoff
+* Manas Sahu                https://github.com/Zangetsu112
 * Sam558                    https://github.com/Sam558
 * Vladimir Setyaev          setyaev_v@pgstudio.io
 * Sergey Shushlyapin        https://github.com/sergeyshushlyapin
@@ -162,5 +163,7 @@ Please see our [guidelines](CONTRIBUTING.md) for contributing to the driver.
 * Craig Wilson              https://github.com/craiggwilson
 * Zhmayev Yaroslav          https://github.com/salaros
 * Aristarkh Zagorodnikov    https://github.com/onyxmaster
+* Samir Boulema             https://github.com/sboulema
+* Dmitry Lukyanov           https://github.com/DmitryLukyanov
 
 If you have contributed and we have neglected to add you to this list please contact one of the maintainers to be added to the list (with apologies).

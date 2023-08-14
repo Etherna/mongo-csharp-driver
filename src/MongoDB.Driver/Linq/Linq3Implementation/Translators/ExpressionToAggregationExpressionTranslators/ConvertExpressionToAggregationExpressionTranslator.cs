@@ -39,6 +39,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var operandExpression = expression.Operand;
                 var operandTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, operandExpression);
 
+                if (expressionType == operandExpression.Type)
+                {
+                    return operandTranslation;
+                }
+
                 if (IsConvertEnumToUnderlyingType(expression))
                 {
                     return TranslateConvertEnumToUnderlyingType(expression, operandTranslation);
@@ -200,29 +205,33 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
         private static AggregationExpression TranslateConvertUnderlyingTypeToEnum(UnaryExpression expression, AggregationExpression operandTranslation)
         {
-            var sourceType = expression.Operand.Type;
             var targetType = expression.Type;
 
-            IBsonSerializer enumUnderlyingTypeSerializer;
-            if (sourceType.IsNullable())
+            var valueSerializer = operandTranslation.Serializer;
+            if (valueSerializer is INullableSerializer nullableSerializer)
             {
-                var nullableSerializer = (INullableSerializer)operandTranslation.Serializer;
-                enumUnderlyingTypeSerializer = nullableSerializer.ValueSerializer;
-            }
-            else
-            {
-                enumUnderlyingTypeSerializer = operandTranslation.Serializer;
+                valueSerializer = nullableSerializer.ValueSerializer;
             }
 
             IBsonSerializer targetSerializer;
-            var enumSerializer = ((IEnumUnderlyingTypeSerializer)enumUnderlyingTypeSerializer).EnumSerializer;
-            if (targetType.IsNullableEnum())
+            if (valueSerializer is IEnumUnderlyingTypeSerializer enumUnderlyingTypeSerializer)
             {
-                targetSerializer = NullableSerializer.Create(enumSerializer);
+                targetSerializer = enumUnderlyingTypeSerializer.EnumSerializer;
             }
             else
             {
-                targetSerializer = enumSerializer;
+                var enumType = targetType;
+                if (targetType.IsNullable(out var wrappedType))
+                {
+                    enumType = wrappedType;
+                }
+
+                targetSerializer = EnumSerializer.Create(enumType);
+            }
+
+            if (targetType.IsNullableEnum())
+            {
+                targetSerializer = NullableSerializer.Create(targetSerializer);
             }
 
             return new AggregationExpression(expression, operandTranslation.Ast, targetSerializer);

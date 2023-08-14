@@ -1149,6 +1149,10 @@ namespace Etherna.MongoDB.Driver.Linq
         /// Flag that specifies whether to perform a full document lookup on the backend database
         /// or return only stored source fields directly from Atlas Search.
         /// </param>
+        /// <param name="scoreDetails">
+        /// Flag that specifies whether to return a detailed breakdown
+        /// of the score for each document in the result. 
+        /// </param>
         /// <returns>The queryable with a new stage appended.</returns>
         public static IMongoQueryable<TSource> Search<TSource>(
             this IMongoQueryable<TSource> source,
@@ -1156,11 +1160,37 @@ namespace Etherna.MongoDB.Driver.Linq
             SearchHighlightOptions<TSource> highlight = null,
             string indexName = null,
             SearchCountOptions count = null,
-            bool returnStoredSource = false)
+            bool returnStoredSource = false,
+            bool scoreDetails = false)
+        {
+            var searchOptions = new SearchOptions<TSource>()
+            {
+                CountOptions = count,
+                Highlight = highlight,
+                IndexName = indexName,
+                ReturnStoredSource = returnStoredSource,
+                ScoreDetails = scoreDetails
+            };
+
+            return Search(source, searchDefinition, searchOptions);
+        }
+
+        /// <summary>
+        /// Appends a $search stage to the LINQ pipeline.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of <paramref name="source" />.</typeparam>
+        /// <param name="source">A sequence of values.</param>
+        /// <param name="searchDefinition">The search definition.</param>
+        /// <param name="searchOptions">The search options.</param>
+        /// <returns>The queryable with a new stage appended.</returns>
+        public static IMongoQueryable<TSource> Search<TSource>(
+            this IMongoQueryable<TSource> source,
+            SearchDefinition<TSource> searchDefinition,
+            SearchOptions<TSource> searchOptions)
         {
             return AppendStage(
                 source,
-                PipelineStageDefinitionBuilder.Search(searchDefinition, highlight, indexName, count, returnStoredSource));
+                PipelineStageDefinitionBuilder.Search(searchDefinition, searchOptions));
         }
 
         /// <summary>

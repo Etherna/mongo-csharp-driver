@@ -1,77 +1,95 @@
 ﻿/* Copyright 2010-present MongoDB Inc.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
+using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Reflection;
-using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Options;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ToFilterFieldTranslators
 {
     internal static class GetItemMethodToFilterFieldTranslator
     {
+        // public static methods
         public static AstFilterField Translate(TranslationContext context, MethodCallExpression expression)
         {
+            var fieldExpression = expression.Object;
             var method = expression.Method;
             var arguments = expression.Arguments;
+            return Translate(context, expression, method, fieldExpression, arguments);
+        }
 
-            if (!method.IsStatic &&
-                method.IsSpecialName &&
-                method.Name == "get_Item" &&
-                arguments.Count == 1)
+        public static AstFilterField Translate(TranslationContext context, Expression expression, MethodInfo method, Expression fieldExpression, ReadOnlyCollection<Expression> arguments)
+        {
+            if (BsonValueMethod.IsGetItemWithIntMethod(method))
             {
-                var fieldExpression = expression.Object;
-                var indexExpression = arguments[0];
+                return TranslateBsonValueGetItemWithInt(context, expression, fieldExpression, arguments[0]);
+            }
 
-                if (indexExpression.Type == typeof(int))
-                {
-                    return ArrayIndexExpressionToFilterFieldTranslator.Translate(context, expression, fieldExpression, indexExpression);
-                }
+            if (BsonValueMethod.IsGetItemWithStringMethod(method))
+            {
+                return TranslateBsonValueGetItemWithString(context, expression, fieldExpression, arguments[0]);
+            }
 
-                if (indexExpression.Type == typeof(string))
-                {
-                    return TranslateWithStringIndex(context, expression, method, fieldExpression, indexExpression);
-                }
+            if (IListMethod.IsGetItemWithIntMethod(method))
+            {
+                return TranslateIListGetItemWithInt(context, expression, fieldExpression, arguments[0]);
+            }
+
+            if (IDictionaryMethod.IsGetItemWithStringMethod(method))
+            {
+                return TranslateIDictionaryGetItemWithString(context, expression, fieldExpression, arguments[0]);
             }
 
             throw new ExpressionNotSupportedException(expression);
         }
 
-        private static AstFilterField TranslateWithStringIndex(TranslationContext context, MethodCallExpression expression, MethodInfo method, Expression fieldExpression, Expression indexExpression)
+        // private static methods
+        private static AstFilterField TranslateBsonValueGetItemWithInt(TranslationContext context, Expression expression, Expression fieldExpression, Expression indexExpression)
+        {
+            return ArrayIndexExpressionToFilterFieldTranslator.Translate(context, expression, fieldExpression, indexExpression);
+        }
+
+        private static AstFilterField TranslateBsonValueGetItemWithString(TranslationContext context, Expression expression, Expression fieldExpression, Expression keyExpression)
         {
             var field = ExpressionToFilterFieldTranslator.Translate(context, fieldExpression);
-            var key = indexExpression.GetConstantValue<string>(containingExpression: expression);
+            var key = keyExpression.GetConstantValue<string>(containingExpression: expression);
+            var valueSerializer = BsonValueSerializer.Instance;
+            return field.SubField(key, valueSerializer);
+        }
 
-            if (typeof(BsonValue).IsAssignableFrom(field.Serializer.ValueType))
-            {
-                var valueSerializer = BsonValueSerializer.Instance;
-                return field.SubField(key, valueSerializer);
-            }
+        private static AstFilterField TranslateIListGetItemWithInt(TranslationContext context, Expression expression, Expression fieldExpression, Expression indexExpression)
+        {
+            return ArrayIndexExpressionToFilterFieldTranslator.Translate(context, expression, fieldExpression, indexExpression);
+        }
+
+        private static AstFilterField TranslateIDictionaryGetItemWithString(TranslationContext context, Expression expression, Expression fieldExpression, Expression keyExpression)
+        {
+            var field = ExpressionToFilterFieldTranslator.Translate(context, fieldExpression);
+            var key = keyExpression.GetConstantValue<string>(containingExpression: expression);
 
             if (field.Serializer is IBsonDictionarySerializer dictionarySerializer &&
                 dictionarySerializer.DictionaryRepresentation == DictionaryRepresentation.Document)
             {
                 var valueSerializer = dictionarySerializer.ValueSerializer;
-                if (method.ReturnType.IsAssignableFrom(valueSerializer.ValueType))
-                {
-                    return field.SubField(key, valueSerializer);
-                }
+                return field.SubField(key, valueSerializer);
             }
 
             throw new ExpressionNotSupportedException(expression);

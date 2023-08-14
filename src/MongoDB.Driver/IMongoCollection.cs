@@ -19,7 +19,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Driver.Core.Operations;
+using Etherna.MongoDB.Driver.Search;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -52,6 +52,11 @@ namespace Etherna.MongoDB.Driver
         /// Gets the index manager.
         /// </summary>
         IMongoIndexManager<TDocument> Indexes { get; }
+
+        /// <summary>
+        /// Gets the search index manager.
+        /// </summary>
+        IMongoSearchIndexManager SearchIndexes { get; }
 
         /// <summary>
         /// Gets the settings.

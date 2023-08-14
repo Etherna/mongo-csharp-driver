@@ -1,17 +1,17 @@
 ﻿/* Copyright 2010-present MongoDB Inc.
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-* http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*/
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 using System;
 using System.Collections;
@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Options;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
@@ -128,29 +129,42 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 AstExpression ast;
                 IBsonSerializer serializer;
 
-                if (propertyInfo.Name == "DayOfWeek")
+                switch (propertyInfo.Name)
                 {
-                    ast = AstExpression.Subtract(AstExpression.DatePart(AstDatePart.DayOfWeek, container.Ast), 1);
-                    serializer = new EnumSerializer<DayOfWeek>(BsonType.Int32);
-                }
-                else
-                {
-                    AstDatePart datePart;
-                    switch (propertyInfo.Name)
-                    {
-                        case "Day": datePart = AstDatePart.DayOfMonth; break;
-                        case "DayOfWeek": datePart = AstDatePart.DayOfWeek; break;
-                        case "DayOfYear": datePart = AstDatePart.DayOfYear; break;
-                        case "Hour": datePart = AstDatePart.Hour; break;
-                        case "Millisecond": datePart = AstDatePart.Millisecond; break;
-                        case "Minute": datePart = AstDatePart.Minute; break;
-                        case "Month": datePart = AstDatePart.Month; break;
-                        case "Second": datePart = AstDatePart.Second; break;
-                        case "Year": datePart = AstDatePart.Year; break;
-                        default: return false;
-                    }
-                    ast = AstExpression.DatePart(datePart, container.Ast);
-                    serializer = new Int32Serializer();
+                    case "Date":
+                        ast = AstExpression.DateTrunc(container.Ast, "day");
+                        serializer = container.Serializer;
+                        break;
+
+                    case "DayOfWeek":
+                        ast = AstExpression.Subtract(AstExpression.DatePart(AstDatePart.DayOfWeek, container.Ast), 1);
+                        serializer = new EnumSerializer<DayOfWeek>(BsonType.Int32);
+                        break;
+
+                    case "TimeOfDay":
+                        var endDate = container.Ast;
+                        var startDate = AstExpression.DateTrunc(container.Ast, "day");
+                        ast = AstExpression.DateDiff(startDate, endDate, "millisecond");
+                        serializer = new TimeSpanSerializer(BsonType.Int64, TimeSpanUnits.Milliseconds);
+                        break;
+
+                    default:
+                        var datePart = propertyInfo.Name switch
+                        {
+                            "Day" => AstDatePart.DayOfMonth,
+                            "DayOfWeek" => AstDatePart.DayOfWeek,
+                            "DayOfYear" => AstDatePart.DayOfYear,
+                            "Hour" => AstDatePart.Hour,
+                            "Millisecond" => AstDatePart.Millisecond,
+                            "Minute" => AstDatePart.Minute,
+                            "Month" => AstDatePart.Month,
+                            "Second" => AstDatePart.Second,
+                            "Year" => AstDatePart.Year,
+                            _ => throw new ExpressionNotSupportedException(expression)
+                        };
+                        ast = AstExpression.DatePart(datePart, container.Ast);
+                        serializer = new Int32Serializer();
+                        break;
                 }
 
                 result = new AggregationExpression(expression, ast, serializer);
