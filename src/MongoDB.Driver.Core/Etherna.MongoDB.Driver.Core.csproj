@@ -8,6 +8,7 @@
     <Product>MongoDB.Driver.Core</Product>
     <Description>Fork by Etherna of the official MongoDB supported Driver Core library. See https://www.mongodb.com/docs/drivers/csharp/ for more details.</Description>
     <PackageDescription>Fork by Etherna of the Core Component of the Official MongoDB .NET Driver.</PackageDescription>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <PropertyGroup>

@@ -274,6 +274,11 @@ namespace Etherna.MongoDB.Driver
             return WithPipeline(_pipeline.SearchMeta(searchDefinition, indexName, count));
         }
 
+        public override IAggregateFluent<TResult> Set(SetFieldDefinitions<TResult> fields)
+        {
+            return WithPipeline(_pipeline.Set(fields));
+        }
+
         public override IAggregateFluent<BsonDocument> SetWindowFields<TWindowFields>(
             AggregateExpressionDefinition<ISetWindowFieldsPartition<TResult>, TWindowFields> output)
         {
@@ -339,6 +344,15 @@ namespace Etherna.MongoDB.Driver
         public override IAggregateFluent<TNewResult> Unwind<TNewResult>(FieldDefinition<TResult> field, AggregateUnwindOptions<TNewResult> options)
         {
             return WithPipeline(_pipeline.Unwind(field, options));
+        }
+
+        public override IAggregateFluent<TResult> VectorSearch(
+            FieldDefinition<TResult> field,
+            QueryVector queryVector,
+            int limit,
+            VectorSearchOptions<TResult> options = null)
+        {
+            return WithPipeline(_pipeline.VectorSearch(field, queryVector, limit, options));
         }
 
         public override string ToString()

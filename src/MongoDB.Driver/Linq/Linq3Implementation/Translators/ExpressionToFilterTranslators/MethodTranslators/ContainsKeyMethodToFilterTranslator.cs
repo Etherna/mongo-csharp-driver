@@ -15,9 +15,11 @@
 
 using System.Linq.Expressions;
 using System.Reflection;
+using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Options;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ToFilterFieldTranslators;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.MethodTranslators
@@ -42,7 +44,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 switch (dictionaryRepresentation)
                 {
                     case DictionaryRepresentation.Document:
-                        var key = GetKeyStringConstant(expression, keyExpression);
+                        var key = GetKeyStringConstant(expression, keyExpression, dictionarySerializer.KeySerializer);
                         var keyField = dictionaryField.SubField(key, valueSerializer);
                         return AstFilter.Exists(keyField);
 
@@ -64,14 +66,19 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             throw new ExpressionNotSupportedException(expression, because: $"class {field.Serializer.GetType().FullName} does not implement the IBsonDictionarySerializer interface");
         }
 
-        private static string GetKeyStringConstant(Expression expression, Expression keyExpression)
+        private static string GetKeyStringConstant(Expression expression, Expression keyExpression, IBsonSerializer keySerializer)
         {
-            if (keyExpression is ConstantExpression keyConstantExpression && keyExpression.Type == typeof(string))
+            if (keyExpression is ConstantExpression keyConstantExpression)
             {
-                return (string)keyConstantExpression.Value;
+                var keyValue = keyConstantExpression.Value;
+                var serializedKeyValue = SerializationHelper.SerializeValue(keySerializer, keyValue);
+                if (serializedKeyValue.BsonType == BsonType.String)
+                {
+                    return serializedKeyValue.AsString;
+                }
             }
 
-            throw new ExpressionNotSupportedException(expression, because: "key must be a string constant");
+            throw new ExpressionNotSupportedException(expression, because: "key must be a constant represented as a string");
         }
 
         private static bool IsContainsKeyMethod(MethodInfo method)

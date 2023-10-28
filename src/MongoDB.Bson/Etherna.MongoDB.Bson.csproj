@@ -10,6 +10,7 @@
     <Description>Fork by Etherna of the official MongoDB supported BSON library. See https://www.mongodb.com/docs/drivers/csharp/ for more details.</Description>
     <PackageDescription>Fork by Etherna of the MongoDB's Official Bson Library.</PackageDescription>
     <PackageTags>$(PackageTags);bson</PackageTags>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

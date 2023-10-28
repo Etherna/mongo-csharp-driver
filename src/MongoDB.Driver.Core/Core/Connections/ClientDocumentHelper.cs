@@ -77,6 +77,11 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                 driverName = $"{driverName}|legacy";
             }
 
+            if (IsEFLoaded())
+            {
+                driverName = $"{driverName}|efcore";
+            }
+
             return new BsonDocument
             {
                 { "name", driverName },
@@ -86,6 +91,11 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             bool IsLegacyLoaded()
             {
                 return Type.GetType("Etherna.MongoDB.Driver.MongoServer, MongoDB.Driver.Legacy") != null;
+            }
+
+            bool IsEFLoaded()
+            {
+                return Type.GetType("MongoDB.EntityFrameworkCore.Query.MongoQueryContext, MongoDB.EntityFrameworkCore") != null;
             }
         }
 

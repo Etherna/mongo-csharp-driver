@@ -22,10 +22,11 @@ namespace Etherna.MongoDB.Driver.Core.Logging
     {
         private static string[] __connectionCommonParams = new[]
         {
-            ClusterId,
+            TopologyId,
             DriverConnectionId,
             ServerHost,
             ServerPort,
+            ServerConnectionId,
             Message,
         };
 
@@ -40,8 +41,8 @@ namespace Etherna.MongoDB.Driver.Core.Logging
 
             AddTemplateProvider<ConnectionOpenedEvent>(
                  LogLevel.Debug,
-                 ConnectionCommonParams(),
-                 (e, _) => GetParams(e.ConnectionId, "Connection ready"));
+                 ConnectionCommonParams(DurationMS),
+                 (e, _) => GetParams(e.ConnectionId, "Connection ready", e.Duration.TotalMilliseconds));
 
             AddTemplateProvider<ConnectionOpeningEvent>(
                 LogLevel.Debug,

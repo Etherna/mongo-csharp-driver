@@ -9,6 +9,7 @@
     <Product>MongoDB.Driver</Product>
     <Description>Fork by Etherna of the official MongoDB supported driver for MongoDB. See https://www.mongodb.com/docs/drivers/csharp/ for more details.</Description>
     <PackageDescription>Fork by Etherna of the official .NET driver for MongoDB.</PackageDescription>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

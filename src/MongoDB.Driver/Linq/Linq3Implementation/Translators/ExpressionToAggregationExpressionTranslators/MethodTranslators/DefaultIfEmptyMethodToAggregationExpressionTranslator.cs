@@ -13,12 +13,12 @@
 * limitations under the License.
 */
 
-using System;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
+using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators.MethodTranslators
 {
@@ -39,7 +39,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 if (method.Is(EnumerableMethod.DefaultIfEmpty))
                 {
                     var sourceItemSerializer = ArraySerializerHelper.GetItemSerializer(sourceTranslation.Serializer);
-                    var defaultValue = Activator.CreateInstance(sourceItemSerializer.ValueType);
+                    var defaultValue = sourceItemSerializer.ValueType.GetDefaultValue();
                     var serializedDefaultValue = SerializationHelper.SerializeValue(sourceItemSerializer, defaultValue);
                     defaultValueAst = AstExpression.Constant(new BsonArray { serializedDefaultValue });
                 }

@@ -622,6 +622,22 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Appends a $set stage to the pipeline.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <typeparam name="TFields">The type of object specifying the fields to set.</typeparam>
+        /// <param name="aggregate">The aggregate.</param>
+        /// <param name="fields">The fields to set.</param>
+        /// <returns>The fluent aggregate interface.</returns>
+        public static IAggregateFluent<TResult> Set<TResult, TFields>(
+            this IAggregateFluent<TResult> aggregate,
+            Expression<Func<TResult, TFields>> fields)
+        {
+            Ensure.IsNotNull(aggregate, nameof(aggregate));
+            return aggregate.AppendStage(PipelineStageDefinitionBuilder.Set(fields));
+        }
+
+        /// <summary>
         /// Appends a $setWindowFields to the pipeline.
         /// </summary>
         /// <typeparam name="TResult">The type of the result.</typeparam>
@@ -950,6 +966,28 @@ namespace Etherna.MongoDB.Driver
             Ensure.IsNotNull(aggregate, nameof(aggregate));
 
             return IAsyncCursorSourceExtensions.SingleOrDefaultAsync(aggregate.Limit(2), cancellationToken);
+        }
+
+        /// <summary>
+        /// Appends a $vectorSearch stage.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="aggregate">The aggregate.</param>
+        /// <param name="field">The field.</param>
+        /// <param name="queryVector">The query vector.</param>
+        /// <param name="limit">The limit.</param>
+        /// <param name="options">The vector search options.</param>
+        /// <returns>The fluent aggregate interface.</returns>
+        public static IAggregateFluent<TResult> VectorSearch<TResult>(
+            this IAggregateFluent<TResult> aggregate,
+            Expression<Func<TResult, object>> field,
+            QueryVector queryVector,
+            int limit,
+            VectorSearchOptions<TResult> options = null)
+        {
+            Ensure.IsNotNull(aggregate, nameof(aggregate));
+
+            return aggregate.VectorSearch(new ExpressionFieldDefinition<TResult>(field), queryVector, limit, options);
         }
     }
 }

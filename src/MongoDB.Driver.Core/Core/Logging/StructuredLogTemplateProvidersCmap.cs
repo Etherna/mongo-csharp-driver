@@ -23,7 +23,7 @@ namespace Etherna.MongoDB.Driver.Core.Logging
     {
         private static string[] __cmapCommonParams = new[]
         {
-            ClusterId,
+            TopologyId,
             ServerHost,
             ServerPort,
             Message,
@@ -55,17 +55,18 @@ namespace Etherna.MongoDB.Driver.Core.Logging
 
             AddTemplateProvider<ConnectionPoolCheckedOutConnectionEvent>(
                 LogLevel.Debug,
-                ConnectionCommonParams(),
-                (e, _) => GetParams(e.ConnectionId, "Connection checked out"));
+                ConnectionCommonParams(DurationMS),
+                (e, _) => GetParams(e.ConnectionId, "Connection checked out", e.Duration.TotalMilliseconds));
 
             AddTemplateProvider<ConnectionPoolCheckingOutConnectionFailedEvent>(
                 LogLevel.Debug,
-                CmapCommonParams(Reason, Error),
+                CmapCommonParams(Reason, Error, DurationMS),
                 (e, o) => GetParams(
                     e.ServerId,
                     "Connection checkout failed",
                     GetCheckoutFailedReason(e.Reason),
-                    FormatException(e.Exception, o)));
+                    FormatException(e.Exception, o),
+                    e.Duration.TotalMilliseconds));
 
             AddTemplateProvider<ConnectionPoolRemovingConnectionEvent>(
                 LogLevel.Debug,

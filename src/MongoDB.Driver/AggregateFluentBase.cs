@@ -246,6 +246,9 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <inheritdoc />
+        public virtual IAggregateFluent<TResult> Set(SetFieldDefinitions<TResult> fields) => throw new NotImplementedException();
+
+        /// <inheritdoc />
         public virtual IAggregateFluent<BsonDocument> SetWindowFields<TWindowFields>(
             AggregateExpressionDefinition<ISetWindowFieldsPartition<TResult>, TWindowFields> output)
         {
@@ -300,6 +303,16 @@ namespace Etherna.MongoDB.Driver
 
         /// <inheritdoc />
         public virtual IAggregateFluent<TNewResult> Unwind<TNewResult>(FieldDefinition<TResult> field, AggregateUnwindOptions<TNewResult> options)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public virtual IAggregateFluent<TResult> VectorSearch(
+            FieldDefinition<TResult> field,
+            QueryVector queryVector,
+            int limit,
+            VectorSearchOptions<TResult> options = null)
         {
             throw new NotImplementedException();
         }
