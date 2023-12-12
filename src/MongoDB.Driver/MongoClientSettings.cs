@@ -20,6 +20,7 @@ using System.Linq;
 using System.Text;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.Compression;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Encryption;
@@ -1221,7 +1222,7 @@ namespace Etherna.MongoDB.Driver
             }
             if (_compressors?.Any() ?? false)
             {
-                sb.AppendFormat("Compressors=[{0}];", string.Join(",", _compressors));
+                sb.AppendFormat("Compressors=[{0}];", string.Join(",", _compressors.Select(x => CompressorTypeMapper.ToServerName(x.Type))));
             }
             if (_connectionModeSwitch == ConnectionModeSwitch.UseConnectionMode)
             {

@@ -43,6 +43,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case ExpressionType.Coalesce:
                 case ExpressionType.Divide:
                 case ExpressionType.Equal:
+                case ExpressionType.ExclusiveOr:
                 case ExpressionType.GreaterThan:
                 case ExpressionType.GreaterThanOrEqual:
                 case ExpressionType.LessThan:

@@ -41,16 +41,19 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __aggregateMerge = new Feature("AggregateMerge", WireVersion.Server42);
         private static readonly Feature __aggregateOut = new Feature("AggregateOut", WireVersion.Server26);
         private static readonly Feature __aggregateOutOnSecondary = new Feature("AggregateOutOnSecondary", WireVersion.Server50);
+        private static readonly Feature __aggregateOutTimeSeries = new Feature("AggregateOutTimeSeries", WireVersion.Server70);
         private static readonly Feature __aggregateOutToDifferentDatabase = new Feature("AggregateOutToDifferentDatabase", WireVersion.Server44);
         private static readonly Feature __aggregateToString = new Feature("AggregateToString", WireVersion.Server40);
         private static readonly Feature __aggregateUnionWith = new Feature("AggregateUnionWith", WireVersion.Server44);
         private static readonly Feature __arrayFilters = new Feature("ArrayFilters", WireVersion.Server36);
+        private static readonly Feature __bitwiseOperators = new Feature("BitwiseOperators", WireVersion.Server63);
         private static readonly Feature __bypassDocumentValidation = new Feature("BypassDocumentValidation", WireVersion.Server32);
         private static readonly Feature __changeStreamStage = new Feature("ChangeStreamStage", WireVersion.Server36);
         private static readonly Feature __changeStreamAllChangesForCluster = new Feature("ChangeStreamAllChangesForCluster", WireVersion.Server40);
         private static readonly Feature __changeStreamForDatabase = new Feature("ChangeStreamForDatabase", WireVersion.Server40);
         private static readonly Feature __changeStreamPostBatchResumeToken = new Feature("ChangeStreamPostBatchResumeToken", WireVersion.Server40);
         private static readonly Feature __changeStreamPrePostImages = new Feature("ChangeStreamPrePostImages", WireVersion.Server60);
+        private static readonly Feature __changeStreamSplitEventStage = new Feature("ChangeStreamSplitEventStage", WireVersion.Server70);
         private static readonly Feature __clientSideEncryption = new Feature("ClientSideEncryption", WireVersion.Server42);
         private static readonly Feature __clusteredIndexes = new Feature("ClusteredIndexes", WireVersion.Server53);
         private static readonly Feature __collation = new Feature("Collation", WireVersion.Server34);
@@ -235,9 +238,14 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         public static Feature AggregateOut => __aggregateOut;
 
         /// <summary>
-        /// Gets the aggregate out on secondary feature,
+        /// Gets the aggregate out on secondary feature.
         /// </summary>
         public static Feature AggregateOutOnSecondary => __aggregateOutOnSecondary;
+
+        /// <summary>
+        /// Gets the aggregate out to time series feature.
+        /// </summary>
+        public static Feature AggregateOutTimeSeries => __aggregateOutTimeSeries;
 
         /// <summary>
         /// Gets the aggregate out to a different database feature.
@@ -259,6 +267,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// </summary>
         [Obsolete("This property will be removed in a later release.")]
         public static Feature ArrayFilters => __arrayFilters;
+
+        /// <summary>
+        /// Gets the bitwise operators feature.
+        /// </summary>
+        public static Feature BitwiseOperators => __bitwiseOperators;
 
         /// <summary>
         /// Gets the bypass document validation feature.
@@ -291,6 +304,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// Gets the change stream pre post images feature.
         /// </summary>
         public static Feature ChangeStreamPrePostImages => __changeStreamPrePostImages;
+
+        /// <summary>
+        /// Gets the change stream splitEvent stage feature.
+        /// </summary>
+        public static Feature ChangeStreamSplitEventStage => __changeStreamSplitEventStage;
 
         /// <summary>
         /// Gets the client side encryption feature.

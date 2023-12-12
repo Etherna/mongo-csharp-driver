@@ -383,6 +383,14 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Creates a $changeStreamSplitLargeEvent stage.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input documents.</typeparam>
+        /// <returns>The stage.</returns>
+        public static PipelineStageDefinition<ChangeStreamDocument<TInput>, ChangeStreamDocument<TInput>> ChangeStreamSplitLargeEvent<TInput>() =>
+            (PipelineStageDefinition<ChangeStreamDocument<TInput>, ChangeStreamDocument<TInput>>)new BsonDocument("$changeStreamSplitLargeEvent", new BsonDocument());
+
+        /// <summary>
         /// Creates a $count stage.
         /// </summary>
         /// <typeparam name="TInput">The type of the input documents.</typeparam>
@@ -1236,14 +1244,21 @@ namespace Etherna.MongoDB.Driver
         /// </summary>
         /// <typeparam name="TInput">The type of the input documents.</typeparam>
         /// <param name="outputCollection">The output collection.</param>
+        /// <param name="timeSeriesOptions">The time series options.</param>
         /// <returns>The stage.</returns>
         public static PipelineStageDefinition<TInput, TInput> Out<TInput>(
-            IMongoCollection<TInput> outputCollection)
+            IMongoCollection<TInput> outputCollection,
+            TimeSeriesOptions timeSeriesOptions = null)
         {
             Ensure.IsNotNull(outputCollection, nameof(outputCollection));
             var outputDatabaseName = outputCollection.Database.DatabaseNamespace.DatabaseName;
             var outputCollectionName = outputCollection.CollectionNamespace.CollectionName;
-            var outDocument = new BsonDocument { { "db", outputDatabaseName }, { "coll", outputCollectionName } };
+            var outDocument = new BsonDocument
+                {
+                    { "db", outputDatabaseName },
+                    { "coll", outputCollectionName },
+                    { "timeseries", () => timeSeriesOptions.ToBsonDocument(), timeSeriesOptions != null}
+                };
             return new BsonDocumentPipelineStageDefinition<TInput, TInput>(new BsonDocument("$out", outDocument));
         }
 
@@ -1323,7 +1338,7 @@ namespace Etherna.MongoDB.Driver
         /// </param>
         /// <param name="scoreDetails">
         /// Flag that specifies whether to return a detailed breakdown
-        /// of the score for each document in the result. 
+        /// of the score for each document in the result.
         /// </param>
         /// <returns>The stage.</returns>
         public static PipelineStageDefinition<TInput, TInput> Search<TInput>(
@@ -1973,7 +1988,7 @@ namespace Etherna.MongoDB.Driver
                         { "limit", limit },
                         { "numCandidates", options?.NumberOfCandidates ?? limit * 10 },
                         { "index", options?.IndexName ?? "default" },
-                        { "filter", () => options?.Filter?.Render(s, sr, linqProvider), options?.Filter != null },
+                        { "filter", () => RenderFilter(s, sr, linqProvider), options?.Filter != null },
                     };
 
                     var document = new BsonDocument(operatorName, vectorSearchOperator);
@@ -1981,6 +1996,12 @@ namespace Etherna.MongoDB.Driver
                 });
 
             return stage;
+
+            BsonDocument RenderFilter(IBsonSerializer<TInput> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+            {
+                using var renderContext = FilterDefinitionRenderContext.StartRender(true);
+                return options.Filter.Render(documentSerializer, serializerRegistry, linqProvider);
+            }
         }
 
         // private methods

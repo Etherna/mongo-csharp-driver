@@ -519,8 +519,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 var field = ExpressionToFilterFieldTranslator.Translate(context, fieldExpression);
 
-                if (field.Serializer is IRepresentationConfigurable representationConfigurable &&
-                    representationConfigurable.Representation != BsonType.String)
+                if (field.Serializer is not IHasRepresentationSerializer hasRepresentationSerializer)
+                {
+                    throw new ExpressionNotSupportedException(fieldExpression, expression, because: $"it was not possible to determine whether field \"{field.Path}\" is represented as a string");
+                }
+                if (hasRepresentationSerializer.Representation != BsonType.String)
                 {
                     throw new ExpressionNotSupportedException(fieldExpression, expression, because: $"field \"{field.Path}\" is not represented as a string");
                 }

@@ -86,7 +86,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 }
             }
 
-            if (fieldSerializer is IBsonDocumentSerializer documentSerializer &&
+            if (DocumentSerializerHelper.AreMembersRepresentedAsFields(fieldSerializer , out var documentSerializer) &&
                 documentSerializer.TryGetMemberSerializationInfo(memberExpression.Member.Name, out BsonSerializationInfo memberSerializationInfo))
             {
                 var subFieldSerializer = memberSerializationInfo.Serializer;

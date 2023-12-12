@@ -72,7 +72,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 {
                     var selectorLambda = ExpressionHelper.UnquoteLambda(arguments[1]);
                     var selectorTranslation = ExpressionToAggregationExpressionTranslator.TranslateLambdaBody(context, selectorLambda, sourceSerializer, asRoot: true);
-                    if (selectorTranslation.Serializer is IBsonDocumentSerializer)
+                    if (SerializationHelper.IsRepresentedAsDocument(selectorTranslation.Serializer))
                     {
                         valueAst = selectorTranslation.Ast;
                         valueSerializer = selectorTranslation.Serializer;

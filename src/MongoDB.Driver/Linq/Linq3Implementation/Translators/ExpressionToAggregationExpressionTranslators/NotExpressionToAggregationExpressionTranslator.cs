@@ -25,7 +25,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             if (expression.NodeType == ExpressionType.Not)
             {
                 var operandTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, expression.Operand);
-                var ast = AstExpression.Not(operandTranslation.Ast);
+                var ast = expression.Type == typeof(bool) ? AstExpression.Not(operandTranslation.Ast) : AstExpression.BitNot(operandTranslation.Ast);
                 return new AggregationExpression(expression, ast, operandTranslation.Serializer);
             }
 

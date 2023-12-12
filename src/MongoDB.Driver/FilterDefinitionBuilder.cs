@@ -1716,6 +1716,15 @@ namespace Etherna.MongoDB.Driver
                 }
             }
 
+            if (FilterDefinitionRenderContext.RenderDollarForm)
+            {
+                if (document.ElementCount > 1 ||
+                    document.ElementCount == 1 && document.GetElement(0).Name != "$and")
+                {
+                    PromoteFilterToDollarForm(document, null);
+                }
+            }
+
             return document;
         }
 
@@ -1769,14 +1778,19 @@ namespace Etherna.MongoDB.Driver
             static bool IsFieldName(string fieldOrOperatorName) => !fieldOrOperatorName.StartsWith("$");
         }
 
-        private static void PromoteFilterToDollarForm(BsonDocument document, BsonElement clause)
+        private static void PromoteFilterToDollarForm(BsonDocument document, BsonElement? clause)
         {
             var clauses = new BsonArray();
             foreach (var queryElement in document)
             {
                 clauses.Add(new BsonDocument(queryElement));
             }
-            clauses.Add(new BsonDocument(clause));
+
+            if (clause != null)
+            {
+                clauses.Add(new BsonDocument(clause.Value));
+            }
+
             document.Clear();
             document.Add("$and", clauses);
         }
@@ -2371,7 +2385,19 @@ namespace Etherna.MongoDB.Driver
                 var context = BsonSerializationContext.CreateRoot(bsonWriter);
                 bsonWriter.WriteStartDocument();
                 bsonWriter.WriteName(renderedField.FieldName);
-                renderedField.ValueSerializer.Serialize(context, _value);
+
+                if (FilterDefinitionRenderContext.RenderDollarForm)
+                {
+                    bsonWriter.WriteStartDocument();
+                    bsonWriter.WriteName("$eq");
+                    renderedField.ValueSerializer.Serialize(context, _value);
+                    bsonWriter.WriteEndDocument();
+                }
+                else
+                {
+                    renderedField.ValueSerializer.Serialize(context, _value);
+                }
+
                 bsonWriter.WriteEndDocument();
             }
 
