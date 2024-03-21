@@ -24,6 +24,7 @@ using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Compression;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver
@@ -69,6 +70,7 @@ namespace Etherna.MongoDB.Driver
         private bool? _retryWrites;
         private ConnectionStringScheme _scheme;
         private IEnumerable<MongoServerAddress> _servers;
+        private ServerMonitoringMode? _serverMonitoringMode;
         private TimeSpan _serverSelectionTimeout;
         private TimeSpan _socketTimeout;
         private int? _srvMaxHosts;
@@ -126,6 +128,7 @@ namespace Etherna.MongoDB.Driver
             _retryWrites = null;
             _scheme = ConnectionStringScheme.MongoDB;
             _servers = new[] { new MongoServerAddress("localhost", 27017) };
+            _serverMonitoringMode = null;
             _serverSelectionTimeout = MongoDefaults.ServerSelectionTimeout;
             _socketTimeout = MongoDefaults.SocketTimeout;
             _srvMaxHosts = null;
@@ -611,6 +614,15 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Gets or sets the server monitoring mode to use.
+        /// </summary>
+        public ServerMonitoringMode? ServerMonitoringMode
+        {
+            get { return _serverMonitoringMode; }
+            set { _serverMonitoringMode = value; }
+        }
+
+        /// <summary>
         /// Gets or sets the server selection timeout.
         /// </summary>
         public TimeSpan ServerSelectionTimeout
@@ -1024,6 +1036,10 @@ namespace Etherna.MongoDB.Driver
             {
                 query.AppendFormat("minPoolSize={0}&", _minConnectionPoolSize);
             }
+            if (_serverMonitoringMode != null)
+            {
+                query.AppendFormat("serverMonitoringMode={0}&", _serverMonitoringMode);
+            }
             if (_serverSelectionTimeout != MongoDefaults.ServerSelectionTimeout)
             {
                 query.AppendFormat("serverSelectionTimeout={0}&", FormatTimeSpan(_serverSelectionTimeout));
@@ -1163,6 +1179,7 @@ namespace Etherna.MongoDB.Driver
             _retryWrites = connectionString.RetryWrites;
             _scheme = connectionString.Scheme;
             _servers = connectionString.Hosts.ToMongoServerAddresses();
+            _serverMonitoringMode = connectionString.ServerMonitoringMode;
             _serverSelectionTimeout = connectionString.ServerSelectionTimeout.GetValueOrDefault(MongoDefaults.ServerSelectionTimeout);
             _socketTimeout = connectionString.SocketTimeout.GetValueOrDefault(MongoDefaults.SocketTimeout);
             _srvMaxHosts = connectionString.SrvMaxHosts;

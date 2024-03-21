@@ -25,6 +25,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         {
             var method = expression.Method;
 
+            if (method.Is(MqlMethod.Exists))
+            {
+                return IsMissingMethodToAggregationExpressionTranslator.Translate(context, expression);
+            }
+
             if (method.Is(ArrayMethod.Exists) || ListMethod.IsExistsMethod(expression.Method))
             {
                 return AnyMethodToAggregationExpressionTranslator.Translate(context, expression);

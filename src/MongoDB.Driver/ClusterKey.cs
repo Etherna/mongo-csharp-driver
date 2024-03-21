@@ -19,6 +19,7 @@ using System.Linq;
 using Microsoft.Extensions.Logging;
 using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Servers;
 using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver
@@ -42,6 +43,7 @@ namespace Etherna.MongoDB.Driver
         private readonly TimeSpan _heartbeatInterval;
         private readonly TimeSpan _heartbeatTimeout;
         private readonly bool _ipv6;
+        private readonly LibraryInfo _libraryInfo;
         private readonly bool _loadBalanced;
         private readonly TimeSpan _localThreshold;
         private readonly LoggingSettings _loggingSettings;
@@ -57,6 +59,7 @@ namespace Etherna.MongoDB.Driver
         private readonly int _sendBufferSize;
         private readonly ServerApi _serverApi;
         private readonly IReadOnlyList<MongoServerAddress> _servers;
+        private readonly ServerMonitoringMode _serverMonitoringMode;
         private readonly TimeSpan _serverSelectionTimeout;
         private readonly TimeSpan _socketTimeout;
         private readonly int _srvMaxHosts;
@@ -82,6 +85,7 @@ namespace Etherna.MongoDB.Driver
             TimeSpan heartbeatInterval,
             TimeSpan heartbeatTimeout,
             bool ipv6,
+            LibraryInfo libraryInfo,
             bool loadBalanced,
             TimeSpan localThreshold,
             LoggingSettings loggingSettings,
@@ -97,6 +101,7 @@ namespace Etherna.MongoDB.Driver
             int sendBufferSize,
             ServerApi serverApi,
             IReadOnlyList<MongoServerAddress> servers,
+            ServerMonitoringMode serverMonitoringMode,
             TimeSpan serverSelectionTimeout,
             TimeSpan socketTimeout,
             int srvMaxHosts,
@@ -120,6 +125,7 @@ namespace Etherna.MongoDB.Driver
             _heartbeatInterval = heartbeatInterval;
             _heartbeatTimeout = heartbeatTimeout;
             _ipv6 = ipv6;
+            _libraryInfo = libraryInfo;
             _loadBalanced = loadBalanced;
             _localThreshold = localThreshold;
             _loggingSettings = loggingSettings;
@@ -135,6 +141,7 @@ namespace Etherna.MongoDB.Driver
             _sendBufferSize = sendBufferSize;
             _serverApi = serverApi;
             _servers = servers;
+            _serverMonitoringMode = serverMonitoringMode;
             _serverSelectionTimeout = serverSelectionTimeout;
             _socketTimeout = socketTimeout;
             _srvMaxHosts = srvMaxHosts;
@@ -184,6 +191,7 @@ namespace Etherna.MongoDB.Driver
         public TimeSpan HeartbeatInterval { get { return _heartbeatInterval; } }
         public TimeSpan HeartbeatTimeout { get { return _heartbeatTimeout; } }
         public bool IPv6 { get { return _ipv6; } }
+        public LibraryInfo LibraryInfo { get { return _libraryInfo; } }
         public bool LoadBalanced => _loadBalanced;
         public TimeSpan LocalThreshold { get { return _localThreshold; } }
         public LoggingSettings LoggingSettings { get { return _loggingSettings; } }
@@ -199,6 +207,7 @@ namespace Etherna.MongoDB.Driver
         public int SendBufferSize { get { return _sendBufferSize; } }
         public ServerApi ServerApi { get { return _serverApi; } }
         public IReadOnlyList<MongoServerAddress> Servers { get { return _servers; } }
+        public ServerMonitoringMode ServerMonitoringMode { get { return _serverMonitoringMode; } }
         public TimeSpan ServerSelectionTimeout { get { return _serverSelectionTimeout; } }
         public TimeSpan SocketTimeout { get { return _socketTimeout; } }
         public int SrvMaxHosts { get { return _srvMaxHosts; } }
@@ -239,6 +248,7 @@ namespace Etherna.MongoDB.Driver
                 _heartbeatInterval == rhs._heartbeatInterval &&
                 _heartbeatTimeout == rhs._heartbeatTimeout &&
                 _ipv6 == rhs._ipv6 &&
+                object.Equals(_libraryInfo, rhs.LibraryInfo) &&
                 _loadBalanced == rhs._loadBalanced &&
                 _localThreshold == rhs._localThreshold &&
                 _loggingSettings == rhs._loggingSettings &&
@@ -254,6 +264,7 @@ namespace Etherna.MongoDB.Driver
                 _sendBufferSize == rhs._sendBufferSize &&
                 _serverApi == rhs._serverApi &&
                 _servers.SequenceEqual(rhs._servers) &&
+                _serverMonitoringMode == rhs._serverMonitoringMode &&
                 _serverSelectionTimeout == rhs._serverSelectionTimeout &&
                 _socketTimeout == rhs._socketTimeout &&
                 _srvMaxHosts == rhs._srvMaxHosts &&

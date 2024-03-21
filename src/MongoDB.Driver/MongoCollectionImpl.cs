@@ -28,6 +28,7 @@ using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Operations;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 using Etherna.MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Search;
 
 namespace Etherna.MongoDB.Driver
@@ -366,6 +367,38 @@ namespace Etherna.MongoDB.Driver
             options = options ?? new DistinctOptions();
 
             var operation = CreateDistinctOperation(field, filter, options);
+            return ExecuteReadOperationAsync(session, operation, cancellationToken);
+        }
+
+        public override IAsyncCursor<TItem> DistinctMany<TItem>(FieldDefinition<TDocument, IEnumerable<TItem>> field, FilterDefinition<TDocument> filter, DistinctOptions options, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return UsingImplicitSession(session => DistinctMany(session, field, filter, options, cancellationToken), cancellationToken);
+        }
+
+        public override IAsyncCursor<TItem> DistinctMany<TItem>(IClientSessionHandle session, FieldDefinition<TDocument, IEnumerable<TItem>> field, FilterDefinition<TDocument> filter, DistinctOptions options, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            Ensure.IsNotNull(session, nameof(session));
+            Ensure.IsNotNull(field, nameof(field));
+            Ensure.IsNotNull(filter, nameof(filter));
+            options = options ?? new DistinctOptions();
+
+            var operation = CreateDistinctManyOperation(field, filter, options);
+            return ExecuteReadOperation(session, operation, cancellationToken);
+        }
+
+        public override Task<IAsyncCursor<TItem>> DistinctManyAsync<TItem>(FieldDefinition<TDocument, IEnumerable<TItem>> field, FilterDefinition<TDocument> filter, DistinctOptions options, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return UsingImplicitSessionAsync(session => DistinctManyAsync(session, field, filter, options, cancellationToken), cancellationToken);
+        }
+
+        public override Task<IAsyncCursor<TItem>> DistinctManyAsync<TItem>(IClientSessionHandle session, FieldDefinition<TDocument, IEnumerable<TItem>> field, FilterDefinition<TDocument> filter, DistinctOptions options, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            Ensure.IsNotNull(session, nameof(session));
+            Ensure.IsNotNull(field, nameof(field));
+            Ensure.IsNotNull(filter, nameof(filter));
+            options = options ?? new DistinctOptions();
+
+            var operation = CreateDistinctManyOperation(field, filter, options);
             return ExecuteReadOperationAsync(session, operation, cancellationToken);
         }
 
@@ -974,6 +1007,26 @@ namespace Etherna.MongoDB.Driver
             };
         }
 
+        private DistinctOperation<TItem> CreateDistinctManyOperation<TItem>(FieldDefinition<TDocument, IEnumerable<TItem>> field, FilterDefinition<TDocument> filter, DistinctOptions options)
+        {
+            var renderedField = field.Render(_documentSerializer, _settings.SerializerRegistry, _linqProvider);
+            var itemSerializer = GetItemSerializerForDistinctMany(renderedField, _settings.SerializerRegistry);
+
+            return new DistinctOperation<TItem>(
+                _collectionNamespace,
+                itemSerializer,
+                renderedField.FieldName,
+                _messageEncoderSettings)
+            {
+                Collation = options.Collation,
+                Comment = options.Comment,
+                Filter = filter.Render(_documentSerializer, _settings.SerializerRegistry, _linqProvider),
+                MaxTime = options.MaxTime,
+                ReadConcern = _settings.ReadConcern,
+                RetryRequested = _database.Client.Settings.RetryReads,
+            };
+        }
+
         private EstimatedDocumentCountOperation CreateEstimatedDocumentCountOperation(EstimatedDocumentCountOptions options)
         {
             return new EstimatedDocumentCountOperation(_collectionNamespace, _messageEncoderSettings)
@@ -1246,6 +1299,26 @@ namespace Etherna.MongoDB.Driver
             }
 
             return serializerRegistry.GetSerializer<TField>();
+        }
+
+        private IBsonSerializer<TItem> GetItemSerializerForDistinctMany<TItem>(RenderedFieldDefinition<IEnumerable<TItem>> renderedField, IBsonSerializerRegistry serializerRegistry)
+        {
+            if (renderedField.UnderlyingSerializer != null)
+            {
+                if (renderedField.UnderlyingSerializer is IBsonArraySerializer arraySerializer)
+                {
+                    BsonSerializationInfo itemSerializationInfo;
+                    if (arraySerializer.TryGetItemSerializationInfo(out itemSerializationInfo))
+                    {
+                        if (itemSerializationInfo.Serializer.ValueType == typeof(TItem))
+                        {
+                            return (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
+                        }
+                    }
+                }
+            }
+
+            return serializerRegistry.GetSerializer<TItem>();
         }
 
         private TResult ExecuteReadOperation<TResult>(IClientSessionHandle session, IReadOperation<TResult> operation, CancellationToken cancellationToken = default(CancellationToken))

@@ -121,6 +121,7 @@ namespace Etherna.MongoDB.Driver
             return settings.With(
                 authenticatorFactories: Optional.Enumerable<IAuthenticatorFactory>(authenticatorFactories),
                 compressors: Optional.Enumerable(clusterKey.Compressors),
+                libraryInfo: clusterKey.LibraryInfo,
                 loadBalanced: clusterKey.LoadBalanced,
                 maxIdleTime: clusterKey.MaxConnectionIdleTime,
                 maxLifeTime: clusterKey.MaxConnectionLifeTime,
@@ -138,7 +139,8 @@ namespace Etherna.MongoDB.Driver
         {
             return settings.With(
                 heartbeatInterval: clusterKey.HeartbeatInterval,
-                heartbeatTimeout: clusterKey.HeartbeatTimeout);
+                heartbeatTimeout: clusterKey.HeartbeatTimeout,
+                serverMonitoringMode: clusterKey.ServerMonitoringMode);
         }
 
         private SslStreamSettings ConfigureSsl(SslStreamSettings settings, ClusterKey clusterKey)

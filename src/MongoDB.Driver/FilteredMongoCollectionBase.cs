@@ -212,6 +212,26 @@ namespace Etherna.MongoDB.Driver
             return _wrappedCollection.DistinctAsync(session, field, CombineFilters(filter), options, cancellationToken);
         }
 
+        public override IAsyncCursor<TItem> DistinctMany<TItem>(FieldDefinition<TDocument, IEnumerable<TItem>> field, FilterDefinition<TDocument> filter, DistinctOptions options = null, CancellationToken cancellationToken = default)
+        {
+            return _wrappedCollection.DistinctMany(field, CombineFilters(filter), options, cancellationToken);
+        }
+
+        public override IAsyncCursor<TItem> DistinctMany<TItem>(IClientSessionHandle session, FieldDefinition<TDocument, IEnumerable<TItem>> field, FilterDefinition<TDocument> filter, DistinctOptions options = null, CancellationToken cancellationToken = default)
+        {
+            return _wrappedCollection.DistinctMany(session, field, CombineFilters(filter), options, cancellationToken);
+        }
+
+        public override Task<IAsyncCursor<TItem>> DistinctManyAsync<TItem>(FieldDefinition<TDocument, IEnumerable<TItem>> field, FilterDefinition<TDocument> filter, DistinctOptions options = null, CancellationToken cancellationToken = default)
+        {
+            return _wrappedCollection.DistinctManyAsync(field, CombineFilters(filter), options, cancellationToken);
+        }
+
+        public override Task<IAsyncCursor<TItem>> DistinctManyAsync<TItem>(IClientSessionHandle session, FieldDefinition<TDocument, IEnumerable<TItem>> field, FilterDefinition<TDocument> filter, DistinctOptions options = null, CancellationToken cancellationToken = default)
+        {
+            return _wrappedCollection.DistinctManyAsync(session, field, CombineFilters(filter), options, cancellationToken);
+        }
+
         public override long EstimatedDocumentCount(EstimatedDocumentCountOptions options = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             throw new NotSupportedException("EstimatedDocumentCount is not supported for filtered collections.");

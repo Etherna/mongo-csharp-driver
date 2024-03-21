@@ -30,6 +30,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case "Aggregate": return AggregateMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "All": return AllMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Any": return AnyMethodToAggregationExpressionTranslator.Translate(context, expression);
+                case "AsQueryable": return AsQueryableMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Average": return AverageMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Ceiling": return CeilingMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "CompareTo": return CompareToMethodToAggregationExpressionTranslator.Translate(context, expression);
@@ -39,12 +40,12 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case "CovariancePopulation": return CovariancePopulationMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "CovarianceSample": return CovarianceSampleMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Create": return CreateMethodToAggregationExpressionTranslator.Translate(context, expression);
+                case "DateFromString": return DateFromStringMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "DefaultIfEmpty": return DefaultIfEmptyMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "DenseRank": return DenseRankMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Derivative": return DerivativeMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Distinct": return DistinctMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "DocumentNumber": return DocumentNumberMethodToAggregationExpressionTranslator.Translate(context, expression);
-                case "ElementAt": return ElementAtMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Equals": return EqualsMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Except": return ExceptMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Exists": return ExistsMethodToAggregationExpressionTranslator.Translate(context, expression);
@@ -127,8 +128,14 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case "LongCount":
                     return CountMethodToAggregationExpressionTranslator.Translate(context, expression);
 
+                case "ElementAt":
+                case "ElementAtOrDefault":
+                    return ElementAtMethodToAggregationExpressionTranslator.Translate(context, expression);
+
                 case "First":
+                case "FirstOrDefault":
                 case "Last":
+                case "LastOrDefault":
                     return FirstOrLastMethodToAggregationExpressionTranslator.Translate(context, expression);
 
                 case "IndexOf":
@@ -137,6 +144,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 case "IndexOfAny":
                     return IndexOfAnyMethodToAggregationExpressionTranslator.Translate(context, expression);
+
+                case "IsMissing":
+                case "IsNullOrMissing":
+                    return IsMissingMethodToAggregationExpressionTranslator.Translate(context, expression);
 
                 case "Log":
                 case "Log10":

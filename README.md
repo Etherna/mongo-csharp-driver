@@ -66,7 +66,7 @@ Documentation
 
 Questions/Bug Reports
 ---------------------
-* [MongoDB Community Forum](https://developer.mongodb.com/community/forums/tags/c/drivers-odms-connectors/7/dot-net-driver)
+* [MongoDB Community Forum](https://www.mongodb.com/community/forums/tags/c/data/drivers-odms/7/dot-net)
 * [Jira](https://jira.mongodb.org/browse/CSHARP)
 
 If you’ve identified a security vulnerability in a driver or any other MongoDB project, please report it according to the [instructions here](https://www.mongodb.com/docs/manual/tutorial/create-a-vulnerability-report).
@@ -165,5 +165,7 @@ Please see our [guidelines](CONTRIBUTING.md) for contributing to the driver.
 * Aristarkh Zagorodnikov    https://github.com/onyxmaster
 * Samir Boulema             https://github.com/sboulema
 * Dmitry Lukyanov           https://github.com/DmitryLukyanov
+* Andrea Balducci           https://github.com/andreabalducci
+* Sergei Lipin              https://github.com/prchaoz
 
 If you have contributed and we have neglected to add you to this list please contact one of the maintainers to be added to the list (with apologies).

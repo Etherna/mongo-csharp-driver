@@ -16,7 +16,9 @@
 using System;
 using System.Collections.Generic;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
 {
@@ -50,20 +52,21 @@ namespace Etherna.MongoDB.Driver.Core.Operations
 
             __retryableWriteExceptions = new HashSet<Type>(resumableAndRetryableExceptions);
 
-            var resumableAndRetryableErrorCodes = new HashSet<ServerErrorCode>
+            var retryableReadAndWriteErrorCodes = new HashSet<ServerErrorCode>
             {
+                ServerErrorCode.ExceededTimeLimit,
                 ServerErrorCode.HostNotFound,
                 ServerErrorCode.HostUnreachable,
                 ServerErrorCode.NetworkTimeout,
                 ServerErrorCode.SocketException
             };
 
-            __retryableReadErrorCodes = new HashSet<ServerErrorCode>(resumableAndRetryableErrorCodes);
-
-            __retryableWriteErrorCodes = new HashSet<ServerErrorCode>(resumableAndRetryableErrorCodes)
+            __retryableReadErrorCodes = new HashSet<ServerErrorCode>(retryableReadAndWriteErrorCodes)
             {
-                ServerErrorCode.ExceededTimeLimit
+                ServerErrorCode.ReadConcernMajorityNotAvailableYet
             };
+
+            __retryableWriteErrorCodes = new HashSet<ServerErrorCode>(retryableReadAndWriteErrorCodes);
 
             __resumableChangeStreamErrorCodes = new HashSet<ServerErrorCode>()
             {
@@ -89,9 +92,9 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         }
 
         // public static methods
-        public static void AddRetryableWriteErrorLabelIfRequired(MongoException exception, int maxWireVersion)
+        public static void AddRetryableWriteErrorLabelIfRequired(MongoException exception, ConnectionDescription connectionDescription)
         {
-            if (ShouldRetryableWriteExceptionLabelBeAdded(exception, maxWireVersion))
+            if (ShouldRetryableWriteExceptionLabelBeAdded(exception, connectionDescription))
             {
                 exception.AddErrorLabel(RetryableWriteErrorLabel);
             }
@@ -171,17 +174,21 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             return exception is MongoConnectionException mongoConnectionException && mongoConnectionException.IsNetworkException;
         }
 
-        private static bool ShouldRetryableWriteExceptionLabelBeAdded(Exception exception, int maxWireVersion)
+        private static bool ShouldRetryableWriteExceptionLabelBeAdded(Exception exception, ConnectionDescription connectionDescription)
         {
             if (IsNetworkException(exception))
             {
                 return true;
             }
 
+            var maxWireVersion = connectionDescription.MaxWireVersion;
             if (Feature.ServerReturnsRetryableWriteErrorLabel.IsSupported(maxWireVersion))
             {
                 return false;
             }
+
+            // on all servers from 4.4 on we would have returned false in the previous if statement
+            // so from this point on we know we are connected to a pre 4.4 server
 
             if (__retryableWriteExceptions.Contains(exception.GetType()))
             {
@@ -198,29 +205,33 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 }
             }
 
-            var writeConcernException = exception as MongoWriteConcernException;
-            if (writeConcernException != null)
+            var serverType = connectionDescription.HelloResult.ServerType;
+            if (serverType != ServerType.ShardRouter)
             {
-                var writeConcernError = writeConcernException.WriteConcernResult.Response.GetValue("writeConcernError", null)?.AsBsonDocument;
-                if (writeConcernError != null)
+                var writeConcernException = exception as MongoWriteConcernException;
+                if (writeConcernException != null)
                 {
-                    var code = (ServerErrorCode)writeConcernError.GetValue("code", -1).AsInt32;
-                    switch (code)
+                    var writeConcernError = writeConcernException.WriteConcernResult.Response.GetValue("writeConcernError", null)?.AsBsonDocument;
+                    if (writeConcernError != null)
                     {
-                        case ServerErrorCode.InterruptedAtShutdown:
-                        case ServerErrorCode.InterruptedDueToReplStateChange:
-                        case ServerErrorCode.LegacyNotPrimary:
-                        case ServerErrorCode.NotWritablePrimary:
-                        case ServerErrorCode.NotPrimaryNoSecondaryOk:
-                        case ServerErrorCode.NotPrimaryOrSecondary:
-                        case ServerErrorCode.PrimarySteppedDown:
-                        case ServerErrorCode.ShutdownInProgress:
-                        case ServerErrorCode.HostNotFound:
-                        case ServerErrorCode.HostUnreachable:
-                        case ServerErrorCode.NetworkTimeout:
-                        case ServerErrorCode.SocketException:
-                        case ServerErrorCode.ExceededTimeLimit:
-                            return true;
+                        var code = (ServerErrorCode)writeConcernError.GetValue("code", -1).AsInt32;
+                        switch (code)
+                        {
+                            case ServerErrorCode.InterruptedAtShutdown:
+                            case ServerErrorCode.InterruptedDueToReplStateChange:
+                            case ServerErrorCode.LegacyNotPrimary:
+                            case ServerErrorCode.NotWritablePrimary:
+                            case ServerErrorCode.NotPrimaryNoSecondaryOk:
+                            case ServerErrorCode.NotPrimaryOrSecondary:
+                            case ServerErrorCode.PrimarySteppedDown:
+                            case ServerErrorCode.ShutdownInProgress:
+                            case ServerErrorCode.HostNotFound:
+                            case ServerErrorCode.HostUnreachable:
+                            case ServerErrorCode.NetworkTimeout:
+                            case ServerErrorCode.SocketException:
+                            case ServerErrorCode.ExceededTimeLimit:
+                                return true;
+                        }
                     }
                 }
             }

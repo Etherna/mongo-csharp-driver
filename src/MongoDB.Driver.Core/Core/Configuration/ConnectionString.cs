@@ -26,6 +26,7 @@ using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Compression;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 
 namespace Etherna.MongoDB.Driver.Core.Configuration
 {
@@ -98,6 +99,7 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
         private bool? _retryReads;
         private bool? _retryWrites;
         private ConnectionStringScheme _scheme;
+        private ServerMonitoringMode? _serverMonitoringMode;
         private TimeSpan? _serverSelectionTimeout;
         private TimeSpan? _socketTimeout;
         private int? _srvMaxHosts;
@@ -450,6 +452,14 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
         public ConnectionStringScheme Scheme
         {
             get { return _scheme; }
+        }
+
+        /// <summary>
+        /// Gets the server monitoring mode.
+        /// </summary>
+        public ServerMonitoringMode? ServerMonitoringMode
+        {
+            get { return _serverMonitoringMode; }
         }
 
         /// <summary>
@@ -1100,6 +1110,9 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
                 case "serverselectiontimeout":
                 case "serverselectiontimeoutms":
                     _serverSelectionTimeout = ParseTimeSpan(name, value);
+                    break;
+                case "servermonitoringmode":
+                    _serverMonitoringMode = ParseEnum<ServerMonitoringMode>(name, value);
                     break;
                 case "sockettimeout":
                 case "sockettimeoutms":

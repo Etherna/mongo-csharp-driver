@@ -14,6 +14,7 @@
 */
 
 using System.Linq.Expressions;
+using System.Reflection;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
@@ -23,23 +24,37 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class TakeMethodToAggregationExpressionTranslator
     {
+        private static MethodInfo[] __takeMethods =
+        {
+            EnumerableMethod.Take,
+            QueryableMethod.Take
+        };
+
+        private static MethodInfo[] __skipMethods =
+        {
+            EnumerableMethod.Skip,
+            QueryableMethod.Skip
+        };
+
         public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
 
-            if (method.Is(EnumerableMethod.Take))
+            if (method.IsOneOf(__takeMethods))
             {
                 var sourceExpression = arguments[0];
                 var countExpression = arguments[1];
                 Expression skipExpression = null;
-                if (sourceExpression is MethodCallExpression sourceSkipExpression && sourceSkipExpression.Method.Is(EnumerableMethod.Skip))
+                if (sourceExpression is MethodCallExpression sourceSkipExpression && sourceSkipExpression.Method.IsOneOf(__skipMethods))
                 {
                     sourceExpression = sourceSkipExpression.Arguments[0];
                     skipExpression = sourceSkipExpression.Arguments[1];
                 }
 
                 var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);
+                NestedAsQueryableHelper.EnsureQueryableMethodHasNestedAsQueryableSource(expression, sourceTranslation);
+
                 var countTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, countExpression);
                 AstExpression ast;
                 if (skipExpression == null)
@@ -52,7 +67,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     ast = AstExpression.Slice(sourceTranslation.Ast, skipTranslation.Ast, countTranslation.Ast);
                 }
                 var itemSerializer = ArraySerializerHelper.GetItemSerializer(sourceTranslation.Serializer);
-                var serializer = IEnumerableSerializer.Create(itemSerializer);
+                var serializer = NestedAsQueryableSerializer.CreateIEnumerableOrNestedAsQueryableSerializer(expression.Type, itemSerializer);
 
                 return new AggregationExpression(expression, ast, serializer);
             }

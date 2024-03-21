@@ -23,6 +23,7 @@ using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Compression;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 using Etherna.MongoDB.Driver.Encryption;
 using Etherna.MongoDB.Driver.Linq;
 using Etherna.MongoDB.Shared;
@@ -51,6 +52,7 @@ namespace Etherna.MongoDB.Driver
         private TimeSpan _heartbeatInterval;
         private TimeSpan _heartbeatTimeout;
         private bool _ipv6;
+        private LibraryInfo _libraryInfo;
         private LinqProvider _linqProvider;
         private bool _loadBalanced;
         private TimeSpan _localThreshold;
@@ -70,6 +72,7 @@ namespace Etherna.MongoDB.Driver
         private string _sdamLogFilename;
         private ServerApi _serverApi;
         private List<MongoServerAddress> _servers;
+        private ServerMonitoringMode _serverMonitoringMode;
         private TimeSpan _serverSelectionTimeout;
         private TimeSpan _socketTimeout;
         private int _srvMaxHosts;
@@ -111,6 +114,7 @@ namespace Etherna.MongoDB.Driver
             _heartbeatInterval = ServerSettings.DefaultHeartbeatInterval;
             _heartbeatTimeout = ServerSettings.DefaultHeartbeatTimeout;
             _ipv6 = false;
+            _libraryInfo = null;
             _linqProvider = LinqProvider.V3;
             _loadBalanced = false;
             _localThreshold = MongoDefaults.LocalThreshold;
@@ -129,6 +133,7 @@ namespace Etherna.MongoDB.Driver
             _sdamLogFilename = null;
             _serverApi = null;
             _servers = new List<MongoServerAddress> { new MongoServerAddress("localhost") };
+            _serverMonitoringMode = ServerMonitoringMode.Auto;
             _serverSelectionTimeout = MongoDefaults.ServerSelectionTimeout;
             _socketTimeout = MongoDefaults.SocketTimeout;
             _srvMaxHosts = 0;
@@ -408,6 +413,19 @@ namespace Etherna.MongoDB.Driver
             {
                 if (_isFrozen) { throw new InvalidOperationException("MongoClientSettings is frozen."); }
                 _ipv6 = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets information about a library using the .NET Driver.
+        /// </summary>
+        public LibraryInfo LibraryInfo
+        {
+            get { return _libraryInfo; }
+            set
+            {
+                if (_isFrozen) { throw new InvalidOperationException("MongoClientSettings is frozen."); }
+                _libraryInfo = value;
             }
         }
 
@@ -699,6 +717,19 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Gets or sets the server monitoring mode to use.
+        /// </summary>
+        public ServerMonitoringMode ServerMonitoringMode
+        {
+            get { return _serverMonitoringMode; }
+            set
+            {
+                if (_isFrozen) { throw new InvalidOperationException("MongoClientSettings is frozen."); }
+                _serverMonitoringMode = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the server selection timeout.
         /// </summary>
         public TimeSpan ServerSelectionTimeout
@@ -959,6 +990,7 @@ namespace Etherna.MongoDB.Driver
             clientSettings.HeartbeatInterval = url.HeartbeatInterval;
             clientSettings.HeartbeatTimeout = url.HeartbeatTimeout;
             clientSettings.IPv6 = url.IPv6;
+            clientSettings.LibraryInfo = null;
             clientSettings.LinqProvider = LinqProvider.V3;
             clientSettings.LoadBalanced = url.LoadBalanced;
             clientSettings.LocalThreshold = url.LocalThreshold;
@@ -975,6 +1007,7 @@ namespace Etherna.MongoDB.Driver
             clientSettings.RetryWrites = url.RetryWrites.GetValueOrDefault(true);
             clientSettings.Scheme = url.Scheme;
             clientSettings.Servers = new List<MongoServerAddress>(url.Servers);
+            clientSettings.ServerMonitoringMode = url.ServerMonitoringMode ?? ServerMonitoringMode.Auto;
             clientSettings.ServerSelectionTimeout = url.ServerSelectionTimeout;
             clientSettings.SocketTimeout = url.SocketTimeout;
             clientSettings.SrvMaxHosts = url.SrvMaxHosts.GetValueOrDefault(0);
@@ -1015,6 +1048,7 @@ namespace Etherna.MongoDB.Driver
             clone._heartbeatInterval = _heartbeatInterval;
             clone._heartbeatTimeout = _heartbeatTimeout;
             clone._ipv6 = _ipv6;
+            clone._libraryInfo = _libraryInfo;
             clone._linqProvider = _linqProvider;
             clone._loadBalanced = _loadBalanced;
             clone._localThreshold = _localThreshold;
@@ -1034,6 +1068,7 @@ namespace Etherna.MongoDB.Driver
             clone._sdamLogFilename = _sdamLogFilename;
             clone._serverApi = _serverApi;
             clone._servers = new List<MongoServerAddress>(_servers);
+            clone._serverMonitoringMode = _serverMonitoringMode;
             clone._serverSelectionTimeout = _serverSelectionTimeout;
             clone._socketTimeout = _socketTimeout;
             clone._srvMaxHosts = _srvMaxHosts;
@@ -1084,6 +1119,7 @@ namespace Etherna.MongoDB.Driver
                 _heartbeatInterval == rhs._heartbeatInterval &&
                 _heartbeatTimeout == rhs._heartbeatTimeout &&
                 _ipv6 == rhs._ipv6 &&
+                object.Equals(_libraryInfo, rhs._libraryInfo) &&
                 _linqProvider == rhs._linqProvider &&
                 _loadBalanced == rhs._loadBalanced &&
                 _localThreshold == rhs._localThreshold &&
@@ -1103,6 +1139,7 @@ namespace Etherna.MongoDB.Driver
                 _sdamLogFilename == rhs._sdamLogFilename &&
                 _serverApi == rhs._serverApi &&
                 _servers.SequenceEqual(rhs._servers) &&
+                _serverMonitoringMode == rhs._serverMonitoringMode &&
                 _serverSelectionTimeout == rhs._serverSelectionTimeout &&
                 _socketTimeout == rhs._socketTimeout &&
                 _srvMaxHosts == rhs._srvMaxHosts &&
@@ -1171,6 +1208,7 @@ namespace Etherna.MongoDB.Driver
                 .Hash(_heartbeatInterval)
                 .Hash(_heartbeatTimeout)
                 .Hash(_ipv6)
+                .Hash(_libraryInfo)
                 .Hash(_loadBalanced)
                 .Hash(_localThreshold)
                 .Hash(_maxConnecting)
@@ -1188,6 +1226,7 @@ namespace Etherna.MongoDB.Driver
                 .Hash(_sdamLogFilename)
                 .Hash(_serverApi)
                 .HashElements(_servers)
+                .Hash(_serverMonitoringMode)
                 .Hash(_serverSelectionTimeout)
                 .Hash(_socketTimeout)
                 .Hash(_srvMaxHosts)
@@ -1238,6 +1277,10 @@ namespace Etherna.MongoDB.Driver
             sb.AppendFormat("HeartbeatInterval={0};", _heartbeatInterval);
             sb.AppendFormat("HeartbeatTimeout={0};", _heartbeatTimeout);
             sb.AppendFormat("IPv6={0};", _ipv6);
+            if (_libraryInfo != null)
+            {
+                sb.AppendFormat("libraryInfo={0};", _libraryInfo);
+            }
             sb.AppendFormat("LinqProvider={0};", _linqProvider);
             if (_loadBalanced)
             {
@@ -1271,6 +1314,7 @@ namespace Etherna.MongoDB.Driver
                 sb.AppendFormat("ServerApi={0};", _serverApi);
             }
             sb.AppendFormat("Servers={0};", string.Join(",", _servers.Select(s => s.ToString()).ToArray()));
+            sb.AppendFormat("serverMonitoringMode={0};", _serverMonitoringMode);
             sb.AppendFormat("ServerSelectionTimeout={0};", _serverSelectionTimeout);
             sb.AppendFormat("SocketTimeout={0};", _socketTimeout);
             sb.AppendFormat("SrvMaxHosts={0}", _srvMaxHosts);
@@ -1307,6 +1351,7 @@ namespace Etherna.MongoDB.Driver
                 _heartbeatInterval,
                 _heartbeatTimeout,
                 _ipv6,
+                _libraryInfo,
                 _loadBalanced,
                 _localThreshold,
                 _loggingSettings,
@@ -1322,6 +1367,7 @@ namespace Etherna.MongoDB.Driver
                 MongoDefaults.TcpSendBufferSize, // TODO: add SendBufferSize to MongoClientSettings?
                 _serverApi,
                 _servers.ToList(),
+                _serverMonitoringMode,
                 _serverSelectionTimeout,
                 _socketTimeout,
                 _srvMaxHosts,

@@ -14,6 +14,7 @@
 */
 
 using System.Linq.Expressions;
+using System.Reflection;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
@@ -23,18 +24,26 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class WhereMethodToAggregationExpressionTranslator
     {
+        private static MethodInfo[] __whereMethods =
+        {
+            EnumerableMethod.Where,
+            MongoEnumerableMethod.WhereWithLimit,
+            QueryableMethod.Where
+        };
+
         public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
 
-            if (method.IsOneOf(EnumerableMethod.Where, MongoEnumerableMethod.WhereWithLimit))
+            if (method.IsOneOf(__whereMethods))
             {
                 var sourceExpression = arguments[0];
                 var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);
                 var itemSerializer = ArraySerializerHelper.GetItemSerializer(sourceTranslation.Serializer);
+                NestedAsQueryableHelper.EnsureQueryableMethodHasNestedAsQueryableSource(expression, sourceTranslation);
 
-                var predicateLambda = (LambdaExpression)arguments[1];
+                var predicateLambda = ExpressionHelper.UnquoteLambdaIfQueryableMethod(method, arguments[1]);
                 var predicateParameter = predicateLambda.Parameters[0];
                 var predicateSymbol = context.CreateSymbol(predicateParameter, itemSerializer);
                 var predicateContext = context.WithSymbol(predicateSymbol);
@@ -53,8 +62,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     predicateParameter.Name,
                     limitTranslation?.Ast);
 
-                var enumerableSerializer = IEnumerableSerializer.Create(itemSerializer);
-                return new AggregationExpression(expression, ast, enumerableSerializer);
+                var resultSerializer = NestedAsQueryableSerializer.CreateIEnumerableOrNestedAsQueryableSerializer(expression.Type, itemSerializer);
+                return new AggregationExpression(expression, ast, resultSerializer);
             }
 
             throw new ExpressionNotSupportedException(expression);

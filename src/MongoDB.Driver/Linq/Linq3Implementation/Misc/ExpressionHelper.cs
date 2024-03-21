@@ -13,7 +13,9 @@
 * limitations under the License.
 */
 
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
@@ -26,6 +28,21 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
             Ensure.That(expression.NodeType == ExpressionType.Quote, "NodeType must be Quote.", nameof(expression));
             var unaryExpression = (UnaryExpression)expression;
             return (LambdaExpression)unaryExpression.Operand;
+        }
+
+        public static LambdaExpression UnquoteLambdaIfQueryableMethod(MethodInfo method, Expression expression)
+        {
+            Ensure.IsNotNull(method, nameof(method));
+            Ensure.IsNotNull(expression, nameof(expression));
+
+            if (method.DeclaringType == typeof(Queryable))
+            {
+                return UnquoteLambda(expression);
+            }
+            else
+            {
+                return (LambdaExpression)expression;
+            }
         }
     }
 }

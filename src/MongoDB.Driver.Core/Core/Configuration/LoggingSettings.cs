@@ -30,7 +30,7 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
         public ILoggerFactory LoggerFactory { get; }
 
         /// <summary>
-        /// Gets the maximum document size in chars
+        /// Gets the maximum document size in chars.
         /// </summary>
         public int MaxDocumentSize { get; }
 
