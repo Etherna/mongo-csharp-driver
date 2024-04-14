@@ -814,12 +814,12 @@ namespace Etherna.MongoDB.Bson.IO
         // private methods
         private string EscapedString(string value)
         {
-            if (value.All(c => !NeedsEscaping(c)))
+            if (!NeedsEscaping(value))
             {
                 return value;
             }
 
-            var sb = new StringBuilder(value.Length);
+            var sb = new StringBuilder(value.Length * 2);
 
             foreach (char c in value)
             {
@@ -933,6 +933,19 @@ namespace Etherna.MongoDB.Bson.IO
                 var guid = GuidConverter.FromBytes(bytes, guidRepresentation);
                 return string.Format("{0}(\"{1}\")", uuidConstructorName, guid.ToString());
             }
+        }
+
+        private static bool NeedsEscaping(string text)
+        {
+            foreach (var letter in text)
+            {
+                if (NeedsEscaping(letter))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static bool NeedsEscaping(char c)

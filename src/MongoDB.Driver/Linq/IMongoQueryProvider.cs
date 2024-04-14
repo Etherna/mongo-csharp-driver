@@ -17,6 +17,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 
 namespace Etherna.MongoDB.Driver.Linq
@@ -30,6 +31,11 @@ namespace Etherna.MongoDB.Driver.Linq
         /// Gets the collection namespace.
         /// </summary>
         CollectionNamespace CollectionNamespace { get; }
+
+        /// <summary>
+        /// Gets the most recently logged stages.
+        /// </summary>
+        BsonDocument[] LoggedStages { get; }
 
         /// <summary>
         /// Gets the pipeline input serializer (the DocumentSerializer for collection queries and NoPipelineInputSerializer for database queries).

@@ -234,7 +234,7 @@ namespace Etherna.MongoDB.Driver
 
             return new MongoBulkWriteException<TDocument>(
                 ex.ConnectionId,
-                BulkWriteResult<TDocument>.FromCore(ex.Result, processedRequests),
+                BulkWriteResult<TDocument>.FromCore(ex.Result, processedRequests.ToArray()),
                 ex.WriteErrors.Select(e => BulkWriteError.FromCore(e)),
                 WriteConcernError.FromCore(ex.WriteConcernError),
                 unprocessedRequests);

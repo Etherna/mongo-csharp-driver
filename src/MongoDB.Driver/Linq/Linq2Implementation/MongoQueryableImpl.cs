@@ -19,8 +19,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Linq;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
 {
@@ -50,6 +50,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
         {
             get { return _expression; }
         }
+
+        public BsonDocument[] LoggedStages => _queryProvider.LoggedStages;
 
         public IQueryProvider Provider
         {

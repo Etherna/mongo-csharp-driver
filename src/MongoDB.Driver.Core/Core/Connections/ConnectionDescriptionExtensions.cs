@@ -1,4 +1,4 @@
-/* Copyright 2021-present MongoDB Inc.
+/* Copyright 2010-present MongoDB Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,23 +13,14 @@
 * limitations under the License.
 */
 
-namespace Etherna.MongoDB.Driver
+namespace Etherna.MongoDB.Driver.Core.Connections
 {
-    internal static class MongoInternalDefaults
+    /// <summary>
+    /// Represents internal ConnectionDescription extension methods.
+    /// </summary>
+    internal static class ConnectionDescriptionExtensions
     {
-        public static class Logging
-        {
-            public const int MaxDocumentSize = 1000;
-        }
-
-        public static class ConnectionPool
-        {
-            public const int MaxConnecting = 2;
-        }
-
-        public static class MongoClientSettings
-        {
-            public const string SrvServiceName = "mongodb";
-        }
+        public static bool IsInitialized(this ConnectionDescription description)
+            => description?.ConnectionId?.LongServerValue.HasValue ?? false;
     }
 }

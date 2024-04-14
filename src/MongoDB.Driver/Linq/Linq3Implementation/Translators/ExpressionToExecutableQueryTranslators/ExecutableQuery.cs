@@ -13,14 +13,17 @@
 * limitations under the License.
 */
 
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators
 {
@@ -39,17 +42,17 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             AstPipeline unoptimizedPipeline,
             IExecutableQueryFinalizer<TOutput, TResult> finalizer)
         {
-            var pipeline = AstPipelineOptimizer.Optimize(unoptimizedPipeline);
+            var optimizedPipeline = AstPipelineOptimizer.Optimize(unoptimizedPipeline);
             return provider.Collection == null ?
-                new ExecutableQuery<TDocument, TOutput, TResult>(provider.Database, provider.Options, unoptimizedPipeline, pipeline, finalizer) :
-                new ExecutableQuery<TDocument, TOutput, TResult>(provider.Collection, provider.Options, unoptimizedPipeline, pipeline, finalizer);
+                new ExecutableQuery<TDocument, TOutput, TResult>(provider.Database, provider.Options, optimizedPipeline, finalizer) :
+                new ExecutableQuery<TDocument, TOutput, TResult>(provider.Collection, provider.Options, optimizedPipeline, finalizer);
         }
     }
 
     internal abstract class ExecutableQuery<TDocument>
     {
+        public abstract BsonDocument[] LoggedStages { get; }
         public abstract AstPipeline Pipeline { get; }
-        public abstract AstPipeline UnoptimizedPipeline { get; }
     }
 
     internal abstract class ExecutableQuery<TDocument, TResult> : ExecutableQuery<TDocument>
@@ -64,18 +67,17 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         private readonly IMongoCollection<TDocument> _collection;
         private readonly IMongoDatabase _database;
         private readonly IExecutableQueryFinalizer<TOutput, TResult> _finalizer;
+        private BsonDocument[] _loggedStages = null;
         private readonly AggregateOptions _options;
         private readonly AstPipeline _pipeline;
-        private readonly AstPipeline _unoptimizedPipeline;
 
         // constructors
         public ExecutableQuery(
             IMongoCollection<TDocument> collection,
             AggregateOptions options,
-            AstPipeline unoptimizedPipeline,
             AstPipeline pipeline,
             IExecutableQueryFinalizer<TOutput, TResult> finalizer)
-            : this(options, unoptimizedPipeline, pipeline, finalizer)
+            : this(options, pipeline, finalizer)
         {
             _collection = Ensure.IsNotNull(collection, nameof(collection));
         }
@@ -83,39 +85,37 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         public ExecutableQuery(
             IMongoDatabase database,
             AggregateOptions options,
-            AstPipeline unoptimizedPipeline,
             AstPipeline pipeline,
             IExecutableQueryFinalizer<TOutput, TResult> finalizer)
-            : this(options, unoptimizedPipeline, pipeline, finalizer)
+            : this(options, pipeline, finalizer)
         {
             _database = Ensure.IsNotNull(database, nameof(database));
         }
 
         private ExecutableQuery(
             AggregateOptions options,
-            AstPipeline unoptimizedPipeline,
             AstPipeline pipeline,
             IExecutableQueryFinalizer<TOutput, TResult> finalizer)
         {
             _options = options;
-            _unoptimizedPipeline = unoptimizedPipeline;
             _pipeline = pipeline;
             _finalizer = finalizer;
         }
 
         // public properties
+        public override BsonDocument[] LoggedStages => _loggedStages;
         public override AstPipeline Pipeline => _pipeline;
-        public override AstPipeline UnoptimizedPipeline => _unoptimizedPipeline;
 
         // public methods
         public override TResult Execute(IClientSessionHandle session, CancellationToken cancellationToken)
         {
+            _loggedStages = RenderPipeline();
             var cursor = (_collection, session) switch
             {
-                (null, null) => _database.Aggregate(CreateDatabasePipelineDefinition(), _options, cancellationToken),
-                (null, _) => _database.Aggregate(session, CreateDatabasePipelineDefinition(), _options, cancellationToken),
-                (_, null) => _collection.Aggregate(CreateCollectionPipelineDefinition(), _options, cancellationToken),
-                (_, _) => _collection.Aggregate(session, CreateCollectionPipelineDefinition(), _options, cancellationToken)
+                (null, null) => _database.Aggregate(CreateDatabasePipelineDefinition(_loggedStages), _options, cancellationToken),
+                (null, _) => _database.Aggregate(session, CreateDatabasePipelineDefinition(_loggedStages), _options, cancellationToken),
+                (_, null) => _collection.Aggregate(CreateCollectionPipelineDefinition(_loggedStages), _options, cancellationToken),
+                (_, _) => _collection.Aggregate(session, CreateCollectionPipelineDefinition(_loggedStages), _options, cancellationToken)
             };
 
             return _finalizer.Finalize(cursor, cancellationToken);
@@ -123,12 +123,13 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
         public override async Task<TResult> ExecuteAsync(IClientSessionHandle session, CancellationToken cancellationToken)
         {
+            _loggedStages = RenderPipeline();
             var cursor = (_collection, session) switch
             {
-                (null, null) => await _database.AggregateAsync(CreateDatabasePipelineDefinition(), _options, cancellationToken).ConfigureAwait(false),
-                (null, _) => await _database.AggregateAsync(session, CreateDatabasePipelineDefinition(), _options, cancellationToken).ConfigureAwait(false),
-                (_, null) => await _collection.AggregateAsync(CreateCollectionPipelineDefinition(), _options, cancellationToken).ConfigureAwait(false),
-                (_, _) => await _collection.AggregateAsync(session, CreateCollectionPipelineDefinition(), _options, cancellationToken).ConfigureAwait(false)
+                (null, null) => await _database.AggregateAsync(CreateDatabasePipelineDefinition(_loggedStages), _options, cancellationToken).ConfigureAwait(false),
+                (null, _) => await _database.AggregateAsync(session, CreateDatabasePipelineDefinition(_loggedStages), _options, cancellationToken).ConfigureAwait(false),
+                (_, null) => await _collection.AggregateAsync(CreateCollectionPipelineDefinition(_loggedStages), _options, cancellationToken).ConfigureAwait(false),
+                (_, _) => await _collection.AggregateAsync(session, CreateCollectionPipelineDefinition(_loggedStages), _options, cancellationToken).ConfigureAwait(false)
             };
 
             return await _finalizer.FinalizeAsync(cursor, cancellationToken).ConfigureAwait(false);
@@ -141,16 +142,44 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         }
 
         // private methods
-        private BsonDocumentStagePipelineDefinition<TDocument, TOutput> CreateCollectionPipelineDefinition()
+        private BsonDocumentStagePipelineDefinition<TDocument, TOutput> CreateCollectionPipelineDefinition(BsonDocument[] stages)
         {
-            var stages = _pipeline.Stages.Select(s => (BsonDocument)s.Render());
-            return new BsonDocumentStagePipelineDefinition<TDocument, TOutput>(stages, (IBsonSerializer<TOutput>)_pipeline.OutputSerializer);
+            var outputSerializer = GetOutputSerializer();
+            return new BsonDocumentStagePipelineDefinition<TDocument, TOutput>(stages, outputSerializer);
         }
 
-        private BsonDocumentStagePipelineDefinition<NoPipelineInput, TOutput> CreateDatabasePipelineDefinition()
+        private BsonDocumentStagePipelineDefinition<NoPipelineInput, TOutput> CreateDatabasePipelineDefinition(BsonDocument[] stages)
         {
-            var stages = _pipeline.Stages.Select(s => (BsonDocument)s.Render());
-            return new BsonDocumentStagePipelineDefinition<NoPipelineInput, TOutput>(stages, (IBsonSerializer<TOutput>)_pipeline.OutputSerializer);
+            var outputSerializer = GetOutputSerializer();
+            return new BsonDocumentStagePipelineDefinition<NoPipelineInput, TOutput>(stages, outputSerializer);
+        }
+
+        private BsonDocument[] RenderPipeline()
+        {
+            return _pipeline.Render().AsBsonArray.Cast<BsonDocument>().ToArray();
+        }
+
+        private IBsonSerializer<TOutput> GetOutputSerializer()
+        {
+            var outputSerializer = _pipeline.OutputSerializer;
+            var outputType = outputSerializer.ValueType;
+
+            if (outputType == typeof(TOutput))
+            {
+                return (IBsonSerializer<TOutput>)outputSerializer;
+            }
+
+            if (!typeof(TOutput).IsAssignableFrom(outputType))
+            {
+                throw new NotSupportedException($"The type of the pipeline output is {outputType} which is not assignable to {typeof(TOutput)}.");
+            }
+
+            if (typeof(TOutput).IsNullableOf(outputType))
+            {
+                return (IBsonSerializer<TOutput>)NullableSerializer.Create(outputSerializer);
+            }
+
+            return (IBsonSerializer<TOutput>)DowncastingSerializer.Create(typeof(TOutput), outputType, outputSerializer);
         }
     }
 }

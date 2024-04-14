@@ -19,6 +19,6 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     internal interface IDnsMonitorFactory
     {
-        IDnsMonitor CreateDnsMonitor(IDnsMonitoringCluster cluster, string lookupDomainName, CancellationToken cancellationToken);
+        IDnsMonitor CreateDnsMonitor(IDnsMonitoringCluster cluster, string srvServiceName, string lookupDomainName, CancellationToken cancellationToken);
     }
 }

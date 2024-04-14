@@ -19,6 +19,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors;
@@ -42,6 +43,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
         }
 
         public CollectionNamespace CollectionNamespace => _collection.CollectionNamespace;
+
+        public BsonDocument[] LoggedStages =>
+            throw new InvalidOperationException($"The {nameof(LoggedStages)} property is only valid when using LINQ3.");
 
         public IBsonSerializer PipelineInputSerializer => _collection.DocumentSerializer;
 
