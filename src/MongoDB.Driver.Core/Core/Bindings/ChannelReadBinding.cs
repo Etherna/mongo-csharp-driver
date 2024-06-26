@@ -14,10 +14,9 @@
 */
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Etherna.MongoDB.Driver.Core.Clusters;
-using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Servers;
 
@@ -51,7 +50,7 @@ namespace Etherna.MongoDB.Driver.Core.Bindings
             _session = Ensure.IsNotNull(session, nameof(session));
         }
 
-        // properties        
+        // properties
         /// <inheritdoc/>
         public ReadPreference ReadPreference
         {
@@ -88,6 +87,18 @@ namespace Etherna.MongoDB.Driver.Core.Bindings
         {
             ThrowIfDisposed();
             return Task.FromResult<IChannelSourceHandle>(GetReadChannelSourceHelper());
+        }
+
+        /// <inheritdoc />
+        public IChannelSourceHandle GetReadChannelSource(IReadOnlyCollection<ServerDescription> deprioritizedServers, CancellationToken cancellationToken)
+        {
+            return GetReadChannelSource(cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public Task<IChannelSourceHandle> GetReadChannelSourceAsync(IReadOnlyCollection<ServerDescription> deprioritizedServers, CancellationToken cancellationToken)
+        {
+            return GetReadChannelSourceAsync(cancellationToken);
         }
 
         private IChannelSourceHandle GetReadChannelSourceHelper()

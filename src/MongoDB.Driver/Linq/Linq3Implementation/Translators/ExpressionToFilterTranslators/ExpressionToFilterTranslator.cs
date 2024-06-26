@@ -18,6 +18,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ExpressionTranslators;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.MethodTranslators;
@@ -118,7 +119,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             if (expression.Type == typeof(bool))
             {
                 var field = ExpressionToFilterFieldTranslator.Translate(context, expression);
-                return AstFilter.Eq(field, true);
+                var serializedTrue = SerializationHelper.SerializeValue(field.Serializer, true);
+                return AstFilter.Eq(field, serializedTrue);
             }
 
             throw new ExpressionNotSupportedException(expression);

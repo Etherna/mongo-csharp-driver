@@ -15,12 +15,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Core.Servers;
 
 namespace Etherna.MongoDB.Driver.Core.Bindings
 {
@@ -74,6 +72,20 @@ namespace Etherna.MongoDB.Driver.Core.Bindings
         {
             ThrowIfDisposed();
             return _reference.Instance.GetReadChannelSourceAsync(cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public IChannelSourceHandle GetReadChannelSource(IReadOnlyCollection<ServerDescription> deprioritizedServers, CancellationToken cancellationToken)
+        {
+            ThrowIfDisposed();
+            return _reference.Instance.GetReadChannelSource(deprioritizedServers, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public Task<IChannelSourceHandle> GetReadChannelSourceAsync(IReadOnlyCollection<ServerDescription> deprioritizedServers, CancellationToken cancellationToken)
+        {
+            ThrowIfDisposed();
+            return _reference.Instance.GetReadChannelSourceAsync(deprioritizedServers, cancellationToken);
         }
 
         /// <inheritdoc/>

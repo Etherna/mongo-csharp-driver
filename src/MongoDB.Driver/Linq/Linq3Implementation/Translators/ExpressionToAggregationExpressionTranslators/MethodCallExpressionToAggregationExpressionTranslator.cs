@@ -37,6 +37,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case "Concat": return ConcatMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Contains": return ContainsMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "ContainsKey": return ContainsKeyMethodToAggregationExpressionTranslator.Translate(context, expression);
+                case "ContainsValue": return ContainsValueMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "CovariancePopulation": return CovariancePopulationMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "CovarianceSample": return CovarianceSampleMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Create": return CreateMethodToAggregationExpressionTranslator.Translate(context, expression);
@@ -68,6 +69,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case "Reverse": return ReverseMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Round": return RoundMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Select": return SelectMethodToAggregationExpressionTranslator.Translate(context, expression);
+                case "SelectMany": return SelectManyMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "SetEquals": return SetEqualsMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Shift": return ShiftMethodToAggregationExpressionTranslator.Translate(context, expression);
                 case "Split": return SplitMethodToAggregationExpressionTranslator.Translate(context, expression);

@@ -26,7 +26,7 @@ using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
 {
-    internal abstract class MongoQueryProvider : IMongoQueryProvider
+    internal abstract class MongoQueryProvider : IMongoQueryProviderInternal
     {
         // protected fields
         protected readonly AggregateOptions _options;

@@ -27,7 +27,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             if (expression.NodeType == ExpressionType.Constant)
             {
                 var query = (IQueryable)((ConstantExpression)expression).Value;
-                var provider = (IMongoQueryProvider)query.Provider;
+                var provider = (IMongoQueryProviderInternal)query.Provider;
                 return AstPipeline.Empty(provider.PipelineInputSerializer);
             }
 
