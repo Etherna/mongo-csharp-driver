@@ -14,10 +14,6 @@
 */
 
 using System;
-using System.IO;
-using Etherna.MongoDB.Bson.IO;
-using Etherna.MongoDB.Bson.Serialization.Attributes;
-using Etherna.MongoDB.Bson.Serialization.Options;
 
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
@@ -98,6 +94,20 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
                     throw CreateCannotDeserializeFromBsonTypeException(bsonType);
             }
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (object.ReferenceEquals(obj, null)) { return false; }
+            if (object.ReferenceEquals(this, obj)) { return true; }
+            return
+                base.Equals(obj) &&
+                obj is CharSerializer other &&
+                _representation.Equals(other._representation);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => 0;
 
         /// <summary>
         /// Serializes a value.

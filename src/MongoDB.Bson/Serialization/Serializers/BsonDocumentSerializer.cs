@@ -14,8 +14,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization.IdGenerators;
 
@@ -47,7 +45,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
             get { return __instance; }
         }
 
-        // public methods
+        // protected methods
         /// <summary>
         /// Deserializes a value.
         /// </summary>

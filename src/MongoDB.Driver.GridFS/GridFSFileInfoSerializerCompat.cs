@@ -50,6 +50,7 @@ namespace Etherna.MongoDB.Driver.GridFS
             RegisterMember("UploadDateTime", "uploadDate", new DateTimeSerializer());
         }
 
+        // protected methods
         /// <inheritdoc/>
         protected override GridFSFileInfo CreateInstance(BsonDocument backingDocument)
         {

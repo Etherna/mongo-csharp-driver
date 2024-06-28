@@ -267,6 +267,11 @@ namespace Etherna.MongoDB.Driver
             return WithPipeline(_pipeline.ReplaceWith(newRoot));
         }
 
+        public override IAggregateFluent<TResult> Sample(long size)
+        {
+            return WithPipeline(_pipeline.Sample(size));
+        }
+
         public override IAggregateFluent<TResult> Search(
             SearchDefinition<TResult> searchDefinition,
             SearchHighlightOptions<TResult> highlight = null,

@@ -13,7 +13,6 @@
 * limitations under the License.
 */
 
-using System.Collections.Generic;
 using Etherna.MongoDB.Bson.IO;
 
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
@@ -64,6 +63,20 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
             return _wrappedSerializer.Deserialize(context);
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (object.ReferenceEquals(obj, null)) { return false; }
+            if (object.ReferenceEquals(this, obj)) { return true; }
+            return
+                base.Equals(obj) &&
+                obj is BsonValueCSharpNullSerializer<TBsonValue> other &&
+                object.Equals(_wrappedSerializer, other._wrappedSerializer);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => 0;
 
         /// <summary>
         /// Serializes a value.

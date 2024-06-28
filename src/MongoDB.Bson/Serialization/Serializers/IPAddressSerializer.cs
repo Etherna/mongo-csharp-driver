@@ -32,7 +32,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         {
         }
 
-        // public methods
+        // protected methods
         /// <summary>
         /// Deserializes a value.
         /// </summary>

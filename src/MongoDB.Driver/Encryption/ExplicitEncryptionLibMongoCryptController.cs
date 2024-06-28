@@ -232,7 +232,7 @@ namespace Etherna.MongoDB.Driver.Encryption
                     contentionFactor: encryptOptions.ContentionFactor,
                     encryptOptions.Algorithm,
                     wrappedValueBytes,
-                    ToBsonIfNotNull(encryptOptions?.RangeOptions?.CreateDocument()),
+                    ToBsonIfNotNull(encryptOptions.RangeOptions?.CreateDocument()),
                     isExpressionMode);
 
                 using (context)
@@ -267,7 +267,7 @@ namespace Etherna.MongoDB.Driver.Encryption
                     contentionFactor: encryptOptions.ContentionFactor,
                     encryptOptions.Algorithm,
                     wrappedValueBytes,
-                    ToBsonIfNotNull(encryptOptions?.RangeOptions?.CreateDocument()),
+                    ToBsonIfNotNull(encryptOptions.RangeOptions?.CreateDocument()),
                     isExpressionMode);
 
                 using (context)

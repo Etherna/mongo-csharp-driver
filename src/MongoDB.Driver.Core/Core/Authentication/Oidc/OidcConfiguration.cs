@@ -40,26 +40,21 @@ namespace Etherna.MongoDB.Driver.Core.Authentication.Oidc
             Ensure.IsNotNull(authMechanismProperties, nameof(authMechanismProperties));
             PrincipalName = principalName;
 
-            if (authMechanismProperties != null)
+            foreach (var authorizationProperty in authMechanismProperties)
             {
-                foreach (var authorizationProperty in authMechanismProperties)
+                switch (authorizationProperty.Key)
                 {
-                    switch (authorizationProperty.Key)
-                    {
-                        case CallbackMechanismPropertyName:
-                            Callback = GetProperty<IOidcCallback>(authorizationProperty);
-                            break;
-                        case EnvironmentMechanismPropertyName:
-                            Environment = GetProperty<string>(authorizationProperty);
-                            break;
-                        case TokenResourceMechanismPropertyName:
-                            TokenResource = GetProperty<string>(authorizationProperty);
-                            break;
-                        default:
-                            throw new ArgumentException(
-                                $"Unknown OIDC property '{authorizationProperty.Key}'.",
-                                authorizationProperty.Key);
-                    }
+                    case CallbackMechanismPropertyName:
+                        Callback = GetProperty<IOidcCallback>(authorizationProperty);
+                        break;
+                    case EnvironmentMechanismPropertyName:
+                        Environment = GetProperty<string>(authorizationProperty);
+                        break;
+                    case TokenResourceMechanismPropertyName:
+                        TokenResource = GetProperty<string>(authorizationProperty);
+                        break;
+                    default:
+                        throw new MongoConfigurationException($"Unknown OIDC property '{authorizationProperty.Key}'.");
                 }
             }
 
@@ -73,7 +68,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication.Oidc
                     return result;
                 }
 
-                throw new ArgumentException($"Cannot read {property.Key} property as {typeof(T).Name}", property.Key);
+                throw new MongoConfigurationException($"Cannot read {property.Key} property as {typeof(T).Name}");
             }
         }
 
@@ -110,34 +105,33 @@ namespace Etherna.MongoDB.Driver.Core.Authentication.Oidc
         {
             if (Environment == null && Callback == null)
             {
-                throw new ArgumentException($"{EnvironmentMechanismPropertyName} or {CallbackMechanismPropertyName} must be configured.");
+                throw new MongoConfigurationException($"{EnvironmentMechanismPropertyName} or {CallbackMechanismPropertyName} must be configured.");
             }
 
             if (Environment != null && Callback != null)
             {
-                throw new ArgumentException($"{CallbackMechanismPropertyName} is mutually exclusive with {EnvironmentMechanismPropertyName}.");
+                throw new MongoConfigurationException($"{CallbackMechanismPropertyName} is mutually exclusive with {EnvironmentMechanismPropertyName}.");
             }
 
             if (Environment != null && !__supportedEnvironments.Contains(Environment))
             {
-                throw new ArgumentException(
-                    $"Not supported value of {EnvironmentMechanismPropertyName} mechanism property: {Environment}.",
-                    EnvironmentMechanismPropertyName);
+                throw new MongoConfigurationException($"Not supported value of {EnvironmentMechanismPropertyName} mechanism property: {Environment}.");
             }
 
             var tokenResourceRequired = Environment == "azure" || Environment == "gcp";
             if (!tokenResourceRequired && !string.IsNullOrEmpty(TokenResource))
             {
-                throw new ArgumentException(
-                    $"{TokenResourceMechanismPropertyName} mechanism property is not supported by {Environment} environment.",
-                    TokenResourceMechanismPropertyName);
+                throw new MongoConfigurationException($"{TokenResourceMechanismPropertyName} mechanism property is not supported by {Environment} environment.");
             }
 
             if (tokenResourceRequired && string.IsNullOrEmpty(TokenResource))
             {
-                throw new ArgumentException(
-                    $"{TokenResourceMechanismPropertyName} mechanism property is required by {Environment} environment.",
-                    TokenResourceMechanismPropertyName);
+                throw new MongoConfigurationException($"{TokenResourceMechanismPropertyName} mechanism property is required by {Environment} environment.");
+            }
+
+            if (Environment == "test" && !string.IsNullOrEmpty(PrincipalName))
+            {
+                throw new MongoConfigurationException($"{nameof(PrincipalName)} is not supported by {Environment} environment.");
             }
         }
     }

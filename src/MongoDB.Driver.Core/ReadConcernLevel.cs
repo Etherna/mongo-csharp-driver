@@ -13,16 +13,10 @@
 * limitations under the License.
 */
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Etherna.MongoDB.Driver
 {
     /// <summary>
-    /// The leve of the read concern.
+    /// The level of the read concern.
     /// </summary>
     public enum ReadConcernLevel
     {
@@ -42,10 +36,10 @@ namespace Etherna.MongoDB.Driver
         Majority,
 
         /// <summary>
-        /// Avoids returning data from a "stale" primary 
-        /// (one that has already been superseded by a new primary but doesn't know it yet). 
-        /// It is important to note that readConcern level linearizable does not by itself 
-        /// produce linearizable reads; they must be issued in conjunction with w:majority 
+        /// Avoids returning data from a "stale" primary
+        /// (one that has already been superseded by a new primary but doesn't know it yet).
+        /// It is important to note that readConcern level linearizable does not by itself
+        /// produce linearizable reads; they must be issued in conjunction with w:majority
         /// writes to the same document(s) in order to be linearizable.
         /// </summary>
         Linearizable,

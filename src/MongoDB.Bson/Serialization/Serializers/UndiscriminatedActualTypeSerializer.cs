@@ -13,15 +13,6 @@
 * limitations under the License.
 */
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using Etherna.MongoDB.Bson.IO;
-using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Bson.Serialization.Conventions;
-
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>

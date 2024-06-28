@@ -17,8 +17,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Etherna.MongoDB.Bson.Serialization.Conventions;
-using Etherna.MongoDB.Bson.Serialization.Options;
 
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {

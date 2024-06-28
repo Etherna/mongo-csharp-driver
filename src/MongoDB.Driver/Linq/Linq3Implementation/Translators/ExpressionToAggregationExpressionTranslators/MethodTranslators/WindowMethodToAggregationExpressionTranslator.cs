@@ -18,6 +18,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
@@ -292,6 +293,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 if (method.IsOneOf(__unaryMethods))
                 {
+                    ThrowIfSelectorTranslationIsNull(selectorTranslation);
                     var @operator = GetUnaryWindowOperator(method);
                     var ast = AstExpression.UnaryWindowExpression(@operator, selectorTranslation.Ast, window);
                     var serializer = BsonSerializer.LookupSerializer(method.ReturnType); // TODO: use correct serializer
@@ -313,6 +315,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 if (method.IsOneOf(__derivativeOrIntegralMethods))
                 {
+                    ThrowIfSelectorTranslationIsNull(selectorTranslation);
                     WindowTimeUnit? unit = default;
                     if (HasArgument<Expression>(parameters, "unit", arguments, out var unitExpression))
                     {
@@ -327,6 +330,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 if (method.IsOneOf(__exponentialMovingAverageMethods))
                 {
+                    ThrowIfSelectorTranslationIsNull(selectorTranslation);
                     var weightingExpression = arguments[2];
                     var weighting = weightingExpression.GetConstantValue<ExponentialMovingAverageWeighting>(expression);
 
@@ -337,6 +341,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 if (method.IsOneOf(__shiftMethods))
                 {
+                    ThrowIfSelectorTranslationIsNull(selectorTranslation);
                     var byExpression = arguments[2];
                     var by = byExpression.GetConstantValue<int>(expression);
 
@@ -435,6 +440,14 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             return false;
         }
 
+        private static void ThrowIfSelectorTranslationIsNull(AggregationExpression selectTranslation)
+        {
+            if (selectTranslation == null)
+            {
+                throw new Exception("selectorTranslation is unexpectedly null.");
+            }
+        }
+
         private static AggregationExpression TranslateSelector(TranslationContext context, LambdaExpression selectorLambda, IBsonSerializer inputSerializer)
         {
             var selectorParameter = selectorLambda.Parameters[0];
@@ -503,6 +516,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
         private static IBsonSerializer GetSortBySerializer(object sortBy, IBsonSerializer inputSerializer, BsonSerializerRegistry serializerRegistry)
         {
+            Ensure.IsNotNull(sortBy, nameof(sortBy));
+
             // use reflection to call GetSortBySerializerGeneric because we don't know TDocument until runtime
             var sortByType = sortBy.GetType();
             var documentType = sortByType.GetGenericArguments().Single();

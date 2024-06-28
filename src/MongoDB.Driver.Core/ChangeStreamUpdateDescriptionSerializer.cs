@@ -13,12 +13,11 @@
 * limitations under the License.
 */
 
+using System;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
-using Etherna.MongoDB.Driver.Core.Misc;
-using System;
 
 namespace Etherna.MongoDB.Driver
 {

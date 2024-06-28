@@ -130,6 +130,7 @@ namespace Etherna.MongoDB.Driver.GridFS
             {
                 _wrappedStream.Dispose();
             }
+            base.Dispose(disposing);
         }
 
         /// <inheritdoc/>

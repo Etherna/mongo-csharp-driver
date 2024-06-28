@@ -14,8 +14,6 @@
 */
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
@@ -28,6 +26,7 @@ namespace Etherna.MongoDB.Driver.GeoJsonObjectModel.Serializers
     /// <typeparam name="TCoordinates">The type of the coordinates.</typeparam>
     public class GeoJsonGeometrySerializer<TCoordinates> : ClassSerializerBase<GeoJsonGeometry<TCoordinates>> where TCoordinates : GeoJsonCoordinates
     {
+        // protected methods
         /// <summary>
         /// Gets the actual type.
         /// </summary>

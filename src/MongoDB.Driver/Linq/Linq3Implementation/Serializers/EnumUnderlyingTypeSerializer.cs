@@ -14,11 +14,9 @@
 */
 
 using System;
-using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers
 {
@@ -27,11 +25,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers
         IBsonSerializer EnumSerializer { get; }
     }
 
-    internal class EnumUnderlyingTypeSerializer<TEnum, TEnumUnderlyingType> : StructSerializerBase<TEnumUnderlyingType>, IEnumUnderlyingTypeSerializer 
-        where TEnum : Enum 
+    internal class EnumUnderlyingTypeSerializer<TEnum, TEnumUnderlyingType> : StructSerializerBase<TEnumUnderlyingType>, IEnumUnderlyingTypeSerializer
+        where TEnum : Enum
         where TEnumUnderlyingType : struct
     {
-        // private fields 
+        // private fields
         private readonly IBsonSerializer<TEnum> _enumSerializer;
 
         // constructors
@@ -60,9 +58,12 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
+            if (object.ReferenceEquals(obj, null)) { return false; }
+            if (object.ReferenceEquals(this, obj)) { return true; }
             return
+                base.Equals(obj) &&
                 obj is EnumUnderlyingTypeSerializer<TEnum, TEnumUnderlyingType> other &&
-                _enumSerializer.Equals(other._enumSerializer);
+                object.Equals(_enumSerializer, other._enumSerializer);
         }
 
         /// <inheritdoc/>

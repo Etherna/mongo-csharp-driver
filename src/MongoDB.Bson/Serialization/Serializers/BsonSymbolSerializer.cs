@@ -13,7 +13,6 @@
 * limitations under the License.
 */
 
-
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
     /// <summary>

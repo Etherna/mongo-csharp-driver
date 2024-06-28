@@ -295,6 +295,20 @@ namespace Etherna.MongoDB.Bson.Serialization
             return CreateInstanceUsingCreator(values);
         }
 
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (object.ReferenceEquals(obj, null)) { return false; }
+            if (object.ReferenceEquals(this, obj)) { return true; }
+            return
+                base.Equals(obj) &&
+                obj is BsonClassMapSerializer<TClass> other &&
+                object.Equals(_classMap, other._classMap);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => 0;
+
         /// <summary>
         /// Gets the document Id.
         /// </summary>
@@ -436,6 +450,12 @@ namespace Etherna.MongoDB.Bson.Serialization
                 var value = keyValuePair.Value;
 
                 var memberMap = _classMap.GetMemberMapForElement(elementName);
+
+                if (memberMap == null)
+                {
+                    throw new FormatException($"Element '{elementName}' does not match any field or property of class {_classMap.ClassType.FullName}");
+                }
+
                 if (!memberMap.IsReadOnly)
                 {
                     memberMap.Setter.Invoke(document, value);

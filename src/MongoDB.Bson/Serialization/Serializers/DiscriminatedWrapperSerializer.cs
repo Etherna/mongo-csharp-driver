@@ -13,8 +13,6 @@
 * limitations under the License.
 */
 
-using System;
-using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization.Conventions;
 
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
@@ -95,6 +93,21 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
             return value;
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (object.ReferenceEquals(obj, null)) { return false; }
+            if (object.ReferenceEquals(this, obj)) { return true; }
+            return
+                base.Equals(obj) &&
+                obj is DiscriminatedWrapperSerializer<TValue> other &&
+                object.Equals(_discriminatorConvention, other._discriminatorConvention) &&
+                object.Equals(_wrappedSerializer, other._wrappedSerializer);
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => 0;
 
         /// <summary>
         /// Determines whether the reader is positioned at a discriminated wrapper.

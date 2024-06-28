@@ -15,7 +15,6 @@
 
 using System;
 using Etherna.MongoDB.Bson.IO;
-using Etherna.MongoDB.Bson.Serialization.Conventions;
 
 namespace Etherna.MongoDB.Bson.Serialization.Serializers
 {
@@ -48,6 +47,17 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         {
             throw CreateCannotBeDeserializedException();
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (object.ReferenceEquals(obj, null)) { return false; }
+            if (object.ReferenceEquals(this, obj)) { return true; }
+            return GetType().Equals(obj.GetType());
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode() => 0;
 
         /// <summary>
         /// Serializes a value.
