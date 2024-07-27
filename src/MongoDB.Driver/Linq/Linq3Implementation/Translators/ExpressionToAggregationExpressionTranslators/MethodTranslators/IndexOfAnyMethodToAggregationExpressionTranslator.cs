@@ -115,6 +115,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 var startIndexExpression = arguments[1];
                 var startIndexTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, startIndexExpression);
+                SerializationHelper.EnsureRepresentationIsNumeric(startIndexExpression, startIndexTranslation);
                 return AstExpression.UseVarIfNotSimple("startIndex", startIndexTranslation.Ast);
             }
 
@@ -127,6 +128,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 var countExpression = arguments[2];
                 var countTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, countExpression);
+                SerializationHelper.EnsureRepresentationIsNumeric(countExpression, countTranslation);
                 return AstExpression.UseVarIfNotSimple("count", countTranslation.Ast);
             }
 
