@@ -2,7 +2,7 @@ next-version: 2.22.0
 tag-prefix: '(v|V|eth-v)'
 branches:
   main:
-    regex: ^master$|^etherna/master$
+    regex: ^main$|^etherna/main$
   etherna:
     regex: ^etherna/v
     mode: ContinuousDeployment
