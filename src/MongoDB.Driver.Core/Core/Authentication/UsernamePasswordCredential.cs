@@ -43,7 +43,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
             : this(source, username, SecureStringHelper.ToSecureString(password))
         {
             // Compute saslPreppedPassword immediately and store it securely while the password is already in
-            // managed memory. We don't create a closure over the password so that it will hopefully get 
+            // managed memory. We don't create a closure over the password so that it will hopefully get
             // garbage-collected sooner rather than later.
             var saslPreppedPassword = SecureStringHelper.ToSecureString(SaslPrepHelper.SaslPrepStored(password));
             _saslPreppedPassword = new Lazy<SecureString>(() => saslPreppedPassword);
@@ -86,7 +86,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication
         /// Gets the the SASLprepped password.
         /// May create a cleartext copy of the password in managed memory the first time it is accessed.
         /// Use only as needed e.g. for SCRAM-SHA-256.
-        /// </summary> 
+        /// </summary>
         /// <returns>The SASLprepped password.</returns>
         public SecureString SaslPreppedPassword
         {

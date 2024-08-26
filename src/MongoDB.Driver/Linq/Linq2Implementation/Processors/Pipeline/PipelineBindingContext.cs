@@ -131,9 +131,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors
                     newFieldName = ((IFieldExpression)projector).FieldName;
                 }
 
-                // the output of a $project stage must be a document, so 
+                // the output of a $project stage must be a document, so
                 // if this isn't already a serialization expression and it's not
-                // a new expression or member init, then we need to create an 
+                // a new expression or member init, then we need to create an
                 // artificial field to project the computation into.
                 var serializer = GetSerializer(selector.Type, selector);
                 selector = new FieldAsDocumentExpression(selector, newFieldName, serializer);

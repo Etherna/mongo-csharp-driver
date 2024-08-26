@@ -293,7 +293,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors
                 return node;
             }
 
-            // we need to discover if this is rooted at an IMongoQueryable... If so, it 
+            // we need to discover if this is rooted at an IMongoQueryable... If so, it
             // gets processed as a top-level pipeline...
 
             return EmbeddedPipelineBinder.Bind(node, _bindingContext);

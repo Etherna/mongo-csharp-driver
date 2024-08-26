@@ -34,7 +34,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
 
         // constructors
         protected MongoQueryProvider(
-            IClientSessionHandle session, 
+            IClientSessionHandle session,
             AggregateOptions options)
         {
             _session = session;

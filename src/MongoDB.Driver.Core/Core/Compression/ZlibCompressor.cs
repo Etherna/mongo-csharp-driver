@@ -24,7 +24,7 @@ namespace Etherna.MongoDB.Driver.Core.Compression
 {
     /// <summary>
     /// Compressor according to the zlib algorithm.
-    /// </summary> 
+    /// </summary>
     internal sealed class ZlibCompressor : ICompressor
     {
         private readonly CompressionLevel _compressionLevel;

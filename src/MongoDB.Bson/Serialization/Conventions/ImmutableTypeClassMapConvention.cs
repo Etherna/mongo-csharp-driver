@@ -11,7 +11,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 */
 
 using System;
@@ -130,7 +130,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Conventions
             var constructors = GetUsableConstructors(classTypeInfo);
             foreach (var constructorInfo in constructors)
             {
-                if (classTypeInfo.IsAbstract || 
+                if (classTypeInfo.IsAbstract ||
                     constructorInfo.IsFamily || // protected
                     constructorInfo.IsFamilyOrAssembly) // protected internal
                 {

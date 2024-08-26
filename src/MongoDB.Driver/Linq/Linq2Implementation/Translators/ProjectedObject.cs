@@ -73,7 +73,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Translators
             {
                 if (_values.TryGetValue(currentKey, out value))
                 {
-                    // we check the full thing first, so we'll never 
+                    // we check the full thing first, so we'll never
                     // end up with a string overflow here
                     return Tuple.Create(value, firstKey.Substring(currentKey.Length + 1));
                 }

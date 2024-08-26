@@ -21,7 +21,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication.Sspi
     /// Flags for InitiateSecurityContext.
     /// </summary>
     /// <remarks>
-    /// See the fContextReq parameter at 
+    /// See the fContextReq parameter at
     /// http://msdn.microsoft.com/en-us/library/windows/desktop/aa375507(v=vs.85).aspx
     /// </remarks>
     [Flags]

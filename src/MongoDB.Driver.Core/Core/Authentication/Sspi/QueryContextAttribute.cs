@@ -19,7 +19,7 @@ namespace Etherna.MongoDB.Driver.Core.Authentication.Sspi
     /// Flags for QueryContextAttributes.
     /// </summary>
     /// <remarks>
-    /// See the ulAttribute parameter at 
+    /// See the ulAttribute parameter at
     /// http://msdn.microsoft.com/en-us/library/windows/desktop/aa379326(v=vs.85).aspx.
     /// </remarks>
     internal enum QueryContextAttributes

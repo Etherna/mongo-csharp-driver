@@ -14,7 +14,7 @@
   <PropertyGroup>
     <Company>MongoDB Inc.</Company>
     <Copyright>Copyright © 2010-present MongoDB Inc.</Copyright>
-    <Authors>Etherna Sagl</Authors>
+    <Authors>Etherna SA</Authors>
     <PackageIcon>packageIcon.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageReleaseNotes>https://github.com/mongodb/mongo-csharp-driver/releases/tag/v$(Version)</PackageReleaseNotes>

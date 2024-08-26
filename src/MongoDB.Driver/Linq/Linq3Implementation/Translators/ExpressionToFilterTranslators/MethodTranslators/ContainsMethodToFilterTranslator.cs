@@ -77,7 +77,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var itemSerializer = ArraySerializerHelper.GetItemSerializer(sourceField.Serializer);
                 var value = itemExpression.GetConstantValue<object>(containingExpression: expression);
                 var serializedValue = SerializationHelper.SerializeValue(itemSerializer, value);
-                return AstFilter.ElemMatch(sourceField, AstFilter.Eq(AstFilter.Field("@<elem>", itemSerializer), serializedValue)); // @<elem> represents the implied element 
+                return AstFilter.ElemMatch(sourceField, AstFilter.Eq(AstFilter.Field("@<elem>", itemSerializer), serializedValue)); // @<elem> represents the implied element
             }
 
             var itemField = ExpressionToFilterFieldTranslator.Translate(context, itemExpression);

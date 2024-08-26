@@ -168,7 +168,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var combinedSortStage = AstStage.Sort(
                     oldSortStage.Fields
                     .Append(newSortStage.Fields.Select(f => AstSort.Field("_document." + f.Path, f.Order)).Single()));
-                    
+
                 return pipeline.ReplaceStagesAtEnd(pipeline.OutputSerializer, numberOfStagesToReplace: 3, oldProjectStage, combinedSortStage, oldReplaceRootStage);
             }
 

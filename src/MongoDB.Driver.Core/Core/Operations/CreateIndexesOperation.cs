@@ -129,7 +129,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         /// <summary>
         /// Gets or sets the MaxTime.
         /// </summary>
-        /// <value> 
+        /// <value>
         /// The maxtime.
         /// </value>
         public TimeSpan? MaxTime

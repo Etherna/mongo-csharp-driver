@@ -20,7 +20,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders
     /// </summary>
     public class CommandResponseMessageEncoderSelector : IMessageEncoderSelector
     {
-        // public methods        
+        // public methods
         /// <inheritdoc />
         public IMessageEncoder GetEncoder(IMessageEncoderFactory encoderFactory)
         {

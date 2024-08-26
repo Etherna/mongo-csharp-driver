@@ -38,7 +38,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages
         /// </summary>
         public abstract MongoDBMessageType MessageType { get; }
 
-        // methods        
+        // methods
         /// <inheritdoc/>
         public abstract IMessageEncoder GetEncoder(IMessageEncoderFactory encoderFactory);
     }

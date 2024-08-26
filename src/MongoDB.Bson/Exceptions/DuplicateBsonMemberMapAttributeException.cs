@@ -24,7 +24,7 @@ namespace Etherna.MongoDB.Bson
     [Serializable]
     public class DuplicateBsonMemberMapAttributeException : BsonException
     {
-        // constructors 
+        // constructors
         /// <summary>
         /// Initializes a new instance of the <see cref="DuplicateBsonMemberMapAttributeException" /> class.
         /// </summary>

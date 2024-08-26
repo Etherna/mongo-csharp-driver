@@ -70,7 +70,7 @@ namespace Etherna.MongoDB.Driver
         /// </summary>
         /// <remarks>
         /// Note: when migrating from Count to CountDocuments the following query operations must be replaced:
-        /// 
+        ///
         /// <code>
         /// +-------------+--------------------------------+
         /// | Operator    | Replacement                    |
@@ -92,7 +92,7 @@ namespace Etherna.MongoDB.Driver
         /// </summary>
         /// <remarks>
         /// Note: when migrating from CountAsync to CountDocumentsAsync the following query operations must be replaced:
-        /// 
+        ///
         /// <code>
         /// +-------------+--------------------------------+
         /// | Operator    | Replacement                    |

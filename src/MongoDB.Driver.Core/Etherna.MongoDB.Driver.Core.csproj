@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <Compile Include="..\MongoDB.Shared\Hasher.cs" Link="Shared\Hasher.cs" />
-    <Compile Remove="Core\Operations\BulkUnmixedWriteOperationEmulatorBase.cs" />
   </ItemGroup>
 
   <ItemGroup>

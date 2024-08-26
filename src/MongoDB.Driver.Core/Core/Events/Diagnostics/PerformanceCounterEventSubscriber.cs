@@ -32,7 +32,7 @@ namespace Etherna.MongoDB.Driver.Core.Events.Diagnostics
     /// </summary>
     public sealed class PerformanceCounterEventSubscriber : IEventSubscriber
     {
-        //static 
+        //static
         /// <summary>
         /// Installs the performance counters.
         /// </summary>

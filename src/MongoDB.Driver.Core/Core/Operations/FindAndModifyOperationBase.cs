@@ -157,7 +157,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public Task<TResult> ExecuteAsync(IWriteBinding binding, CancellationToken cancellationToken)
         {
             using (BeginOperation())
-            { 
+            {
                 return RetryableWriteOperationExecutor.ExecuteAsync(this, binding, _retryRequested, cancellationToken);
             }
         }

@@ -11,7 +11,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 */
 
 using System;
@@ -102,7 +102,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation
             switch (index)
             {
                 // We've treated -1 as meaning $ operator. We can't break this now,
-                // so, specifically when we are flattening fields names, this is 
+                // so, specifically when we are flattening fields names, this is
                 // how we'll continue to treat -1.
                 case var _ when index < -1L:
                     throw new IndexOutOfRangeException("Array indexes must be greater than or equal to -1.");

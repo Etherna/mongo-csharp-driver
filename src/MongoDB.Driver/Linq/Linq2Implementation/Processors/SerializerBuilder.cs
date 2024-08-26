@@ -111,9 +111,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors
         {
             // We are building a serializer specifically for a projected type based
             // on serialization information collected from other serializers.
-            // We cannot cache this in the serializer registry because the compiler reuses 
-            // the same anonymous type definition in different contexts as long as they 
-            // are structurally equatable. As such, it might be that two different queries 
+            // We cannot cache this in the serializer registry because the compiler reuses
+            // the same anonymous type definition in different contexts as long as they
+            // are structurally equatable. As such, it might be that two different queries
             // projecting the same shape might need to be deserialized differently.
             var classMap = BuildClassMap(mapping.Expression.Type, mapping);
 

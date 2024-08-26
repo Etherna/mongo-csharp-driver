@@ -18,7 +18,7 @@ using System.Linq.Expressions;
 namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Processors.Transformers
 {
     /// <remarks>
-    /// VB introduces a Convert on the LHS with a Nothing comparison, so we make it look like 
+    /// VB introduces a Convert on the LHS with a Nothing comparison, so we make it look like
     /// C# which does not have one with a comparison to null.
     /// </remarks>
     internal sealed class VBNothingConversionRemovalTransformer : IExpressionTransformer<BinaryExpression>

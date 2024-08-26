@@ -115,7 +115,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             var arguments = expression.Arguments;
 
             if (method.IsOneOf(__sumMethods))
-            { 
+            {
                 var sourceExpression = arguments[0];
                 var pipeline = ExpressionToPipelineTranslator.Translate(context, sourceExpression);
                 var sourceSerializer = pipeline.OutputSerializer;

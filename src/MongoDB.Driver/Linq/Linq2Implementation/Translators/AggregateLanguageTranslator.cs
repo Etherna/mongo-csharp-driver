@@ -11,7 +11,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 * See the License for the specific language governing permissions and
 * limitations under the License.
-* 
+*
 */
 
 using System;
@@ -272,7 +272,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Translators
                 return "$" + expression.FieldName;
             }
 
-            // 2 possibilities. 
+            // 2 possibilities.
             // 1. This is translatable into a single string:
             // 2. This has an array index operation in it which we must then use a $let expression for
             var parent = expression.Document;
@@ -554,7 +554,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Translators
             var right = TranslateValue(node.Right);
 
             // some operations take an array as the argument.
-            // we want to flatten binary values into the top-level 
+            // we want to flatten binary values into the top-level
             // array if they are flattenable :).
             if (canBeFlattened && left.IsBsonDocument && left.AsBsonDocument.Contains(op) && left[op].IsBsonArray)
             {
@@ -610,7 +610,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq2Implementation.Translators
             var inValue = TranslateValue(FieldNamePrefixer.Prefix(node.Selector, "$" + node.ItemName));
             if (inputValue.BsonType == BsonType.String && inValue.BsonType == BsonType.String)
             {
-                // if inputValue is a BsonString and inValue is a BsonString, 
+                // if inputValue is a BsonString and inValue is a BsonString,
                 // then it is a simple field inclusion...
                 // inValue is prefixed with a $${node.ItemName}, so we remove the itemName and the 2 $s.
                 return inputValue.ToString() + inValue.ToString().Substring(node.ItemName.Length + 2);

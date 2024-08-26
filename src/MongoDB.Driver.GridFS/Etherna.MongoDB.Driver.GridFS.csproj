@@ -10,6 +10,7 @@
     <Description>Fork by Etherna of the official MongoDB supported driver for MongoDB GridFS implementation. See https://www.mongodb.com/docs/drivers/csharp/ for more details.</Description>
     <PackageDescription>Fork by Etherna of the GridFS Component of the Official MongoDB .NET Driver.</PackageDescription>
     <PackageTags>$(PackageTags);gridfs</PackageTags>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

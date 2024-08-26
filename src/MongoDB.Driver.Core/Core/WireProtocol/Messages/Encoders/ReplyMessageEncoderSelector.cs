@@ -37,7 +37,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders
             _documentSerializer = Ensure.IsNotNull(documentSerializer, nameof(documentSerializer));
         }
 
-        // methods        
+        // methods
         /// <inheritdoc />
         public IMessageEncoder GetEncoder(IMessageEncoderFactory encoderFactory)
         {

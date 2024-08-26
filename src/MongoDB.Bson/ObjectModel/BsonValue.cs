@@ -1281,7 +1281,7 @@ namespace Etherna.MongoDB.Bson
         public virtual bool ToBoolean()
         {
             // some subclasses override as appropriate
-            return true; // everything else is true        
+            return true; // everything else is true
         }
 
         /// <summary>
