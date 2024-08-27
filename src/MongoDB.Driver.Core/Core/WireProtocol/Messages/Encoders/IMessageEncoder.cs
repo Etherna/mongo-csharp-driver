@@ -29,13 +29,18 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders
         /// <summary>
         /// Reads the message.
         /// </summary>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A message.</returns>
-        MongoDBMessage ReadMessage();
+        MongoDBMessage ReadMessage(
+            bool forceStaticSerializerRegistry = false);
 
         /// <summary>
         /// Writes the message.
         /// </summary>
         /// <param name="message">The message.</param>
-        void WriteMessage(MongoDBMessage message);
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        void WriteMessage(
+            MongoDBMessage message,
+            bool forceStaticSerializerRegistry = false);
     }
 }

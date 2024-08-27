@@ -58,13 +58,6 @@ namespace Etherna.MongoDB.Bson.Serialization
 
         // public static properties
         /// <summary>
-        /// Gets the serializer registry.
-        /// </summary>
-        public static IBsonSerializerRegistry SerializerRegistry =>
-            __serializationContextAccessor?.TryGetCurrentBsonSerializerRegistry() ??
-            __serializerRegistry;
-
-        /// <summary>
         /// Gets or sets whether to use the NullIdChecker on reference Id types that don't have an IdGenerator registered.
         /// </summary>
         public static bool UseNullIdChecker
@@ -267,6 +260,19 @@ namespace Etherna.MongoDB.Bson.Serialization
             {
                 return Deserialize(bsonReader, nominalType, configurator);
             }
+        }
+
+        /// <summary>
+        /// Gets the serializer registry.
+        /// </summary>
+        public static IBsonSerializerRegistry GetSerializerRegistry(
+            bool forceStaticSerializerRegistry = false)
+        {
+            if (forceStaticSerializerRegistry)
+                return __serializerRegistry;
+
+            return __serializationContextAccessor?.TryGetCurrentBsonSerializerRegistry() ??
+                __serializerRegistry;
         }
 
         /// <summary>
@@ -485,20 +491,25 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// Looks up a serializer for a Type.
         /// </summary>
         /// <typeparam name="T">The type.</typeparam>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A serializer for type T.</returns>
-        public static IBsonSerializer<T> LookupSerializer<T>()
+        public static IBsonSerializer<T> LookupSerializer<T>(
+            bool forceStaticSerializerRegistry = false)
         {
-            return (IBsonSerializer<T>)LookupSerializer(typeof(T));
+            return (IBsonSerializer<T>)LookupSerializer(typeof(T), forceStaticSerializerRegistry);
         }
 
         /// <summary>
         /// Looks up a serializer for a Type.
         /// </summary>
         /// <param name="type">The Type.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A serializer for the Type.</returns>
-        public static IBsonSerializer LookupSerializer(Type type)
+        public static IBsonSerializer LookupSerializer(
+            Type type,
+            bool forceStaticSerializerRegistry = false)
         {
-            return SerializerRegistry.GetSerializer(type);
+            return GetSerializerRegistry(forceStaticSerializerRegistry).GetSerializer(type);
         }
 
         /// <summary>
@@ -613,7 +624,7 @@ namespace Etherna.MongoDB.Bson.Serialization
             BsonSerializationArgs args = default(BsonSerializationArgs))
         {
             args.SetOrValidateNominalType(typeof(TNominalType), "<TNominalType>");
-            var serializer = LookupSerializer<TNominalType>();
+            var serializer = LookupSerializer<TNominalType>(args.ForceStaticSerializerRegistry);
             var context = BsonSerializationContext.CreateRoot(bsonWriter, configurator);
             serializer.Serialize(context, args, value);
         }
@@ -634,7 +645,7 @@ namespace Etherna.MongoDB.Bson.Serialization
             BsonSerializationArgs args = default(BsonSerializationArgs))
         {
             args.SetOrValidateNominalType(nominalType, "nominalType");
-            var serializer = LookupSerializer(nominalType);
+            var serializer = LookupSerializer(nominalType, args.ForceStaticSerializerRegistry);
             var context = BsonSerializationContext.CreateRoot(bsonWriter, configurator);
             serializer.Serialize(context, args, value);
         }

@@ -133,7 +133,7 @@ namespace Etherna.MongoDB.Driver
         {
             get { return _serializerRegistry.HasBeenSet ?
                     _serializerRegistry.Value :
-                    BsonSerializer.SerializerRegistry; }
+                    BsonSerializer.GetSerializerRegistry(); }
             set
             {
                 if (_isFrozen) { throw new InvalidOperationException("MongoCollectionSettings is frozen."); }

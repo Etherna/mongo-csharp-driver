@@ -668,14 +668,18 @@ namespace Etherna.MongoDB.Bson
         /// </summary>
         /// <param name="name">The name of the element.</param>
         /// <param name="defaultValue">The default value returned if the element is not found.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>
         /// The value of the element or the default value if the element is not found.
         /// </returns>
-        public override BsonValue GetValue(string name, BsonValue defaultValue)
+        public override BsonValue GetValue(
+            string name,
+            BsonValue defaultValue,
+            bool forceStaticSerializerRegistry = false)
         {
             ThrowIfDisposed();
             BsonValue value;
-            if (TryGetValue(name, out value))
+            if (TryGetValue(name, out value, forceStaticSerializerRegistry))
             {
                 return value;
             }
@@ -697,14 +701,19 @@ namespace Etherna.MongoDB.Bson
         /// Materializes the RawBsonDocument into a regular BsonDocument.
         /// </summary>
         /// <param name="binaryReaderSettings">The binary reader settings.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A BsonDocument.</returns>
-        public BsonDocument Materialize(BsonBinaryReaderSettings binaryReaderSettings)
+        public BsonDocument Materialize(
+            BsonBinaryReaderSettings binaryReaderSettings,
+            bool forceStaticSerializerRegistry = false)
         {
             ThrowIfDisposed();
             using (var stream = new ByteBufferStream(_slice, ownsBuffer: false))
             using (var reader = new BsonBinaryReader(stream, binaryReaderSettings))
             {
-                var context = BsonDeserializationContext.CreateRoot(reader);
+                var context = BsonDeserializationContext.CreateRoot(
+                    reader,
+                    forceStaticSerializerRegistry: forceStaticSerializerRegistry);
                 return BsonDocumentSerializer.Instance.Deserialize(context);
             }
         }
@@ -853,16 +862,22 @@ namespace Etherna.MongoDB.Bson
         /// </summary>
         /// <param name="name">The name of the element.</param>
         /// <param name="value">The value of the element.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>
         /// True if an element with that name was found.
         /// </returns>
-        public override bool TryGetValue(string name, out BsonValue value)
+        public override bool TryGetValue(
+            string name,
+            out BsonValue value,
+            bool forceStaticSerializerRegistry = false)
         {
             ThrowIfDisposed();
             using (var stream = new ByteBufferStream(_slice, ownsBuffer: false))
             using (var bsonReader = new BsonBinaryReader(stream, _readerSettings))
             {
-                var context = BsonDeserializationContext.CreateRoot(bsonReader);
+                var context = BsonDeserializationContext.CreateRoot(
+                    bsonReader,
+                    forceStaticSerializerRegistry: forceStaticSerializerRegistry);
 
                 bsonReader.ReadStartDocument();
                 while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)

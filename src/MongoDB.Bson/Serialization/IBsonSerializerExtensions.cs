@@ -55,9 +55,18 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <param name="serializer">The serializer.</param>
         /// <param name="context">The serialization context.</param>
         /// <param name="value">The value.</param>
-        public static void Serialize(this IBsonSerializer serializer, BsonSerializationContext context, object value)
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        public static void Serialize(
+            this IBsonSerializer serializer,
+            BsonSerializationContext context,
+            object value,
+            bool forceStaticSerializerRegistry = false)
         {
-            var args = new BsonSerializationArgs { NominalType = serializer.ValueType };
+            var args = new BsonSerializationArgs
+            {
+                ForceStaticSerializerRegistry = forceStaticSerializerRegistry,
+                NominalType = serializer.ValueType
+            };
             serializer.Serialize(context, args, value);
         }
 
@@ -68,9 +77,18 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <param name="serializer">The serializer.</param>
         /// <param name="context">The serialization context.</param>
         /// <param name="value">The value.</param>
-        public static void Serialize<TValue>(this IBsonSerializer<TValue> serializer, BsonSerializationContext context, TValue value)
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        public static void Serialize<TValue>(
+            this IBsonSerializer<TValue> serializer,
+            BsonSerializationContext context,
+            TValue value,
+            bool forceStaticSerializerRegistry = false)
         {
-            var args = new BsonSerializationArgs { NominalType = serializer.ValueType };
+            var args = new BsonSerializationArgs
+            {
+                ForceStaticSerializerRegistry = forceStaticSerializerRegistry,
+                NominalType = serializer.ValueType
+            };
             serializer.Serialize(context, args, value);
         }
 

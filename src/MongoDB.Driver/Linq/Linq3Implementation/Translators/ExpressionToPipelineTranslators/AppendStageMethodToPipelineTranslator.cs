@@ -38,7 +38,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var sourceSerializer = pipeline.OutputSerializer;
 
                 var stageExpression = arguments[1];
-                var renderedStage = TranslateStage(expression, stageExpression, sourceSerializer, BsonSerializer.SerializerRegistry);
+                var renderedStage = TranslateStage(expression, stageExpression, sourceSerializer, BsonSerializer.GetSerializerRegistry());
                 var stage = AstStage.Universal(renderedStage.Document);
 
                 var resultSerializerExpression = arguments[2];

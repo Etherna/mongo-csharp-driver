@@ -599,7 +599,7 @@ namespace Etherna.MongoDB.Driver
             Ensure.IsNotNull(facets, nameof(facets));
             var outputSerializer = new AggregateFacetResultsSerializer(
                 facets.Select(f => f.Name),
-                facets.Select(f => f.OutputSerializer ?? BsonSerializer.SerializerRegistry.GetSerializer(f.OutputType)));
+                facets.Select(f => f.OutputSerializer ?? BsonSerializer.GetSerializerRegistry().GetSerializer(f.OutputType)));
             var options = new AggregateFacetOptions<AggregateFacetResults> { OutputSerializer = outputSerializer };
             return Facet(facets, options);
         }

@@ -290,7 +290,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
         private static AstSortFields TranslateSortByDefinitionGeneric<TDocument>(Expression expression, Expression sortByExpression, SortDefinition<TDocument> sortByDefinition, IBsonSerializer<TDocument> documentSerializer)
         {
-            var serializerRegistry = BsonSerializer.SerializerRegistry;
+            var serializerRegistry = BsonSerializer.GetSerializerRegistry();
             var sortDocument = sortByDefinition.Render(documentSerializer, serializerRegistry);
             var fields = new List<AstSortField>();
             foreach (var element in sortDocument)

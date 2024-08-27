@@ -172,7 +172,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
 
                 var element = value.GetElement(index);
                 bsonWriter.WriteName(element.Name);
-                BsonValueSerializer.Instance.Serialize(context, element.Value);
+                BsonValueSerializer.Instance.Serialize(context, element.Value, args.ForceStaticSerializerRegistry);
             }
 
             bsonWriter.WriteEndDocument();

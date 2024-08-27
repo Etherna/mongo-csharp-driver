@@ -93,14 +93,16 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// </summary>
         /// <param name="reader">The reader.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>
         /// A root context.
         /// </returns>
         public static BsonDeserializationContext CreateRoot(
             IBsonReader reader,
-            Action<Builder> configurator = null)
+            Action<Builder> configurator = null,
+            bool forceStaticSerializerRegistry = false)
         {
-            var builder = new Builder(null, reader);
+            var builder = new Builder(null, reader, forceStaticSerializerRegistry);
             if (configurator != null)
             {
                 configurator(builder);
@@ -113,13 +115,15 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// Creates a new context with some values changed.
         /// </summary>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>
         /// A new context.
         /// </returns>
         public BsonDeserializationContext With(
-            Action<Builder> configurator = null)
+            Action<Builder> configurator = null,
+            bool forceStaticSerializerRegistry = false)
         {
-            var builder = new Builder(this, _reader);
+            var builder = new Builder(this, _reader, forceStaticSerializerRegistry);
             if (configurator != null)
             {
                 configurator(builder);
@@ -140,7 +144,10 @@ namespace Etherna.MongoDB.Bson.Serialization
             private IBsonReader _reader;
 
             // constructors
-            internal Builder(BsonDeserializationContext other, IBsonReader reader)
+            internal Builder(
+                BsonDeserializationContext other,
+                IBsonReader reader,
+                bool forceStaticSerializerRegistry)
             {
                 if (reader == null)
                 {
@@ -156,8 +163,8 @@ namespace Etherna.MongoDB.Bson.Serialization
                 }
                 else
                 {
-                    _dynamicArraySerializer = BsonDefaults.DynamicArraySerializer;
-                    _dynamicDocumentSerializer = BsonDefaults.DynamicDocumentSerializer;
+                    _dynamicArraySerializer = BsonDefaults.GetDynamicArraySerializer(forceStaticSerializerRegistry);
+                    _dynamicDocumentSerializer = BsonDefaults.GetDynamicDocumentSerializer(forceStaticSerializerRegistry);
                 }
             }
 

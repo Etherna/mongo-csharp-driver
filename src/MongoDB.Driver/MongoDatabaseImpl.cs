@@ -660,7 +660,7 @@ namespace Etherna.MongoDB.Driver
 
         private IWriteOperation<BsonDocument> CreateCreateCollectionOperation<TDocument>(string name, CreateCollectionOptions<TDocument> options)
         {
-            var serializerRegistry = options.SerializerRegistry ?? BsonSerializer.SerializerRegistry;
+            var serializerRegistry = options.SerializerRegistry ?? BsonSerializer.GetSerializerRegistry();
             var documentSerializer = options.DocumentSerializer ?? serializerRegistry.GetSerializer<TDocument>();
 
             var clusteredIndex = options.ClusteredIndex?.Render(documentSerializer, serializerRegistry);
@@ -701,7 +701,7 @@ namespace Etherna.MongoDB.Driver
 
         private CreateViewOperation CreateCreateViewOperation<TDocument, TResult>(string viewName, string viewOn, PipelineDefinition<TDocument, TResult> pipeline, CreateViewOptions<TDocument> options)
         {
-            var serializerRegistry = options.SerializerRegistry ?? BsonSerializer.SerializerRegistry;
+            var serializerRegistry = options.SerializerRegistry ?? BsonSerializer.GetSerializerRegistry();
             var documentSerializer = options.DocumentSerializer ?? serializerRegistry.GetSerializer<TDocument>();
             var pipelineDocuments = pipeline.Render(documentSerializer, serializerRegistry, _linqProvider).Documents;
             return new CreateViewOperation(_databaseNamespace, viewName, viewOn, pipelineDocuments, GetMessageEncoderSettings())

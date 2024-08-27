@@ -263,22 +263,22 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol
                 };
 
                 BsonValue clusterTime;
-                if (rawDocument.TryGetValue("$clusterTime", out clusterTime))
+                if (rawDocument.TryGetValue("$clusterTime", out clusterTime, true))
                 {
                     // note: we are assuming that _session is an instance of ClusterClockAdvancingClusterTime
                     // and that calling _session.AdvanceClusterTime will have the side effect of advancing the cluster's ClusterTime also
-                    var materializedClusterTime = ((RawBsonDocument)clusterTime).Materialize(binaryReaderSettings);
+                    var materializedClusterTime = ((RawBsonDocument)clusterTime).Materialize(binaryReaderSettings, true);
                     _session.AdvanceClusterTime(materializedClusterTime);
                 }
                 BsonValue operationTime;
-                if (rawDocument.TryGetValue("operationTime", out operationTime))
+                if (rawDocument.TryGetValue("operationTime", out operationTime, true))
                 {
                     _session.AdvanceOperationTime(operationTime.AsBsonTimestamp);
                 }
 
-                if (!rawDocument.GetValue("ok", false).ToBoolean())
+                if (!rawDocument.GetValue("ok", defaultValue: false, forceStaticSerializerRegistry: true).ToBoolean())
                 {
-                    var materializedDocument = rawDocument.Materialize(binaryReaderSettings);
+                    var materializedDocument = rawDocument.Materialize(binaryReaderSettings, true);
 
                     var commandName = _command.GetElement(0).Name;
                     if (commandName == "$query")
@@ -315,7 +315,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol
 
                 if (rawDocument.Contains("writeConcernError"))
                 {
-                    var materializedDocument = rawDocument.Materialize(binaryReaderSettings);
+                    var materializedDocument = rawDocument.Materialize(binaryReaderSettings, true);
                     var writeConcernError = materializedDocument["writeConcernError"].AsBsonDocument;
                     var message = writeConcernError.AsBsonDocument.GetValue("errmsg", null)?.AsString;
                     var writeConcernResult = new WriteConcernResult(materializedDocument);
@@ -328,7 +328,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol
                     var encoder = (ReplyMessageBinaryEncoder<TCommandResult>)encoderFactory.GetReplyMessageEncoder<TCommandResult>(_resultSerializer);
                     using (var reader = encoder.CreateBinaryReader())
                     {
-                        var context = BsonDeserializationContext.CreateRoot(reader);
+                        var context = BsonDeserializationContext.CreateRoot(reader, forceStaticSerializerRegistry: true);
                         return _resultSerializer.Deserialize(context);
                     }
                 }

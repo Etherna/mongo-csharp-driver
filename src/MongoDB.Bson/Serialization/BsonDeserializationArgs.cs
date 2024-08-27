@@ -24,16 +24,28 @@ namespace Etherna.MongoDB.Bson.Serialization
     public struct BsonDeserializationArgs
     {
         // private fields
+        private bool _forceStaticSerializerRegistry;
         private Type _nominalType;
 
         // constructors
         private BsonDeserializationArgs(
+            bool forceStaticSerializerRegistry,
             Type nominalType)
         {
+            _forceStaticSerializerRegistry = forceStaticSerializerRegistry;
             _nominalType = nominalType;
         }
 
         // public properties
+        /// <summary>
+        /// Gets or sets when to force using of static serialization registry
+        /// </summary>
+        public bool ForceStaticSerializerRegistry
+        {
+            get { return _forceStaticSerializerRegistry; }
+            set { _forceStaticSerializerRegistry = value; }
+        }
+
         /// <summary>
         /// Gets or sets the nominal type.
         /// </summary>

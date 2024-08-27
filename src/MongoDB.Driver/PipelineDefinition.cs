@@ -113,7 +113,7 @@ namespace Etherna.MongoDB.Driver
         /// </returns>
         public string ToString(LinqProvider linqProvider)
         {
-            var serializerRegistry = BsonSerializer.SerializerRegistry;
+            var serializerRegistry = BsonSerializer.GetSerializerRegistry();
             var inputSerializer = serializerRegistry.GetSerializer<TInput>();
             return ToString(inputSerializer, serializerRegistry, linqProvider);
         }

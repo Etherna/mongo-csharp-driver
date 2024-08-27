@@ -122,8 +122,8 @@ namespace Etherna.MongoDB.Bson.Serialization
                 else
                 {
                     _isDynamicType = t =>
-                        (BsonDefaults.DynamicArraySerializer != null && t == BsonDefaults.DynamicArraySerializer.ValueType) ||
-                        (BsonDefaults.DynamicDocumentSerializer != null && t == BsonDefaults.DynamicDocumentSerializer.ValueType);
+                        (BsonDefaults.GetDynamicArraySerializer() != null && t == BsonDefaults.GetDynamicArraySerializer().ValueType) ||
+                        (BsonDefaults.GetDynamicDocumentSerializer() != null && t == BsonDefaults.GetDynamicDocumentSerializer().ValueType);
                 }
             }
 

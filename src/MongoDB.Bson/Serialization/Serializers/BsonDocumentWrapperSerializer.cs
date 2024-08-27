@@ -73,7 +73,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// <param name="value">The object.</param>
         protected override void SerializeValue(BsonSerializationContext context, BsonSerializationArgs args, BsonDocumentWrapper value)
         {
-            value.Serializer.Serialize(context, value.Wrapped);
+            value.Serializer.Serialize(context, value.Wrapped, args.ForceStaticSerializerRegistry);
         }
     }
 }

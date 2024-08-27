@@ -386,7 +386,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// </summary>
         /// <param name="dictionaryRepresentation">The dictionary representation.</param>
         public DictionarySerializerBase(DictionaryRepresentation dictionaryRepresentation)
-            : this(dictionaryRepresentation, BsonSerializer.SerializerRegistry)
+            : this(dictionaryRepresentation, BsonSerializer.GetSerializerRegistry())
         {
         }
 

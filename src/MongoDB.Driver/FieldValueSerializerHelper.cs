@@ -52,7 +52,7 @@ namespace Etherna.MongoDB.Driver
             // serialize numeric values without converting them
             if (fieldType.IsNumeric() && valueType.IsNumeric())
             {
-                var valueSerializer = BsonSerializer.SerializerRegistry.GetSerializer(valueType);
+                var valueSerializer = BsonSerializer.GetSerializerRegistry().GetSerializer(valueType);
                 if (HasStringRepresentation(fieldSerializer))
                 {
                     valueSerializer = WithStringRepresentation(valueSerializer);

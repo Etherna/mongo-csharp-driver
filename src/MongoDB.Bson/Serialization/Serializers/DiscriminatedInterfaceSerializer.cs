@@ -146,7 +146,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
                     throw new FormatException(message);
                 }
 
-                var serializer = BsonSerializer.LookupSerializer(actualType);
+                var serializer = BsonSerializer.LookupSerializer(actualType, args.ForceStaticSerializerRegistry);
                 return (TInterface)serializer.Deserialize(context, args);
             }
         }
