@@ -48,8 +48,10 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         /// <summary>
         /// Reads the message.
         /// </summary>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A message.</returns>
-        public CommandMessage ReadMessage()
+        public CommandMessage ReadMessage(
+            bool forceStaticSerializerRegistry = false)
         {
             var reader = CreateBinaryReader();
             var stream = reader.BsonStream;
@@ -67,7 +69,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             EnsureFlagsAreValid(flags);
             var moreToCome = (flags & OpMsgFlags.MoreToCome) != 0;
             var exhaustAllowed = (flags & OpMsgFlags.ExhaustAllowed) != 0;
-            var sections = ReadSections(reader, messageEndPosition);
+            var sections = ReadSections(reader, messageEndPosition, forceStaticSerializerRegistry);
             EnsureExactlyOneType0SectionIsPresent(sections);
             EnsureMessageEndedAtEndPosition(stream, messageEndPosition);
 
@@ -81,7 +83,10 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         /// Writes the message.
         /// </summary>
         /// <param name="message">The message.</param>
-        public void WriteMessage(CommandMessage message)
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        public void WriteMessage(
+            CommandMessage message,
+            bool forceStaticSerializerRegistry = false)
         {
             Ensure.IsNotNull(message, nameof(message));
 
@@ -94,7 +99,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             stream.WriteInt32(message.ResponseTo);
             stream.WriteInt32((int)Opcode.OpMsg);
             stream.WriteInt32((int)CreateFlags(message));
-            WriteSections(writer, message.Sections, messageStartPosition);
+            WriteSections(writer, message.Sections, messageStartPosition, forceStaticSerializerRegistry);
             stream.BackpatchSize(messageStartPosition);
 
             message.PostWriteAction?.Invoke(new PostProcessor(message, stream, messageStartPosition));
@@ -198,7 +203,9 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             }
         }
 
-        private CommandMessageSection ReadSection(BsonBinaryReader reader)
+        private CommandMessageSection ReadSection(
+            BsonBinaryReader reader,
+            bool forceStaticSerializerRegistry)
         {
             var payloadType = reader.BsonStream.ReadByte();
             if (payloadType == -1)
@@ -209,36 +216,43 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             switch (payloadType)
             {
                 case 0:
-                    return ReadType0Section(reader);
+                    return ReadType0Section(reader, forceStaticSerializerRegistry);
 
                 case 1:
-                    return ReadType1Section(reader);
+                    return ReadType1Section(reader, forceStaticSerializerRegistry);
 
                 default:
                     throw new FormatException($"Command message invalid payload type: {payloadType}.");
             }
         }
 
-        private List<CommandMessageSection> ReadSections(BsonBinaryReader reader, long messageEndPosition)
+        private List<CommandMessageSection> ReadSections(
+            BsonBinaryReader reader,
+            long messageEndPosition,
+            bool forceStaticSerializerRegistry)
         {
             var sections = new List<CommandMessageSection>();
             while (reader.BsonStream.Position < messageEndPosition)
             {
-                var section = ReadSection(reader);
+                var section = ReadSection(reader, forceStaticSerializerRegistry);
                 sections.Add(section);
             }
             return sections;
         }
 
-        private Type0CommandMessageSection<RawBsonDocument> ReadType0Section(IBsonReader reader)
+        private Type0CommandMessageSection<RawBsonDocument> ReadType0Section(
+            IBsonReader reader,
+            bool forceStaticSerializerRegistry)
         {
             var serializer = RawBsonDocumentSerializer.Instance;
             var context = BsonDeserializationContext.CreateRoot(reader);
-            var document = serializer.Deserialize(context);
+            var document = serializer.Deserialize(context, forceStaticSerializerRegistry);
             return new Type0CommandMessageSection<RawBsonDocument>(document, serializer);
         }
 
-        private Type1CommandMessageSection<RawBsonDocument> ReadType1Section(BsonBinaryReader reader)
+        private Type1CommandMessageSection<RawBsonDocument> ReadType1Section(
+            BsonBinaryReader reader,
+            bool forceStaticSerializerRegistry)
         {
             var stream = reader.BsonStream;
 
@@ -252,7 +266,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             var documents = new List<RawBsonDocument>();
             while (stream.Position < payloadEndPosition)
             {
-                var document = serializer.Deserialize(context);
+                var document = serializer.Deserialize(context, forceStaticSerializerRegistry);
                 documents.Add(document);
             }
             EnsurePayloadEndedAtEndPosition(stream, payloadEndPosition);
@@ -261,18 +275,22 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             return new Type1CommandMessageSection<RawBsonDocument>(identifier, batch, serializer, NoOpElementNameValidator.Instance, null, null);
         }
 
-        private void WriteSection(BsonBinaryWriter writer, CommandMessageSection section, long messageStartPosition)
+        private void WriteSection(
+            BsonBinaryWriter writer,
+            CommandMessageSection section,
+            long messageStartPosition,
+            bool forceStaticSerializerRegistry)
         {
             writer.BsonStream.WriteByte((byte)section.PayloadType);
 
             switch (section.PayloadType)
             {
                 case PayloadType.Type0:
-                    WriteType0Section(writer, (Type0CommandMessageSection)section);
+                    WriteType0Section(writer, (Type0CommandMessageSection)section, forceStaticSerializerRegistry);
                     break;
 
                 case PayloadType.Type1:
-                    WriteType1Section(writer, (Type1CommandMessageSection)section, messageStartPosition);
+                    WriteType1Section(writer, (Type1CommandMessageSection)section, messageStartPosition, forceStaticSerializerRegistry);
                     break;
 
                 default:
@@ -280,22 +298,33 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             }
         }
 
-        private void WriteSections(BsonBinaryWriter writer, IEnumerable<CommandMessageSection> sections, long messageStartPosition)
+        private void WriteSections(
+            BsonBinaryWriter writer,
+            IEnumerable<CommandMessageSection> sections,
+            long messageStartPosition,
+            bool forceStaticSerializerRegistry)
         {
             foreach (var section in sections)
             {
-                WriteSection(writer, section, messageStartPosition);
+                WriteSection(writer, section, messageStartPosition, forceStaticSerializerRegistry);
             }
         }
 
-        private void WriteType0Section(BsonBinaryWriter writer, Type0CommandMessageSection section)
+        private void WriteType0Section(
+            BsonBinaryWriter writer,
+            Type0CommandMessageSection section,
+            bool forceStaticSerializerRegistry)
         {
             var serializer = section.DocumentSerializer;
             var context = BsonSerializationContext.CreateRoot(writer);
-            serializer.Serialize(context, section.Document);
+            serializer.Serialize(context, section.Document, forceStaticSerializerRegistry);
         }
 
-        private void WriteType1Section(BsonBinaryWriter writer, Type1CommandMessageSection section, long messageStartPosition)
+        private void WriteType1Section(
+            BsonBinaryWriter writer,
+            Type1CommandMessageSection section,
+            long messageStartPosition,
+            bool forceStaticSerializerRegistry)
         {
             var stream = writer.BsonStream;
             var serializer = section.DocumentSerializer;
@@ -329,7 +358,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
                 {
                     var documentStartPosition = stream.Position;
                     var document = batch.Items[batch.Offset + i];
-                    serializer.Serialize(context, document);
+                    serializer.Serialize(context, document, forceStaticSerializerRegistry);
 
                     var messageSize = stream.Position - messageStartPosition;
                     if (messageSize > maxMessageSize && batch.CanBeSplit && i > 0)

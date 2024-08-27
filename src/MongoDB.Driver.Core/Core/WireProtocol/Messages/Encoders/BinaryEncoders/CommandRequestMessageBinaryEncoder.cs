@@ -42,10 +42,12 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         /// <summary>
         /// Reads the message.
         /// </summary>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A message.</returns>
-        public CommandRequestMessage ReadMessage()
+        public CommandRequestMessage ReadMessage(
+            bool forceStaticSerializerRegistry = false)
         {
-            var wrappedMessage = (CommandMessage)_wrappedEncoder.ReadMessage();
+            var wrappedMessage = (CommandMessage)_wrappedEncoder.ReadMessage(forceStaticSerializerRegistry);
             return new CommandRequestMessage(wrappedMessage, null);
         }
 
@@ -53,24 +55,27 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         /// Writes the message.
         /// </summary>
         /// <param name="message">The message.</param>
-        public void WriteMessage(CommandRequestMessage message)
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        public void WriteMessage(
+            CommandRequestMessage message,
+            bool forceStaticSerializerRegistry = false)
         {
             var wrappedMessage = message.WrappedMessage;
-            _wrappedEncoder.WriteMessage(wrappedMessage);
+            _wrappedEncoder.WriteMessage(wrappedMessage, forceStaticSerializerRegistry);
         }
 
         // explicit interface implementations
         MongoDBMessage IMessageEncoder.ReadMessage(
             bool forceStaticSerializerRegistry)
         {
-            return ReadMessage();
+            return ReadMessage(forceStaticSerializerRegistry);
         }
 
         void IMessageEncoder.WriteMessage(
             MongoDBMessage message,
             bool forceStaticSerializerRegistry)
         {
-            WriteMessage((CommandRequestMessage)message);
+            WriteMessage((CommandRequestMessage)message, forceStaticSerializerRegistry);
         }
     }
 }
