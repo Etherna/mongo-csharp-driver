@@ -272,7 +272,7 @@ namespace Etherna.MongoDB.Driver.GridFS
         /// </value>
         public IBsonSerializerRegistry SerializerRegistry
         {
-            get { return BsonSerializer.SerializerRegistry; }
+            get { return BsonSerializer.GetSerializerRegistry(); }
         }
 
         /// <summary>

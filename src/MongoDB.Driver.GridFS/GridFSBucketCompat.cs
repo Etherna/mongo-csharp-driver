@@ -242,7 +242,7 @@ namespace Etherna.MongoDB.Driver.GridFS
         private FilterDefinition<GridFSFileInfo<ObjectId>> WrapFilter(FilterDefinition<GridFSFileInfo> filter)
         {
             var linqProvider = Database.Client.Settings.LinqProvider;
-            var renderedFilter = filter.Render(GridFSFileInfoSerializer.Instance, BsonSerializer.SerializerRegistry, linqProvider);
+            var renderedFilter = filter.Render(GridFSFileInfoSerializer.Instance, BsonSerializer.GetSerializerRegistry(), linqProvider);
             return new BsonDocumentFilterDefinition<GridFSFileInfo<ObjectId>>(renderedFilter);
         }
 
@@ -251,7 +251,7 @@ namespace Etherna.MongoDB.Driver.GridFS
             if (options != null)
             {
                 var linqProvider = Database.Client.Settings.LinqProvider;
-                var renderedSort = options.Sort == null ? null : options.Sort.Render(GridFSFileInfoSerializer.Instance, BsonSerializer.SerializerRegistry, linqProvider);
+                var renderedSort = options.Sort == null ? null : options.Sort.Render(GridFSFileInfoSerializer.Instance, BsonSerializer.GetSerializerRegistry(), linqProvider);
                 var wrappedSort = renderedSort == null ? null : new BsonDocumentSortDefinition<GridFSFileInfo<ObjectId>>(renderedSort);
                 return new GridFSFindOptions<ObjectId>
                 {

@@ -551,7 +551,7 @@ namespace Etherna.MongoDB.Driver.Encryption
 
         private BsonValue RenderFilter(FilterDefinition<BsonDocument> filter)
         {
-            var registry = BsonSerializer.SerializerRegistry;
+            var registry = BsonSerializer.GetSerializerRegistry();
             var serializer = registry.GetSerializer<BsonDocument>();
             return filter.Render(serializer, registry);
         }

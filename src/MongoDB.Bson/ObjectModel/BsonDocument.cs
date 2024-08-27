@@ -949,8 +949,12 @@ namespace Etherna.MongoDB.Bson
         /// </summary>
         /// <param name="name">The name of the element.</param>
         /// <param name="defaultValue">The default value returned if the element is not found.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>The value of the element or the default value if the element is not found.</returns>
-        public virtual BsonValue GetValue(string name, BsonValue defaultValue)
+        public virtual BsonValue GetValue(
+            string name,
+            BsonValue defaultValue,
+            bool forceStaticSerializerRegistry = false)
         {
             if (name == null)
             {
@@ -1265,8 +1269,12 @@ namespace Etherna.MongoDB.Bson
         /// </summary>
         /// <param name="name">The name of the element.</param>
         /// <param name="value">The value of the element.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>True if an element with that name was found.</returns>
-        public virtual bool TryGetValue(string name, out BsonValue value)
+        public virtual bool TryGetValue(
+            string name,
+            out BsonValue value,
+            bool forceStaticSerializerRegistry = false)
         {
             if (name == null)
             {

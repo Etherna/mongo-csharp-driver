@@ -52,7 +52,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// Initializes a new instance of the <see cref="ImpliedImplementationInterfaceSerializer{TInterface, TImplementation}"/> class.
         /// </summary>
         public ImpliedImplementationInterfaceSerializer()
-            : this(BsonSerializer.SerializerRegistry)
+            : this(BsonSerializer.GetSerializerRegistry())
         {
         }
 
@@ -279,7 +279,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
                 }
                 else
                 {
-                    var serializer = BsonSerializer.LookupSerializer(actualType);
+                    var serializer = BsonSerializer.LookupSerializer(actualType, args.ForceStaticSerializerRegistry);
                     serializer.Serialize(context, value);
                 }
             }

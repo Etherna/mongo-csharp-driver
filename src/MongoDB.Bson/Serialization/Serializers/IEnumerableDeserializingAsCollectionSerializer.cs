@@ -50,7 +50,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// Initializes a new instance of the IEnumerableDeserializingAsCollectionSerializer class.
         /// </summary>
         public IEnumerableDeserializingAsCollectionSerializer()
-            : this(BsonSerializer.SerializerRegistry)
+            : this(BsonSerializer.GetSerializerRegistry())
         {
         }
 

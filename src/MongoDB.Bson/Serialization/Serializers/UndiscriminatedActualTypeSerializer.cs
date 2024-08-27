@@ -62,7 +62,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
             else
             {
                 var actualType = value.GetType();
-                var serializer = BsonSerializer.LookupSerializer(actualType);
+                var serializer = BsonSerializer.LookupSerializer(actualType, args.ForceStaticSerializerRegistry);
                 args.NominalType = actualType;
                 serializer.Serialize(context, args, value);
             }

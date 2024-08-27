@@ -51,7 +51,8 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         /// Reads the message.
         /// </summary>
         /// <returns>A message.</returns>
-        public ReplyMessage<TDocument> ReadMessage()
+        public ReplyMessage<TDocument> ReadMessage(
+            bool forceStaticSerializerRegistry = false)
         {
             var binaryReader = CreateBinaryReader();
             var stream = binaryReader.BsonStream;
@@ -84,9 +85,10 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
                 {
                     var allowDuplicateElementNames = typeof(TDocument) == typeof(BsonDocument);
                     var context = BsonDeserializationContext.CreateRoot(binaryReader, builder =>
-                    {
-                        builder.AllowDuplicateElementNames = allowDuplicateElementNames;
-                    });
+                        {
+                            builder.AllowDuplicateElementNames = allowDuplicateElementNames;
+                        },
+                        forceStaticSerializerRegistry);
                     documents.Add(_serializer.Deserialize(context));
                 }
             }
@@ -166,12 +168,15 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         }
 
         // explicit interface implementations
-        MongoDBMessage IMessageEncoder.ReadMessage()
+        MongoDBMessage IMessageEncoder.ReadMessage(
+            bool forceStaticSerializerRegistry)
         {
-            return ReadMessage();
+            return ReadMessage(forceStaticSerializerRegistry);
         }
 
-        void IMessageEncoder.WriteMessage(MongoDBMessage message)
+        void IMessageEncoder.WriteMessage(
+            MongoDBMessage message,
+            bool forceStaticSerializerRegistry)
         {
             WriteMessage((ReplyMessage<TDocument>)message);
         }

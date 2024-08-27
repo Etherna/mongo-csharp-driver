@@ -84,7 +84,7 @@ namespace Etherna.MongoDB.Bson
 
             if (serializer == null)
             {
-                serializer = BsonSerializer.LookupSerializer(nominalType);
+                serializer = BsonSerializer.LookupSerializer(nominalType, args.ForceStaticSerializerRegistry);
             }
             if (serializer.ValueType != nominalType)
             {
@@ -165,7 +165,7 @@ namespace Etherna.MongoDB.Bson
                     return convertibleToBsonDocument.ToBsonDocument(); // use the provided ToBsonDocument method
                 }
 
-                serializer = BsonSerializer.LookupSerializer(nominalType);
+                serializer = BsonSerializer.LookupSerializer(nominalType, args.ForceStaticSerializerRegistry);
             }
             if (serializer.ValueType != nominalType)
             {
@@ -236,7 +236,7 @@ namespace Etherna.MongoDB.Bson
 
             if (serializer == null)
             {
-                serializer = BsonSerializer.LookupSerializer(nominalType);
+                serializer = BsonSerializer.LookupSerializer(nominalType, args.ForceStaticSerializerRegistry);
             }
             if (serializer.ValueType != nominalType)
             {

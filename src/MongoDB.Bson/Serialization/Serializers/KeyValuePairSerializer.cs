@@ -66,7 +66,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// </summary>
         /// <param name="representation">The representation.</param>
         public KeyValuePairSerializer(BsonType representation)
-            : this(representation, BsonSerializer.SerializerRegistry)
+            : this(representation, BsonSerializer.GetSerializerRegistry())
         {
         }
 

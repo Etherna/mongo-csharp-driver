@@ -136,7 +136,10 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         /// Writes the message.
         /// </summary>
         /// <param name="message">The message.</param>
-        public void WriteMessage(QueryMessage message)
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        public void WriteMessage(
+            QueryMessage message,
+            bool forceStaticSerializerRegistry = false)
         {
             Ensure.IsNotNull(message, nameof(message));
 
@@ -152,7 +155,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             stream.WriteCString(message.CollectionNamespace.FullName);
             stream.WriteInt32(message.Skip);
             stream.WriteInt32(message.BatchSize);
-            WriteQuery(binaryWriter, message.Query, message.QueryValidator);
+            WriteQuery(binaryWriter, message.Query, message.QueryValidator, forceStaticSerializerRegistry);
             WriteOptionalFields(binaryWriter, message.Fields);
             stream.BackpatchSize(messageStartPosition);
 
@@ -177,7 +180,11 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             }
         }
 
-        private void WriteQuery(BsonBinaryWriter binaryWriter, BsonDocument query, IElementNameValidator queryValidator)
+        private void WriteQuery(
+            BsonBinaryWriter binaryWriter,
+            BsonDocument query,
+            IElementNameValidator queryValidator,
+            bool forceStaticSerializerRegistry = false)
         {
             var maxWireDocumentSize = MaxWireDocumentSize ?? MaxDocumentSize ?? binaryWriter.Settings.MaxDocumentSize;
 
@@ -186,7 +193,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             try
             {
                 var context = BsonSerializationContext.CreateRoot(binaryWriter);
-                BsonDocumentSerializer.Instance.Serialize(context, query ?? new BsonDocument());
+                BsonDocumentSerializer.Instance.Serialize(context, query ?? new BsonDocument(), forceStaticSerializerRegistry);
             }
             finally
             {
@@ -196,14 +203,17 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         }
 
         // explicit interface implementations
-        MongoDBMessage IMessageEncoder.ReadMessage()
+        MongoDBMessage IMessageEncoder.ReadMessage(
+            bool forceStaticSerializerRegistry)
         {
             return ReadMessage();
         }
 
-        void IMessageEncoder.WriteMessage(MongoDBMessage message)
+        void IMessageEncoder.WriteMessage(
+            MongoDBMessage message,
+            bool forceStaticSerializerRegistry)
         {
-            WriteMessage((QueryMessage)message);
+            WriteMessage((QueryMessage)message, forceStaticSerializerRegistry);
         }
 
         // nested types

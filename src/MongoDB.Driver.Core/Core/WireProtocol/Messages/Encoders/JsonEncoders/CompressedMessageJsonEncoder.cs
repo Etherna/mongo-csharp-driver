@@ -104,13 +104,16 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.JsonEncoder
         }
 
         /// <inheritdoc />
-        MongoDBMessage IMessageEncoder.ReadMessage()
+        MongoDBMessage IMessageEncoder.ReadMessage(
+            bool forceStaticSerializerRegistry)
         {
             return ReadMessage();
         }
 
         /// <inheritdoc />
-        void IMessageEncoder.WriteMessage(MongoDBMessage message)
+        void IMessageEncoder.WriteMessage(
+            MongoDBMessage message,
+            bool forceStaticSerializerRegistry)
         {
             WriteMessage((CompressedMessage)message);
         }

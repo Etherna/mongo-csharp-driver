@@ -35,7 +35,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// Initializes a new instance of the <see cref="EnumerableSerializerBase{TValue}"/> class.
         /// </summary>
         protected EnumerableSerializerBase()
-            : this(BsonSerializer.SerializerRegistry)
+            : this(BsonSerializer.GetSerializerRegistry())
         {
         }
 
@@ -230,7 +230,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// Initializes a new instance of the <see cref="EnumerableSerializerBase{TValue, TItem}"/> class.
         /// </summary>
         protected EnumerableSerializerBase()
-            : this(BsonSerializer.SerializerRegistry)
+            : this(BsonSerializer.GetSerializerRegistry())
         {
         }
 

@@ -136,7 +136,7 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc />
         public override string ToString()
         {
-            var serializerRegistry = BsonSerializer.SerializerRegistry;
+            var serializerRegistry = BsonSerializer.GetSerializerRegistry();
             var inputSerializer = serializerRegistry.GetSerializer<TDocument>();
             return ToString(inputSerializer, serializerRegistry);
         }

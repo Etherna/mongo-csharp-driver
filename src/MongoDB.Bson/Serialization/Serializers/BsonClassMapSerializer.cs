@@ -92,7 +92,7 @@ namespace Etherna.MongoDB.Bson.Serialization
                 return DeserializeClass(context);
             }
 
-            var serializer = BsonSerializer.LookupSerializer(actualType);
+            var serializer = BsonSerializer.LookupSerializer(actualType, args.ForceStaticSerializerRegistry);
             return (TClass)serializer.Deserialize(context);
         }
 
@@ -388,7 +388,7 @@ namespace Etherna.MongoDB.Bson.Serialization
                 return;
             }
 
-            var serializer = BsonSerializer.LookupSerializer(actualType);
+            var serializer = BsonSerializer.LookupSerializer(actualType, args.ForceStaticSerializerRegistry);
             serializer.Serialize(context, args, value);
         }
 

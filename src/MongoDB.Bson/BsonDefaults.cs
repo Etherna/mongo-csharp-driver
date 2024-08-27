@@ -52,46 +52,6 @@ namespace Etherna.MongoDB.Bson
 
         // public static properties
         /// <summary>
-        /// Gets or sets the dynamic array serializer.
-        /// </summary>
-        public static IBsonSerializer DynamicArraySerializer
-        {
-            get
-            {
-                if (!__dynamicArraySerializerWasSet)
-                {
-                    __dynamicArraySerializer = BsonSerializer.LookupSerializer<List<object>>();
-                }
-                return __dynamicArraySerializer;
-            }
-            set
-            {
-                __dynamicArraySerializerWasSet = true;
-                __dynamicArraySerializer = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the dynamic document serializer.
-        /// </summary>
-        public static IBsonSerializer DynamicDocumentSerializer
-        {
-            get
-            {
-                if (!__dynamicDocumentSerializerWasSet)
-                {
-                    __dynamicDocumentSerializer = BsonSerializer.LookupSerializer<ExpandoObject>();
-                }
-                return __dynamicDocumentSerializer;
-            }
-            set
-            {
-                __dynamicDocumentSerializerWasSet = true;
-                __dynamicDocumentSerializer = value;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the default representation to be used in serialization of
         /// Guids to the database.
         /// <seealso cref="MongoDB.Bson.GuidRepresentation"/>
@@ -152,6 +112,53 @@ namespace Etherna.MongoDB.Bson
         {
             get { return __maxSerializationDepth; }
             set { __maxSerializationDepth = value; }
+        }
+
+        //public static methods
+        /// <summary>
+        /// Gets the dynamic array serializer.
+        /// </summary>
+        public static IBsonSerializer GetDynamicArraySerializer(
+            bool forceStaticSerializerRegistry = false)
+        {
+            if (!__dynamicArraySerializerWasSet)
+            {
+                __dynamicArraySerializer = BsonSerializer.LookupSerializer<List<object>>(forceStaticSerializerRegistry);
+            }
+
+            return __dynamicArraySerializer;
+        }
+
+        /// <summary>
+        /// Gets or sets the dynamic document serializer.
+        /// </summary>
+        public static IBsonSerializer GetDynamicDocumentSerializer(
+            bool forceStaticSerializerRegistry = false)
+        {
+            if (!__dynamicDocumentSerializerWasSet)
+            {
+                __dynamicDocumentSerializer = BsonSerializer.LookupSerializer<ExpandoObject>(forceStaticSerializerRegistry);
+            }
+
+            return __dynamicDocumentSerializer;
+        }
+
+        /// <summary>
+        /// Sets the dynamic array serializer.
+        /// </summary>
+        public static void SetDynamicArraySerializer(IBsonSerializer value)
+        {
+            __dynamicArraySerializerWasSet = true;
+            __dynamicArraySerializer = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the dynamic document serializer.
+        /// </summary>
+        public static void SetDynamicDocumentSerializer(IBsonSerializer value)
+        {
+            __dynamicDocumentSerializerWasSet = true;
+            __dynamicDocumentSerializer = value;
         }
     }
 }

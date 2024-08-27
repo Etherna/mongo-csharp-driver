@@ -122,12 +122,15 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             stream.BackpatchSize(messageStartPosition);
         }
 
-        MongoDBMessage IMessageEncoder.ReadMessage()
+        MongoDBMessage IMessageEncoder.ReadMessage(
+            bool forceStaticSerializerRegistry)
         {
             return ReadMessage();
         }
 
-        void IMessageEncoder.WriteMessage(MongoDBMessage message)
+        void IMessageEncoder.WriteMessage(
+            MongoDBMessage message,
+            bool forceStaticSerializerRegistry)
         {
             WriteMessage((CompressedMessage)message);
         }

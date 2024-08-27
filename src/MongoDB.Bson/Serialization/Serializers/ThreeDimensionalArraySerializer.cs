@@ -34,7 +34,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         /// Initializes a new instance of the <see cref="ThreeDimensionalArraySerializer{TItem}"/> class.
         /// </summary>
         public ThreeDimensionalArraySerializer()
-            : this(BsonSerializer.SerializerRegistry)
+            : this(BsonSerializer.GetSerializerRegistry())
         {
         }
 

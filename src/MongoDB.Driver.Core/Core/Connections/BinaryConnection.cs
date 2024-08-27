@@ -936,7 +936,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                     else
                     {
                         var encoder = encoderSelector.GetEncoder(encoderFactory);
-                        message = (ResponseMessage)encoder.ReadMessage();
+                        message = (ResponseMessage)encoder.ReadMessage(true);
                     }
                 }
                 _stopwatch.Stop();
@@ -1018,7 +1018,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                         if (message.ShouldBeSent == null || message.ShouldBeSent())
                         {
                             var encoder = message.GetEncoder(encoderFactory);
-                            encoder.WriteMessage(message);
+                            encoder.WriteMessage(message, true);
                             message.WasSent = true;
                             sentMessages.Add(message);
                         }
