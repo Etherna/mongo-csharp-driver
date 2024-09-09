@@ -127,7 +127,7 @@ namespace Etherna.MongoDB.Bson.IO
         /// <summary>
         /// Writes the end of a BSON document to the writer.
         /// </summary>
-        void WriteEndDocument();
+        void WriteEndDocument(bool forceStaticSerializerRegistry = false);
 
         /// <summary>
         /// Writes a BSON Int32 to the writer.

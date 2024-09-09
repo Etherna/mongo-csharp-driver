@@ -197,7 +197,7 @@ namespace Etherna.MongoDB.Bson.IO
         }
 
         /// <inheritdoc />
-        public virtual void WriteEndDocument()
+        public virtual void WriteEndDocument(bool forceStaticSerializerRegistry = false)
         {
             ThrowIfDisposed();
             _wrapped.WriteEndDocument();

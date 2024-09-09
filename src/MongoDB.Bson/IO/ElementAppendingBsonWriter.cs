@@ -53,7 +53,7 @@ namespace Etherna.MongoDB.Bson.IO
 
         // public methods
         /// <inheritdoc />
-        public override void WriteEndDocument()
+        public override void WriteEndDocument(bool forceStaticSerializerRegistry = false)
         {
             if (--_depth == 0)
             {
@@ -64,7 +64,7 @@ namespace Etherna.MongoDB.Bson.IO
                     foreach (var element in _elements)
                     {
                         Wrapped.WriteName(element.Name);
-                        BsonValueSerializer.Instance.Serialize(context, element.Value);
+                        BsonValueSerializer.Instance.Serialize(context, element.Value, forceStaticSerializerRegistry);
                     }
                 }
                 finally

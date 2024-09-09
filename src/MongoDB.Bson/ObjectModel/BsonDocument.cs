@@ -1234,9 +1234,19 @@ namespace Etherna.MongoDB.Bson
         /// Returns a string representation of the document.
         /// </summary>
         /// <returns>A string representation of the document.</returns>
-        public override string ToString()
+        public override string ToString() => ToString(false);
+
+        /// <summary>
+        /// Returns a string representation of the document.
+        /// </summary>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        /// <returns>A string representation of the document.</returns>
+        public string ToString(bool forceStaticSerializerRegistry)
         {
-            return this.ToJson();
+            return this.ToJson(args: new BsonSerializationArgs()
+            {
+                ForceStaticSerializerRegistry = forceStaticSerializerRegistry
+            });
         }
 
         /// <summary>

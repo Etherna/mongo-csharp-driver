@@ -332,9 +332,16 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override string ToString() => ToString(false);
+
+        /// <summary>
+        /// Returns a string representation of the document.
+        /// </summary>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        /// <returns>A string representation of the document.</returns>
+        public string ToString(bool forceStaticSerializerRegistry)
         {
-            var servers = string.Join(", ", _servers.Select(n => n.ToString()).ToArray());
+            var servers = string.Join(", ", _servers.Select(n => n.ToString(forceStaticSerializerRegistry)).ToArray());
             var value = string.Format(
                 "{{ ClusterId : \"{0}\", {1}Type : \"{2}\", State : \"{3}\", Servers : [{4}] }}",
                 _clusterId,

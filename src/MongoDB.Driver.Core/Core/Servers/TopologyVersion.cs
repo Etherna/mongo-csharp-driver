@@ -15,6 +15,7 @@
 
 using System;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Shared;
 
 namespace Etherna.MongoDB.Driver.Core.Servers
@@ -215,6 +216,14 @@ namespace Etherna.MongoDB.Driver.Core.Servers
         public BsonDocument ToBsonDocument() => new BsonDocument { { "processId", _processId }, { "counter", _counter } };
 
         /// <inheritdoc/>
-        public override string ToString() => ToBsonDocument().ToJson();
+        public override string ToString() => ToString(false);
+
+        /// <summary>
+        /// Returns a string representation of the document.
+        /// </summary>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        /// <returns>A string representation of the document.</returns>
+        public string ToString(bool forceStaticSerializerRegistry) => ToBsonDocument()
+            .ToJson(args: new BsonSerializationArgs { ForceStaticSerializerRegistry = forceStaticSerializerRegistry });
     }
 }

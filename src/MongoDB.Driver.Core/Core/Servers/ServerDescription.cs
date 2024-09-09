@@ -569,7 +569,14 @@ namespace Etherna.MongoDB.Driver.Core.Servers
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override string ToString() => ToString(false);
+
+        /// <summary>
+        /// Returns a string representation of the document.
+        /// </summary>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
+        /// <returns>A string representation of the document.</returns>
+        public string ToString(bool forceStaticSerializerRegistry)
         {
             return new StringBuilder()
                 .Append("{ ")
@@ -578,7 +585,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
                 .AppendFormat(", ReasonChanged: \"{0}\"", _reasonChanged)
                 .AppendFormat(", State: \"{0}\"", _state)
                 .Append($", ServerVersion: {_version}")
-                .Append($", TopologyVersion: {_topologyVersion}")
+                .Append($", TopologyVersion: {_topologyVersion?.ToString(forceStaticSerializerRegistry)}")
                 .AppendFormat(", Type: \"{0}\"", _type)
                 .AppendFormatIf(_tags != null && !_tags.IsEmpty, ", Tags: \"{0}\"", _tags)
                 .AppendFormatIf(_state == ServerState.Connected, ", WireVersionRange: \"{0}\"", _wireVersionRange)

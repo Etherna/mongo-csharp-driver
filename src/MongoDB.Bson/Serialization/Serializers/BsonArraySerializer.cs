@@ -94,7 +94,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
             bsonWriter.WriteStartArray();
             for (int i = 0; i < value.Count; i++)
             {
-                BsonValueSerializer.Instance.Serialize(context, value[i]);
+                BsonValueSerializer.Instance.Serialize(context, value[i], forceStaticSerializerRegistry: args.ForceStaticSerializerRegistry);
             }
             bsonWriter.WriteEndArray();
         }

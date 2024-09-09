@@ -208,7 +208,7 @@ namespace Etherna.MongoDB.Bson.IO
         /// <summary>
         /// Writes the end of a BSON document to the writer.
         /// </summary>
-        public virtual void WriteEndDocument()
+        public virtual void WriteEndDocument(bool forceStaticSerializerRegistry = false)
             => ExitSerializationScope();
 
         /// <summary>

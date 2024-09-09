@@ -203,7 +203,7 @@ namespace Etherna.MongoDB.Bson.IO
         /// <summary>
         /// Writes the end of a BSON document to the writer.
         /// </summary>
-        public override void WriteEndDocument()
+        public override void WriteEndDocument(bool forceStaticSerializerRegistry = false)
         {
             if (Disposed) { throw new ObjectDisposedException("BsonDocumentWriter"); }
             if (State != BsonWriterState.Name)

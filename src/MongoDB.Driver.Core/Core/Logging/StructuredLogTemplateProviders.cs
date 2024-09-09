@@ -94,7 +94,7 @@ namespace Etherna.MongoDB.Driver.Core.Logging
 
         public static object[] GetParams(ClusterId clusterId, object message, ClusterDescription oldDescription, ClusterDescription newDescription)
         {
-            return new[] { clusterId.Value, message, oldDescription.ToString(), newDescription.ToString() };
+            return new[] { clusterId.Value, message, oldDescription.ToString(true), newDescription.ToString(true) };
         }
 
         public static object[] GetParams(ClusterId clusterId, EndPoint endPoint, object arg1)
@@ -247,7 +247,7 @@ namespace Etherna.MongoDB.Driver.Core.Logging
                 return null;
             }
 
-            return TruncateIfNeeded(document.ToString(), eventLogFormattingOptions.MaxDocumentSize);
+            return TruncateIfNeeded(document.ToString(forceStaticSerializerRegistry: true), eventLogFormattingOptions.MaxDocumentSize);
         }
 
         private static string FormatException(Exception exception, EventLogFormattingOptions eventLogFormattingOptions)
