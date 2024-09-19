@@ -434,7 +434,7 @@ namespace Etherna.MongoDB.Driver
             {
                 AuthorizedDatabases = options.AuthorizedDatabases,
                 Comment = options.Comment,
-                Filter = options.Filter?.Render(BsonDocumentSerializer.Instance, BsonSerializer.GetSerializerRegistry(), _linqProvider),
+                Filter = options.Filter?.Render(new(BsonDocumentSerializer.Instance, BsonSerializer.GetSerializerRegistry(), _linqProvider)),
                 NameOnly = options.NameOnly,
                 RetryRequested = _settings.RetryReads
             };

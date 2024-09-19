@@ -137,7 +137,7 @@ namespace Etherna.MongoDB.Driver
         {
             var changeStreamDocumentSerializer = new ChangeStreamDocumentSerializer<TDocument>(documentSerializer);
             var serializerRegistry = BsonSerializer.GetSerializerRegistry();
-            return pipeline.Render(changeStreamDocumentSerializer, serializerRegistry, linqProvider);
+            return pipeline.Render(new(changeStreamDocumentSerializer, serializerRegistry, linqProvider));
         }
 
         private static void SetOperationOptions<TResult>(

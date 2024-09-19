@@ -18,9 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Linq;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -217,7 +215,7 @@ namespace Etherna.MongoDB.Driver
 
         /// <summary>
         /// Creates a descending sort on the computed relevance score of a text search.
-        /// The name of the key should be the name of the projected relevence score field.
+        /// The name of the key should be the name of the projected relevance score field.
         /// </summary>
         /// <param name="field">The field.</param>
         /// <returns>A meta text score sort.</returns>
@@ -236,13 +234,13 @@ namespace Etherna.MongoDB.Driver
             _sorts = Ensure.IsNotNull(sorts, nameof(sorts)).ToList();
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
             var document = new BsonDocument();
 
             foreach (var sort in _sorts)
             {
-                var renderedSort = sort.Render(documentSerializer, serializerRegistry, linqProvider);
+                var renderedSort = sort.Render(args);
 
                 foreach (var element in renderedSort.Elements)
                 {
@@ -270,9 +268,9 @@ namespace Etherna.MongoDB.Driver
         public SortDirection Direction => _direction;
         public FieldDefinition<TDocument> Field => _field;
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
 
             BsonValue value;
             switch (_direction)

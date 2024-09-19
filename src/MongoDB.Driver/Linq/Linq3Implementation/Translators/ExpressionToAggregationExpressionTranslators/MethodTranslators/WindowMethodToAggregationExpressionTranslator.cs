@@ -541,7 +541,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             }
 
             var field = directionalSortBy.Field;
-            var renderedField = field.Render(documentSerializer, serializerRegistry);
+            var renderedField = field.Render(new(documentSerializer, serializerRegistry));
 
             return renderedField.FieldSerializer;
         }

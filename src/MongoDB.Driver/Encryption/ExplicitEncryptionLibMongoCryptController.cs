@@ -553,7 +553,7 @@ namespace Etherna.MongoDB.Driver.Encryption
         {
             var registry = BsonSerializer.GetSerializerRegistry();
             var serializer = registry.GetSerializer<BsonDocument>();
-            return filter.Render(serializer, registry);
+            return filter.Render(new(serializer, registry));
         }
 
         private Guid UnwrapKeyId(BsonDocument wrappedKeyDocument)

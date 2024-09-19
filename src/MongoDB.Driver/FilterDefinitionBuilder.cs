@@ -1698,7 +1698,7 @@ namespace Etherna.MongoDB.Driver
             _filters = Ensure.IsNotNull(filters, nameof(filters)).ToList();
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
             if (_filters.Count == 0)
             {
@@ -1709,14 +1709,14 @@ namespace Etherna.MongoDB.Driver
 
             foreach (var filter in _filters)
             {
-                var renderedFilter = filter.Render(documentSerializer, serializerRegistry, linqProvider);
+                var renderedFilter = filter.Render(args);
                 foreach (var clause in renderedFilter)
                 {
                     AddClause(document, clause);
                 }
             }
 
-            if (FilterDefinitionRenderContext.RenderDollarForm)
+            if (args.RenderDollarForm)
             {
                 if (document.ElementCount > 1 ||
                     document.ElementCount == 1 && document.GetElement(0).Name != "$and")
@@ -1809,9 +1809,9 @@ namespace Etherna.MongoDB.Driver
             _values = values;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
 
             IBsonSerializer itemSerializer;
             if (renderedField.FieldSerializer != null)
@@ -1823,11 +1823,11 @@ namespace Etherna.MongoDB.Driver
                     var message = string.Format("The serializer for field '{0}' must implement IBsonArraySerializer and provide item serialization info.", renderedField.FieldName);
                     throw new InvalidOperationException(message);
                 }
-                itemSerializer = FieldValueSerializerHelper.GetSerializerForValueType(itemSerializationInfo.Serializer, serializerRegistry, typeof(TItem));
+                itemSerializer = FieldValueSerializerHelper.GetSerializerForValueType(itemSerializationInfo.Serializer, args.SerializerRegistry, typeof(TItem));
             }
             else
             {
-                itemSerializer = serializerRegistry.GetSerializer<TItem>();
+                itemSerializer = args.SerializerRegistry.GetSerializer<TItem>();
             }
 
             var document = new BsonDocument();
@@ -1868,11 +1868,11 @@ namespace Etherna.MongoDB.Driver
             _filter = filter;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
             if (_field != null)
             {
-                var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+                var renderedField = _field.Render(args);
 
                 IBsonSerializer<TItem> itemSerializer;
                 if (renderedField.FieldSerializer != null)
@@ -1888,16 +1888,16 @@ namespace Etherna.MongoDB.Driver
                 }
                 else
                 {
-                    itemSerializer = serializerRegistry.GetSerializer<TItem>();
+                    itemSerializer = args.SerializerRegistry.GetSerializer<TItem>();
                 }
 
-                var renderedFilter = _filter.Render(itemSerializer, serializerRegistry, linqProvider);
+                var renderedFilter = _filter.Render(args.WithNewDocumentType(itemSerializer));
 
                 return new BsonDocument(renderedField.FieldName, new BsonDocument("$elemMatch", renderedFilter));
             }
             else
             {
-                if (documentSerializer is not IBsonArraySerializer arraySerializer ||
+                if (args.DocumentSerializer is not IBsonArraySerializer arraySerializer ||
                     !arraySerializer.TryGetItemSerializationInfo(out var itemSerializationInfo))
                 {
                     var message = "The serializer must implement IBsonArraySerializer and provide item serialization info.";
@@ -1905,7 +1905,7 @@ namespace Etherna.MongoDB.Driver
                 }
                 var itemSerializer = (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
 
-                var renderedFilter = _filter.Render(itemSerializer, serializerRegistry, linqProvider);
+                var renderedFilter = _filter.Render(new(itemSerializer, args.SerializerRegistry, args.LinqProvider));
 
                 return new BsonDocument("$elemMatch", renderedFilter);
             }
@@ -1921,9 +1921,9 @@ namespace Etherna.MongoDB.Driver
             _elementMatchFilter = Ensure.IsNotNull(elementMatchFilter, nameof(elementMatchFilter));
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var document = _elementMatchFilter.Render(documentSerializer, serializerRegistry, linqProvider);
+            var document = _elementMatchFilter.Render(args);
 
             var elemMatch = (BsonDocument)document[0]["$elemMatch"];
             Compress(elemMatch);
@@ -1980,9 +1980,9 @@ namespace Etherna.MongoDB.Driver
             _geometry = Ensure.IsNotNull(geometry, nameof(geometry));
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
 
             var document = new BsonDocument();
             using (var bsonWriter = new BsonDocumentWriter(document))
@@ -1994,7 +1994,7 @@ namespace Etherna.MongoDB.Driver
                 bsonWriter.WriteName(_operatorName);
                 bsonWriter.WriteStartDocument();
                 bsonWriter.WriteName("$geometry");
-                serializerRegistry.GetSerializer<GeoJsonGeometry<TCoordinates>>().Serialize(context, _geometry);
+                args.SerializerRegistry.GetSerializer<GeoJsonGeometry<TCoordinates>>().Serialize(context, _geometry);
                 bsonWriter.WriteEndDocument();
                 bsonWriter.WriteEndDocument();
                 bsonWriter.WriteEndDocument();
@@ -2022,9 +2022,9 @@ namespace Etherna.MongoDB.Driver
             _minDistance = minDistance;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
 
             var document = new BsonDocument();
             using (var bsonWriter = new BsonDocumentWriter(document))
@@ -2036,7 +2036,7 @@ namespace Etherna.MongoDB.Driver
                 bsonWriter.WriteName(_spherical ? "$nearSphere" : "$near");
                 bsonWriter.WriteStartDocument();
                 bsonWriter.WriteName("$geometry");
-                serializerRegistry.GetSerializer<GeoJsonPoint<TCoordinates>>().Serialize(context, _point);
+                args.SerializerRegistry.GetSerializer<GeoJsonPoint<TCoordinates>>().Serialize(context, _point);
                 if (_maxDistance.HasValue)
                 {
                     bsonWriter.WriteName("$maxDistance");
@@ -2065,9 +2065,9 @@ namespace Etherna.MongoDB.Driver
             _filter = Ensure.IsNotNull(filter, nameof(filter));
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedFilter = _filter.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedFilter = _filter.Render(args);
 
             if (renderedFilter.ElementCount == 1)
             {
@@ -2167,7 +2167,7 @@ namespace Etherna.MongoDB.Driver
             _derivedDocumentFilter = derivedDocumentFilter; // can be null
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
             var discriminatorConvention = BsonSerializer.LookupDiscriminatorConvention(typeof(TDocument));
             if (discriminatorConvention == null)
@@ -2192,12 +2192,12 @@ namespace Etherna.MongoDB.Driver
                 return renderedOfTypeFilter;
             }
 
-            var derivedDocumentSerializer = serializerRegistry.GetSerializer<TDerived>();
-            var renderedDerivedDocumentFilter = _derivedDocumentFilter.Render(derivedDocumentSerializer, serializerRegistry, linqProvider);
+            var derivedDocumentRenderArgs = args.WithNewDocumentType(args.SerializerRegistry.GetSerializer<TDerived>());
+            var renderedDerivedDocumentFilter = _derivedDocumentFilter.Render(derivedDocumentRenderArgs);
             var combinedFilter = Builders<TDerived>.Filter.And(
                 new BsonDocumentFilterDefinition<TDerived>(renderedOfTypeFilter),
                 new BsonDocumentFilterDefinition<TDerived>(renderedDerivedDocumentFilter));
-            return combinedFilter.Render(derivedDocumentSerializer, serializerRegistry, linqProvider);
+            return combinedFilter.Render(derivedDocumentRenderArgs);
         }
     }
 
@@ -2213,7 +2213,7 @@ namespace Etherna.MongoDB.Driver
             _derivedFieldFilter = derivedFieldFilter; // can be null
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
             var discriminatorConvention = BsonSerializer.LookupDiscriminatorConvention(typeof(TField));
             if (discriminatorConvention == null)
@@ -2222,7 +2222,7 @@ namespace Etherna.MongoDB.Driver
                 throw new NotSupportedException(message);
             }
 
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
             var discriminatorElementName = renderedField.FieldName + "." + discriminatorConvention.ElementName;
             var discriminatorValue = discriminatorConvention.GetDiscriminator(typeof(TField), typeof(TDerived));
             var renderedDiscriminatorFilter = new BsonDocument(discriminatorElementName, discriminatorValue);
@@ -2232,14 +2232,14 @@ namespace Etherna.MongoDB.Driver
                 return renderedDiscriminatorFilter;
             }
 
-            var derivedDocumentSerializer = serializerRegistry.GetSerializer<TDerived>();
-            var unprefixedRenderedDerivedFilter = _derivedFieldFilter.Render(derivedDocumentSerializer, serializerRegistry, linqProvider);
+            var derivedDocumentRenderArgs = args.WithNewDocumentType(args.SerializerRegistry.GetSerializer<TDerived>());
+            var unprefixedRenderedDerivedFilter = _derivedFieldFilter.Render(derivedDocumentRenderArgs);
             var renderedDerivedFilter = new BsonDocument(
                 unprefixedRenderedDerivedFilter.Select(e => new BsonElement(renderedField.FieldName + "." + e.Name, e.Value)));
             var combinedFilter = Builders<TDerived>.Filter.And(
                 new BsonDocumentFilterDefinition<TDerived>(renderedDiscriminatorFilter),
                 new BsonDocumentFilterDefinition<TDerived>(renderedDerivedFilter));
-            return combinedFilter.Render(derivedDocumentSerializer, serializerRegistry, linqProvider);
+            return combinedFilter.Render(derivedDocumentRenderArgs);
         }
     }
 
@@ -2256,9 +2256,9 @@ namespace Etherna.MongoDB.Driver
             _value = value;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
             return new BsonDocument(renderedField.FieldName, new BsonDocument(_operatorName, _value));
         }
     }
@@ -2282,9 +2282,10 @@ namespace Etherna.MongoDB.Driver
             _allowScalarValueForArrayField = allowScalarValueForArrayField;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider, _allowScalarValueForArrayField);
+            var fieldRenderArgs = args with { PathRenderArgs = args.PathRenderArgs with { AllowScalarValueForArray = _allowScalarValueForArrayField } };
+            var renderedField = _field.Render(fieldRenderArgs);
 
             var document = new BsonDocument();
             using (var bsonWriter = new BsonDocumentWriter(document))
@@ -2312,13 +2313,13 @@ namespace Etherna.MongoDB.Driver
             _filters = Ensure.IsNotNull(filters, nameof(filters)).ToList();
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
             var clauses = new BsonArray();
 
             foreach (var filter in _filters)
             {
-                var renderedFilter = filter.Render(documentSerializer, serializerRegistry, linqProvider);
+                var renderedFilter = filter.Render(args);
                 AddClause(clauses, renderedFilter);
             }
 
@@ -2352,9 +2353,9 @@ namespace Etherna.MongoDB.Driver
             _value = value;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
             return new BsonDocument(renderedField.FieldName, _value);
         }
     }
@@ -2375,9 +2376,10 @@ namespace Etherna.MongoDB.Driver
             _allowScalarValueForArrayField = allowScalarValueForArrayField;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider, _allowScalarValueForArrayField);
+            var fieldRenderArgs = args with { PathRenderArgs = args.PathRenderArgs with { AllowScalarValueForArray = _allowScalarValueForArrayField } };
+            var renderedField = _field.Render(fieldRenderArgs);
 
             var document = new BsonDocument();
             using (var bsonWriter = new BsonDocumentWriter(document))
@@ -2386,7 +2388,7 @@ namespace Etherna.MongoDB.Driver
                 bsonWriter.WriteStartDocument();
                 bsonWriter.WriteName(renderedField.FieldName);
 
-                if (FilterDefinitionRenderContext.RenderDollarForm)
+                if (args.RenderDollarForm)
                 {
                     bsonWriter.WriteStartDocument();
                     bsonWriter.WriteName("$eq");
@@ -2424,9 +2426,10 @@ namespace Etherna.MongoDB.Driver
             _allowScalarValueForArrayField = allowScalarValueForArrayField;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider, _allowScalarValueForArrayField);
+            var fieldRenderArgs = args with { PathRenderArgs = args.PathRenderArgs with { AllowScalarValueForArray = _allowScalarValueForArrayField } };
+            var renderedField = _field.Render(fieldRenderArgs);
 
             var document = new BsonDocument();
             using (var bsonWriter = new BsonDocumentWriter(document))
@@ -2463,9 +2466,9 @@ namespace Etherna.MongoDB.Driver
             _value = value;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
 
             IBsonSerializer itemSerializer;
             if (renderedField.FieldSerializer != null)
@@ -2477,11 +2480,11 @@ namespace Etherna.MongoDB.Driver
                     var message = string.Format("The serializer for field '{0}' must implement IBsonArraySerializer and provide item serialization info.", renderedField.FieldName);
                     throw new InvalidOperationException(message);
                 }
-                itemSerializer = FieldValueSerializerHelper.GetSerializerForValueType(itemSerializationInfo.Serializer, serializerRegistry, typeof(TItem));
+                itemSerializer = FieldValueSerializerHelper.GetSerializerForValueType(itemSerializationInfo.Serializer, args.SerializerRegistry, typeof(TItem));
             }
             else
             {
-                itemSerializer = serializerRegistry.GetSerializer<TItem>();
+                itemSerializer = args.SerializerRegistry.GetSerializer<TItem>();
             }
 
             var document = new BsonDocument();
@@ -2512,9 +2515,9 @@ namespace Etherna.MongoDB.Driver
             _value = value;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
 
             IBsonSerializer<TItem> itemSerializer;
             if (renderedField.FieldSerializer != null)
@@ -2526,11 +2529,11 @@ namespace Etherna.MongoDB.Driver
                     var message = string.Format("The serializer for field '{0}' must implement IBsonArraySerializer and provide item serialization info.", renderedField.FieldName);
                     throw new InvalidOperationException(message);
                 }
-                itemSerializer = (IBsonSerializer<TItem>)FieldValueSerializerHelper.GetSerializerForValueType(itemSerializationInfo.Serializer, serializerRegistry, typeof(TItem));
+                itemSerializer = (IBsonSerializer<TItem>)FieldValueSerializerHelper.GetSerializerForValueType(itemSerializationInfo.Serializer, args.SerializerRegistry, typeof(TItem));
             }
             else
             {
-                itemSerializer = serializerRegistry.GetSerializer<TItem>();
+                itemSerializer = args.SerializerRegistry.GetSerializer<TItem>();
             }
 
             var document = new BsonDocument();
@@ -2560,9 +2563,9 @@ namespace Etherna.MongoDB.Driver
             _exists = exists;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
             var fieldName = renderedField.FieldName + "." + _index;
             return new BsonDocument(fieldName, new BsonDocument("$exists", _exists));
         }
@@ -2589,9 +2592,9 @@ namespace Etherna.MongoDB.Driver
             }
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
 
             var document = new BsonDocument();
             using (var bsonWriter = new BsonDocumentWriter(document))
@@ -2660,9 +2663,9 @@ namespace Etherna.MongoDB.Driver
             _value = value;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
             var serializedValue = renderedField.ValueSerializer.ToBsonValue(_value);
 
             if (serializedValue.BsonType != BsonType.Int32)
@@ -2712,9 +2715,9 @@ namespace Etherna.MongoDB.Driver
             _value = value;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
             var serializedValue = renderedField.ValueSerializer.ToBsonValue(_value);
 
             if (serializedValue.BsonType != BsonType.Int32)
@@ -2764,9 +2767,9 @@ namespace Etherna.MongoDB.Driver
             _value = value;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
             var serializedValue = renderedField.ValueSerializer.ToBsonValue(_value);
 
             if (serializedValue.BsonType != BsonType.Int64)
@@ -2816,9 +2819,9 @@ namespace Etherna.MongoDB.Driver
             _value = value;
         }
 
-        public override BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var renderedField = _field.Render(documentSerializer, serializerRegistry, linqProvider);
+            var renderedField = _field.Render(args);
             var serializedValue = renderedField.ValueSerializer.ToBsonValue(_value);
 
             if (serializedValue.BsonType != BsonType.Int64)
