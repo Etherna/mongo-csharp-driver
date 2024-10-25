@@ -13,10 +13,12 @@
 * limitations under the License.
 */
 
+using System;
 using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
@@ -72,12 +74,30 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     }
                     else
                     {
+                        // { $elemMatch : { $or : [{ $eq : x }, { $eq : y }, ... ] } } => { $in : [x, y, ...] }
+                        if (filter is AstOrFilter orFilter &&
+                            orFilter.Filters.All(IsImpliedElementEqualityComparison))
+                        {
+                            var values = orFilter.Filters
+                                .Select(filter => ((AstFieldOperationFilter)filter).Operation)
+                                .Select(operation => ((AstComparisonFilterOperation)operation).Value);
+
+                            return AstFilter.In(field, values);
+                        }
+
                         return AstFilter.ElemMatch(field, filter);
                     }
                 }
             }
 
             throw new ExpressionNotSupportedException(expression);
+
+            static bool IsImpliedElementEqualityComparison(AstFilter filter)
+                =>
+                    filter is AstFieldOperationFilter fieldOperationFilter &&
+                    fieldOperationFilter.Field.Path == "@<elem>" &&
+                    fieldOperationFilter.Operation is AstComparisonFilterOperation comparisonFilterOperation &&
+                    comparisonFilterOperation.Operator == AstComparisonFilterOperator.Eq;
         }
     }
 
@@ -97,10 +117,19 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                     var nominalType = ArraySerializerHelper.GetItemSerializer(sourceField.Serializer).ValueType;
                     var actualType = method.GetGenericArguments()[0];
-                    var discriminatorConvention = BsonSerializer.LookupDiscriminatorConvention(actualType);
+                    var sourceSerializer = sourceField.Serializer;
+                    var itemSerializer = ArraySerializerHelper.GetItemSerializer(sourceSerializer);
+
+                    var discriminatorConvention = itemSerializer.GetDiscriminatorConvention();
                     var discriminatorField = AstFilter.Field(discriminatorConvention.ElementName, BsonValueSerializer.Instance);
-                    var discriminatorValue = discriminatorConvention.GetDiscriminator(nominalType, actualType);
-                    var ofTypeFilter = AstFilter.Eq(discriminatorField, discriminatorValue);
+
+                    var ofTypeFilter = discriminatorConvention switch
+                    {
+                        IHierarchicalDiscriminatorConvention hierarchicalDiscriminatorConvention => DiscriminatorAstFilter.TypeIs(discriminatorField, hierarchicalDiscriminatorConvention, nominalType, actualType),
+                        IScalarDiscriminatorConvention scalarDiscriminatorConvention => DiscriminatorAstFilter.TypeIs(discriminatorField, scalarDiscriminatorConvention, nominalType, actualType),
+                        _ => throw new ExpressionNotSupportedException(sourceExpression, because: "OfType method is not supported with the configured discriminator convention")
+                    };
+
                     var actualTypeSerializer = context.KnownSerializersRegistry.GetSerializer(sourceExpression);
                     var enumerableActualTypeSerializer = IEnumerableSerializer.Create(actualTypeSerializer);
                     var actualTypeSourceField = AstFilter.Field(sourceField.Path, enumerableActualTypeSerializer);

@@ -15,9 +15,7 @@
 
 using System;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Linq;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -42,31 +40,6 @@ namespace Etherna.MongoDB.Driver
     /// <typeparam name="TDocument">The type of the document.</typeparam>
     public abstract class SortDefinition<TDocument>
     {
-        /// <summary>
-        /// Renders the sort to a <see cref="BsonDocument"/>.
-        /// </summary>
-        /// <param name="documentSerializer">The document serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <returns>A <see cref="BsonDocument"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TDocument> args) overload instead.")]
-        public virtual BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry)
-        {
-            return Render(new(documentSerializer, serializerRegistry, LinqProvider.V3));
-        }
-
-        /// <summary>
-        /// Renders the sort to a <see cref="BsonDocument"/>.
-        /// </summary>
-        /// <param name="documentSerializer">The document serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
-        /// <returns>A <see cref="BsonDocument"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TDocument> args) overload instead.")]
-        public virtual BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
-        {
-            return Render(new(documentSerializer, serializerRegistry, linqProvider));
-        }
-
         /// <summary>
         /// Renders the sort to a <see cref="BsonDocument"/>.
         /// </summary>

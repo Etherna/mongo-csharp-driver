@@ -20,7 +20,6 @@ namespace Etherna.MongoDB.Bson
     /// <summary>
     /// Represents the type of a BSON element.
     /// </summary>
-    [Serializable]
     public enum BsonType
     {
         /// <summary>

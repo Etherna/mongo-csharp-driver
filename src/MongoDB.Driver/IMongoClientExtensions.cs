@@ -16,6 +16,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Operations;
 
@@ -107,5 +108,8 @@ namespace Etherna.MongoDB.Driver
             var emptyPipeline = new EmptyPipelineDefinition<ChangeStreamDocument<BsonDocument>>();
             return client.WatchAsync(session, emptyPipeline, options, cancellationToken);
         }
+
+        // internal static methods
+        internal static IClusterInternal GetClusterInternal(this IMongoClient client) => (IClusterInternal)client.Cluster;
     }
 }

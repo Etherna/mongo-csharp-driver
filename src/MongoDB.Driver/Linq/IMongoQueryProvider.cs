@@ -58,10 +58,9 @@ namespace Etherna.MongoDB.Driver.Linq
         IBsonSerializer PipelineInputSerializer { get; }
 
         /// <summary>
-        /// Gets the execution model.
+        /// Gets the translation options.
         /// </summary>
-        /// <param name="expression">The expression.</param>
-        /// <returns>The execution model.</returns>
-        QueryableExecutionModel GetExecutionModel(Expression expression);
+        /// <returns>The translation options.</returns>
+        ExpressionTranslationOptions GetTranslationOptions();
     }
 }

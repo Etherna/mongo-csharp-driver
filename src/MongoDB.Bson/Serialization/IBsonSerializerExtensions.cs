@@ -15,6 +15,7 @@
 
 using System;
 using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
 
 namespace Etherna.MongoDB.Bson.Serialization
 {
@@ -56,6 +57,16 @@ namespace Etherna.MongoDB.Bson.Serialization
             };
             return serializer.Deserialize(context, args);
         }
+
+        /// <summary>
+        /// Gets the discriminator convention for a serializer.
+        /// </summary>
+        /// <param name="serializer">The serializer.</param>
+        /// <returns>The discriminator convention.</returns>
+        public static IDiscriminatorConvention GetDiscriminatorConvention(this IBsonSerializer serializer) =>
+            serializer is IHasDiscriminatorConvention hasDiscriminatorConvention
+                ? hasDiscriminatorConvention.DiscriminatorConvention
+                : BsonSerializer.LookupDiscriminatorConvention(serializer.ValueType);
 
         /// <summary>
         /// Serializes a value.

@@ -38,6 +38,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 var outerExpression = arguments[0];
                 var pipeline = ExpressionToPipelineTranslator.Translate(context, outerExpression);
+                ClientSideProjectionHelper.ThrowIfClientSideProjection(expression, pipeline, method);
 
                 AstExpression outerAst;
                 var rootVar = AstExpression.Var("ROOT", isCurrent: true);

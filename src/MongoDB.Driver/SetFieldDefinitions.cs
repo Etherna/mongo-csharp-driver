@@ -18,7 +18,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq;
 
@@ -30,19 +29,6 @@ namespace Etherna.MongoDB.Driver
     /// <typeparam name="TDocument">The type of the document.</typeparam>
     public abstract class SetFieldDefinitions<TDocument>
     {
-        /// <summary>
-        /// Renders the set field definitions.
-        /// </summary>
-        /// <param name="documentSerializer">The document serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The linq provider.</param>
-        /// <returns>The rendered set field definitions.</returns>
-        [Obsolete("Use Render(RenderArgs<TDocument> args) overload instead.")]
-        public virtual BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
-        {
-            return Render(new(documentSerializer, serializerRegistry, linqProvider));
-        }
-
         /// <summary>
         /// Renders the set field definitions.
         /// </summary>
@@ -107,8 +93,7 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc/>
         public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var linqAdapter = args.LinqProvider.GetAdapter();
-            var stage = linqAdapter.TranslateExpressionToSetStage(_expression, args.DocumentSerializer, args.SerializerRegistry);
+            var stage = LinqProviderAdapter.TranslateExpressionToSetStage(_expression, args.DocumentSerializer, args.SerializerRegistry, args.TranslationOptions);
             return stage["$set"].AsBsonDocument;
         }
     }

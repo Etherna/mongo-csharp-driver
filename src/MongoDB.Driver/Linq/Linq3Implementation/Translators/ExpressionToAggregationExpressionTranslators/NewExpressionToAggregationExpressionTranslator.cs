@@ -16,6 +16,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using Etherna.MongoDB.Bson;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
 {
@@ -25,6 +26,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         {
             var expressionType = expression.Type;
 
+            if (expressionType == typeof(BsonDocument))
+            {
+                return NewBsonDocumentExpressionToAggregationExpressionTranslator.Translate(context, expression);
+            }
             if (expressionType == typeof(DateTime))
             {
                 return NewDateTimeExpressionToAggregationExpressionTranslator.Translate(context, expression);

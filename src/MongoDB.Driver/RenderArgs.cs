@@ -15,7 +15,6 @@
 
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Linq;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -33,35 +32,39 @@ namespace Etherna.MongoDB.Driver
     public record struct RenderArgs<TDocument>
     {
         private readonly IBsonSerializer<TDocument> _documentSerializer = default;
-        private readonly bool _renderForFind = false;
-        private readonly LinqProvider _linqProvider = default;
         private readonly PathRenderArgs _pathRenderArgs = default;
         private readonly bool _renderDollarForm = default;
+        private readonly bool _renderForElemMatch = false;
+        private readonly bool _renderForFind = false;
         private readonly IBsonSerializerRegistry _serializerRegistry = default;
+        private readonly ExpressionTranslationOptions _translationOptions = default;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RenderArgs{TDocument}"/> record.
         /// </summary>
         /// <param name="documentSerializer">The document serializer.</param>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
         /// <param name="pathRenderArgs">The path render arguments.</param>
         /// <param name="renderDollarForm">Value that specifies whether full dollar for should be rendered.</param>
         /// <param name="renderForFind">Value that specifies whether rendering a find operation.</param>
+        /// <param name="renderForElemMatch">Value that specifies whether rendering an $elemMatch.</param>
+        /// <param name="translationOptions">The translation options.</param>
         public RenderArgs(
             IBsonSerializer<TDocument> documentSerializer,
             IBsonSerializerRegistry serializerRegistry,
-            LinqProvider linqProvider = LinqProvider.V3,
             PathRenderArgs pathRenderArgs = default,
             bool renderDollarForm = default,
-            bool renderForFind = false)
+            bool renderForFind = false,
+            bool renderForElemMatch = false,
+            ExpressionTranslationOptions translationOptions = null)
         {
             DocumentSerializer = documentSerializer;
-            LinqProvider = linqProvider;
             PathRenderArgs = pathRenderArgs;
             SerializerRegistry = serializerRegistry;
             RenderDollarForm = renderDollarForm;
             _renderForFind = renderForFind;
+            _renderForElemMatch = renderForElemMatch;
+            _translationOptions = translationOptions; // can be null
         }
 
         /// <summary>
@@ -74,14 +77,14 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Gets the value indicating whether Render is being called for ElemMatch.
+        /// </summary>
+        public readonly bool RenderForElemMatch { get => _renderForElemMatch; init => _renderForElemMatch = value; }
+
+        /// <summary>
         /// Gets the value indicating whether Render is being called for Find.
         /// </summary>
         public readonly bool RenderForFind { get => _renderForFind; init => _renderForFind = value; }
-
-        /// <summary>
-        /// Gets the linq provider.
-        /// </summary>
-        public readonly LinqProvider LinqProvider { get => _linqProvider; init => _linqProvider = value; }
 
         /// <summary>
         /// Gets the path render arguments.
@@ -103,6 +106,15 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Gets the translation options used when translation Expressions to MQL.
+        /// </summary>
+        public readonly ExpressionTranslationOptions TranslationOptions
+        {
+            get => _translationOptions;
+            init => _translationOptions = value;
+        }
+
+        /// <summary>
         /// Returns <see cref="DocumentSerializer"/> if it implements <c>IBsonSerializer{T}</c>
         /// or resolves <c>IBsonSerializer{T}</c> from <see cref="SerializerRegistry"/>.
         /// </summary>
@@ -117,6 +129,6 @@ namespace Etherna.MongoDB.Driver
         /// A new RenderArgs{TNewDocument} instance.
         /// </returns>
         public readonly RenderArgs<TNewDocument> WithNewDocumentType<TNewDocument>(IBsonSerializer<TNewDocument> serializer) =>
-            new(serializer, SerializerRegistry, LinqProvider, PathRenderArgs);
+            new(serializer, _serializerRegistry, _pathRenderArgs, _renderDollarForm, _renderForFind, _renderForElemMatch, _translationOptions);
     }
 }

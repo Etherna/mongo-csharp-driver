@@ -17,6 +17,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ToFilterFieldTranslators;
@@ -34,17 +35,22 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var nominalType = fieldExpression.Type;
                 var actualType = expression.TypeOperand;
 
-                var discriminatorConvention = field.Serializer is ObjectSerializer objectSerializer ?
-                    objectSerializer.DiscriminatorConvention :
-                    BsonSerializer.LookupDiscriminatorConvention(actualType);
-                var discriminatorField = field.SubField(discriminatorConvention.ElementName, BsonValueSerializer.Instance);
-                var discriminatorValue = discriminatorConvention.GetDiscriminator(nominalType, actualType);
-                if (discriminatorValue is BsonArray array)
+                if (nominalType == actualType)
                 {
-                    discriminatorValue = array.Last();
+                    return AstFilter.MatchesEverything();
                 }
+                else
+                {
+                    var discriminatorConvention = field.Serializer.GetDiscriminatorConvention();
+                    var discriminatorField = field.SubField(discriminatorConvention.ElementName, BsonValueSerializer.Instance);
 
-                return AstFilter.Eq(discriminatorField, discriminatorValue); // will match subclasses also
+                    return discriminatorConvention switch
+                    {
+                        IHierarchicalDiscriminatorConvention hierarchicalDiscriminatorConvention => DiscriminatorAstFilter.TypeIs(discriminatorField, hierarchicalDiscriminatorConvention, nominalType, actualType),
+                        IScalarDiscriminatorConvention scalarDiscriminatorConvention => DiscriminatorAstFilter.TypeIs(discriminatorField, scalarDiscriminatorConvention, nominalType, actualType),
+                        _ => throw new ExpressionNotSupportedException(expression, because: "is operator is not supported with the configured discriminator convention")
+                    };
+                }
             }
 
             throw new ExpressionNotSupportedException(expression);

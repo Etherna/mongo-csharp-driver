@@ -16,7 +16,6 @@
 using System;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq;
 
@@ -36,31 +35,6 @@ namespace Etherna.MongoDB.Driver
         public static FilterDefinition<TDocument> Empty
         {
             get { return __empty; }
-        }
-
-        /// <summary>
-        /// Renders the filter to a <see cref="BsonDocument"/>.
-        /// </summary>
-        /// <param name="documentSerializer">The document serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <returns>A <see cref="BsonDocument"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TDocument> args) overload instead.")]
-        public virtual BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry)
-        {
-            return Render(new(documentSerializer, serializerRegistry, LinqProvider.V3));
-        }
-
-        /// <summary>
-        /// Renders the filter to a <see cref="BsonDocument"/>.
-        /// </summary>
-        /// <param name="documentSerializer">The document serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
-        /// <returns>A <see cref="BsonDocument"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TDocument> args) overload instead.")]
-        public virtual BsonDocument Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
-        {
-            return Render(new(documentSerializer, serializerRegistry, linqProvider));
         }
 
         /// <summary>
@@ -229,7 +203,14 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc />
         public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            return args.LinqProvider.GetAdapter().TranslateExpressionToFilter(_expression, args.DocumentSerializer, args.SerializerRegistry);
+            if (args.RenderForElemMatch)
+            {
+                return LinqProviderAdapter.TranslateExpressionToElemMatchFilter(_expression, elementSerializer: args.DocumentSerializer, args.SerializerRegistry, args.TranslationOptions);
+            }
+            else
+            {
+                return LinqProviderAdapter.TranslateExpressionToFilter(_expression, args.DocumentSerializer, args.SerializerRegistry, args.TranslationOptions);
+            }
         }
     }
 

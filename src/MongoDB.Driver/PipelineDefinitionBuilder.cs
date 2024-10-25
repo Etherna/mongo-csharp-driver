@@ -20,7 +20,6 @@ using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Linq;
 using Etherna.MongoDB.Driver.Search;
 
 namespace Etherna.MongoDB.Driver
@@ -122,17 +121,15 @@ namespace Etherna.MongoDB.Driver
         /// <param name="groupBy">The group by expression.</param>
         /// <param name="boundaries">The boundaries.</param>
         /// <param name="options">The options.</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, AggregateBucketResult<TValue>> Bucket<TInput, TIntermediate, TValue>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
             Expression<Func<TIntermediate, TValue>> groupBy,
             IEnumerable<TValue> boundaries,
-            AggregateBucketOptions<TValue> options = null,
-            ExpressionTranslationOptions translationOptions = null)
+            AggregateBucketOptions<TValue> options = null)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Bucket(groupBy, boundaries, options, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Bucket(groupBy, boundaries, options));
         }
 
         /// <summary>
@@ -147,18 +144,16 @@ namespace Etherna.MongoDB.Driver
         /// <param name="boundaries">The boundaries.</param>
         /// <param name="output">The output projection.</param>
         /// <param name="options">The options.</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, TOutput> Bucket<TInput, TIntermediate, TValue, TOutput>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
             Expression<Func<TIntermediate, TValue>> groupBy,
             IEnumerable<TValue> boundaries,
             Expression<Func<IGrouping<TValue, TIntermediate>, TOutput>> output,
-            AggregateBucketOptions<TValue> options = null,
-            ExpressionTranslationOptions translationOptions = null)
+            AggregateBucketOptions<TValue> options = null)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Bucket(groupBy, boundaries, output, options, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Bucket(groupBy, boundaries, output, options));
         }
 
         /// <summary>
@@ -216,17 +211,15 @@ namespace Etherna.MongoDB.Driver
         /// <param name="groupBy">The group by expression.</param>
         /// <param name="buckets">The number of buckets.</param>
         /// <param name="options">The options (optional).</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, AggregateBucketAutoResult<TValue>> BucketAuto<TInput, TIntermediate, TValue>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
             Expression<Func<TIntermediate, TValue>> groupBy,
             int buckets,
-            AggregateBucketAutoOptions options = null,
-            ExpressionTranslationOptions translationOptions = null)
+            AggregateBucketAutoOptions options = null)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.BucketAuto(groupBy, buckets, options, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.BucketAuto(groupBy, buckets, options));
         }
 
         /// <summary>
@@ -241,44 +234,16 @@ namespace Etherna.MongoDB.Driver
         /// <param name="buckets">The number of buckets.</param>
         /// <param name="output">The output projection.</param>
         /// <param name="options">The options (optional).</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, TOutput> BucketAuto<TInput, TIntermediate, TValue, TOutput>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
             Expression<Func<TIntermediate, TValue>> groupBy,
             int buckets,
             Expression<Func<IGrouping<AggregateBucketAutoResultId<TValue>, TIntermediate>, TOutput>> output,
-            AggregateBucketAutoOptions options = null,
-            ExpressionTranslationOptions translationOptions = null)
+            AggregateBucketAutoOptions options = null)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.BucketAuto(groupBy, buckets, output, options, translationOptions));
-        }
-
-        /// <summary>
-        /// Appends a $bucketAuto stage to the pipeline (this method can only be used with LINQ2).
-        /// </summary>
-        /// <typeparam name="TInput">The type of the input documents.</typeparam>
-        /// <typeparam name="TIntermediate">The type of the intermediate documents.</typeparam>
-        /// <typeparam name="TValue">The type of the value.</typeparam>
-        /// <typeparam name="TOutput">The type of the output documents.</typeparam>
-        /// <param name="pipeline">The pipeline.</param>
-        /// <param name="groupBy">The group by expression.</param>
-        /// <param name="buckets">The number of buckets.</param>
-        /// <param name="output">The output projection.</param>
-        /// <param name="options">The options (optional).</param>
-        /// <param name="translationOptions">The translation options.</param>
-        /// <returns>A new pipeline with an additional stage.</returns>
-        public static PipelineDefinition<TInput, TOutput> BucketAutoForLinq2<TInput, TIntermediate, TValue, TOutput>(
-            this PipelineDefinition<TInput, TIntermediate> pipeline,
-            Expression<Func<TIntermediate, TValue>> groupBy,
-            int buckets,
-            Expression<Func<IGrouping<TValue, TIntermediate>, TOutput>> output, // the IGrouping for BucketAuto has been wrong all along, only fixing it for LINQ3
-            AggregateBucketAutoOptions options = null,
-            ExpressionTranslationOptions translationOptions = null)
-        {
-            Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.BucketAutoForLinq2(groupBy, buckets, output, options, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.BucketAuto(groupBy, buckets, output, options));
         }
 
         /// <summary>
@@ -633,7 +598,6 @@ namespace Etherna.MongoDB.Driver
         /// <param name="startWith">The start with value.</param>
         /// <param name="as">The as field.</param>
         /// <param name="options">The options.</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, TOutput> GraphLookup<TInput, TIntermediate, TFrom, TConnectFrom, TConnectTo, TStartWith, TAs, TOutput>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
@@ -642,12 +606,11 @@ namespace Etherna.MongoDB.Driver
             Expression<Func<TFrom, TConnectTo>> connectToField,
             Expression<Func<TIntermediate, TStartWith>> startWith,
             Expression<Func<TOutput, TAs>> @as,
-            AggregateGraphLookupOptions<TFrom, TFrom, TOutput> options = null,
-            ExpressionTranslationOptions translationOptions = null)
+            AggregateGraphLookupOptions<TFrom, TFrom, TOutput> options = null)
                 where TAs : IEnumerable<TFrom>
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.GraphLookup(from, connectFromField, connectToField, startWith, @as, options, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.GraphLookup(from, connectFromField, connectToField, startWith, @as, options));
         }
 
         /// <summary>
@@ -670,7 +633,6 @@ namespace Etherna.MongoDB.Driver
         /// <param name="as">The as field.</param>
         /// <param name="depthField">The depth field.</param>
         /// <param name="options">The options.</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, TOutput> GraphLookup<TInput, TIntermediate, TFrom, TConnectFrom, TConnectTo, TStartWith, TAsElement, TAs, TOutput>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
@@ -680,12 +642,11 @@ namespace Etherna.MongoDB.Driver
             Expression<Func<TIntermediate, TStartWith>> startWith,
             Expression<Func<TOutput, TAs>> @as,
             Expression<Func<TAsElement, int>> depthField,
-            AggregateGraphLookupOptions<TFrom, TAsElement, TOutput> options = null,
-            ExpressionTranslationOptions translationOptions = null)
+            AggregateGraphLookupOptions<TFrom, TAsElement, TOutput> options = null)
                 where TAs : IEnumerable<TAsElement>
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.GraphLookup(from, connectFromField, connectToField, startWith, @as, depthField, options, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.GraphLookup(from, connectFromField, connectToField, startWith, @as, depthField, options));
         }
 
         /// <summary>
@@ -722,7 +683,7 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
-        /// Appends a group stage to the pipeline (this method can only be used with LINQ2).
+        /// Appends a group stage to the pipeline.
         /// </summary>
         /// <typeparam name="TInput">The type of the input documents.</typeparam>
         /// <typeparam name="TIntermediate">The type of the intermediate documents.</typeparam>
@@ -731,17 +692,14 @@ namespace Etherna.MongoDB.Driver
         /// <param name="pipeline">The pipeline.</param>
         /// <param name="id">The id.</param>
         /// <param name="group">The group projection.</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
-        /// <remarks>This method can only be used with LINQ2 but that can't be verified until Render is called.</remarks>
         public static PipelineDefinition<TInput, TOutput> Group<TInput, TIntermediate, TKey, TOutput>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
             Expression<Func<TIntermediate, TKey>> id,
-            Expression<Func<IGrouping<TKey, TIntermediate>, TOutput>> group,
-            ExpressionTranslationOptions translationOptions = null)
+            Expression<Func<IGrouping<TKey, TIntermediate>, TOutput>> group)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Group(id, group, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Group(id, group));
         }
 
         /// <summary>
@@ -1014,15 +972,13 @@ namespace Etherna.MongoDB.Driver
         /// <typeparam name="TOutput">The type of the output documents.</typeparam>
         /// <param name="pipeline">The pipeline.</param>
         /// <param name="projection">The projection.</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, TOutput> Project<TInput, TIntermediate, TOutput>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
-            Expression<Func<TIntermediate, TOutput>> projection,
-            ExpressionTranslationOptions translationOptions = null)
+            Expression<Func<TIntermediate, TOutput>> projection)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Project(projection, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.Project(projection));
         }
 
         /// <summary>
@@ -1050,15 +1006,13 @@ namespace Etherna.MongoDB.Driver
         /// <typeparam name="TOutput">The type of the output documents.</typeparam>
         /// <param name="pipeline">The pipeline.</param>
         /// <param name="newRoot">The new root.</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, TOutput> ReplaceRoot<TInput, TIntermediate, TOutput>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
-            Expression<Func<TIntermediate, TOutput>> newRoot,
-            ExpressionTranslationOptions translationOptions = null)
+            Expression<Func<TIntermediate, TOutput>> newRoot)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.ReplaceRoot(newRoot, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.ReplaceRoot(newRoot));
         }
 
         /// <summary>
@@ -1086,15 +1040,13 @@ namespace Etherna.MongoDB.Driver
         /// <typeparam name="TOutput">The type of the output documents.</typeparam>
         /// <param name="pipeline">The pipeline.</param>
         /// <param name="newRoot">The new root.</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, TOutput> ReplaceWith<TInput, TIntermediate, TOutput>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
-            Expression<Func<TIntermediate, TOutput>> newRoot,
-            ExpressionTranslationOptions translationOptions = null)
+            Expression<Func<TIntermediate, TOutput>> newRoot)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.ReplaceWith(newRoot, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.ReplaceWith(newRoot));
         }
 
         /// <summary>
@@ -1400,15 +1352,13 @@ namespace Etherna.MongoDB.Driver
         /// <typeparam name="TValue">The type of the values.</typeparam>
         /// <param name="pipeline">The pipeline.</param>
         /// <param name="value">The value expression.</param>
-        /// <param name="translationOptions">The translation options.</param>
         /// <returns>A new pipeline with an additional stage.</returns>
         public static PipelineDefinition<TInput, AggregateSortByCountResult<TValue>> SortByCount<TInput, TIntermediate, TValue>(
             this PipelineDefinition<TInput, TIntermediate> pipeline,
-            Expression<Func<TIntermediate, TValue>> value,
-            ExpressionTranslationOptions translationOptions = null)
+            Expression<Func<TIntermediate, TValue>> value)
         {
             Ensure.IsNotNull(pipeline, nameof(pipeline));
-            return pipeline.AppendStage(PipelineStageDefinitionBuilder.SortByCount(value, translationOptions));
+            return pipeline.AppendStage(PipelineStageDefinitionBuilder.SortByCount(value));
         }
 
         /// <summary>
@@ -1594,7 +1544,7 @@ namespace Etherna.MongoDB.Driver
         public override RenderedPipelineDefinition<TOutput> Render(RenderArgs<TInput> args)
         {
             var renderedPipeline = _pipeline.Render(args);
-            var renderedStage = _stage.Render(new(renderedPipeline.OutputSerializer, args.SerializerRegistry, args.LinqProvider));
+            var renderedStage = _stage.Render(new(renderedPipeline.OutputSerializer, args.SerializerRegistry, translationOptions: args.TranslationOptions));
             var documents = renderedPipeline.Documents.Concat(renderedStage.Documents);
             var outputSerializer = _outputSerializer ?? renderedStage.OutputSerializer;
             return new RenderedPipelineDefinition<TOutput>(documents, outputSerializer);
@@ -1670,7 +1620,7 @@ namespace Etherna.MongoDB.Driver
         public override RenderedPipelineDefinition<TOutput> Render(RenderArgs<TInput> args)
         {
             var renderedStage = _stage.Render(args);
-            var renderedPipeline = _pipeline.Render(new(renderedStage.OutputSerializer, args.SerializerRegistry, args.LinqProvider));
+            var renderedPipeline = _pipeline.Render(new(renderedStage.OutputSerializer, args.SerializerRegistry, translationOptions: args.TranslationOptions));
             var documents = renderedStage.Documents.Concat(renderedPipeline.Documents);
             var outputSerializer = _outputSerializer ?? renderedPipeline.OutputSerializer;
             return new RenderedPipelineDefinition<TOutput>(documents, outputSerializer);

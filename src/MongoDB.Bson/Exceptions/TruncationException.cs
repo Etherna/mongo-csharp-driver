@@ -21,7 +21,6 @@ namespace Etherna.MongoDB.Bson
     /// <summary>
     /// Represents a truncation exception.
     /// </summary>
-    [Serializable]
     public class TruncationException : BsonException
     {
         // constructors

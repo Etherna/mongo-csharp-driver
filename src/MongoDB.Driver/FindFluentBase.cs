@@ -79,5 +79,11 @@ namespace Etherna.MongoDB.Driver
 
         /// <inheritdoc />
         public abstract Task<IAsyncCursor<TProjection>> ToCursorAsync(CancellationToken cancellationToken);
+
+        /// <inheritdoc />
+        public virtual string ToString(ExpressionTranslationOptions translationOptions)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

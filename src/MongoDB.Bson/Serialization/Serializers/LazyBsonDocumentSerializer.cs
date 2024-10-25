@@ -18,7 +18,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     /// <summary>
     /// Represents a serializer for LazyBsonDocuments.
     /// </summary>
-    public class LazyBsonDocumentSerializer : BsonValueSerializerBase<LazyBsonDocument>
+    public sealed class LazyBsonDocumentSerializer : BsonValueSerializerBase<LazyBsonDocument>
     {
         // constructors
         /// <summary>

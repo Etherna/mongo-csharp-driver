@@ -22,7 +22,6 @@ namespace Etherna.MongoDB.Driver
     /// <summary>
     /// Represents the details of a write error for a particular request.
     /// </summary>
-    [Serializable]
     public class BulkWriteError : WriteError
     {
         // private fields

@@ -17,7 +17,6 @@ using System;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Linq;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -27,31 +26,6 @@ namespace Etherna.MongoDB.Driver
     /// <typeparam name="TDocument">The type of the document.</typeparam>
     public abstract class UpdateDefinition<TDocument>
     {
-        /// <summary>
-        /// Renders the update to a <see cref="BsonValue"/>.
-        /// </summary>
-        /// <param name="documentSerializer">The document serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <returns>A <see cref="BsonValue"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TDocument> args) overload instead.")]
-        public virtual BsonValue Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry)
-        {
-            return Render(new(documentSerializer, serializerRegistry, LinqProvider.V3));
-        }
-
-        /// <summary>
-        /// Renders the update to a <see cref="BsonValue"/>.
-        /// </summary>
-        /// <param name="documentSerializer">The document serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
-        /// <returns>A <see cref="BsonValue"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TDocument> args) overload instead.")]
-        public virtual BsonValue Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
-        {
-            return Render(new(documentSerializer, serializerRegistry, linqProvider));
-        }
-
         /// <summary>
         /// Renders the update to a <see cref="BsonValue"/>.
         /// </summary>
@@ -154,28 +128,26 @@ namespace Etherna.MongoDB.Driver
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public string ToString(IBsonSerializer<TDocument> inputSerializer, IBsonSerializerRegistry serializerRegistry)
-        {
-            return ToString(inputSerializer, serializerRegistry, LinqProvider.V3);
-        }
+        public string ToString(IBsonSerializer<TDocument> inputSerializer, IBsonSerializerRegistry serializerRegistry) =>
+            ToString(inputSerializer, serializerRegistry, translationOptions: null);
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <param name="inputSerializer">The input serializer.</param>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
+        /// <param name="translationOptions">The translation options.</param>
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public string ToString(IBsonSerializer<TDocument> inputSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public string ToString(IBsonSerializer<TDocument> inputSerializer, IBsonSerializerRegistry serializerRegistry, ExpressionTranslationOptions translationOptions)
         {
-            var renderedPipeline = Render(new(inputSerializer, serializerRegistry, linqProvider));
+            var renderedPipeline = Render(new(inputSerializer, serializerRegistry, translationOptions: translationOptions));
             return renderedPipeline.ToJson();
         }
     }
 
-         /// <summary>
+    /// <summary>
     /// A <see cref="BsonDocument"/> based update.
     /// </summary>
     /// <typeparam name="TDocument">The type of the document.</typeparam>

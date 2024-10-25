@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using Etherna.MongoDB.Bson.IO;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 
 namespace Etherna.MongoDB.Bson.Serialization
@@ -26,7 +27,7 @@ namespace Etherna.MongoDB.Bson.Serialization
     /// Represents a serializer for a class map.
     /// </summary>
     /// <typeparam name="TClass">The type of the class.</typeparam>
-    public class BsonClassMapSerializer<TClass> : SerializerBase<TClass>, IBsonIdProvider, IBsonDocumentSerializer, IBsonPolymorphicSerializer
+    public sealed class BsonClassMapSerializer<TClass> : SerializerBase<TClass>, IBsonIdProvider, IBsonDocumentSerializer, IBsonPolymorphicSerializer, IHasDiscriminatorConvention
     {
         // private fields
         private readonly BsonClassMap _classMap;
@@ -56,6 +57,9 @@ namespace Etherna.MongoDB.Bson.Serialization
         }
 
         // public properties
+        /// <inheritdoc/>
+        public IDiscriminatorConvention DiscriminatorConvention => _classMap.GetDiscriminatorConvention();
+
         /// <summary>
         /// Gets a value indicating whether this serializer's discriminator is compatible with the object serializer.
         /// </summary>

@@ -21,7 +21,6 @@ namespace Etherna.MongoDB.Bson
     /// <summary>
     /// Represents a BSON serialization exception.
     /// </summary>
-    [Serializable]
     public class BsonSerializationException : BsonException
     {
         // constructors

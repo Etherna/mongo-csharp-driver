@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
@@ -28,7 +29,14 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     internal static class MemberInitExpressionToAggregationExpressionTranslator
     {
         public static AggregationExpression Translate(TranslationContext context, MemberInitExpression expression)
-            => Translate(context, expression, expression.NewExpression, expression.Bindings);
+        {
+            if (expression.Type == typeof(BsonDocument))
+            {
+                return NewBsonDocumentExpressionToAggregationExpressionTranslator.Translate(context, expression);
+            }
+
+            return Translate(context, expression, expression.NewExpression, expression.Bindings);
+        }
 
         public static AggregationExpression Translate(
             TranslationContext context,

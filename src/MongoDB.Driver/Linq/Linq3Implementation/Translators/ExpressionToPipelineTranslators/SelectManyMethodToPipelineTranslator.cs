@@ -51,6 +51,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 var sourceExpression = arguments[0];
                 var pipeline = ExpressionToPipelineTranslator.Translate(context, sourceExpression);
+                ClientSideProjectionHelper.ThrowIfClientSideProjection(expression, pipeline, method);
 
                 if (method.Is(QueryableMethod.SelectMany))
                 {

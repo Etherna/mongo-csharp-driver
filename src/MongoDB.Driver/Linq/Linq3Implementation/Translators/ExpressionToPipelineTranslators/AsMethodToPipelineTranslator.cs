@@ -34,8 +34,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
             if (method.Is(MongoQueryableMethod.As))
             {
-                var sourceExpression = ConvertHelper.RemoveConvertToMongoQueryable(arguments[0]);
+                var sourceExpression = arguments[0];
                 var pipeline = ExpressionToPipelineTranslator.Translate(context, sourceExpression);
+                ClientSideProjectionHelper.ThrowIfClientSideProjection(expression, pipeline, method);
 
                 var resultSerializerExpression = arguments[1];
                 var resultSerializer = resultSerializerExpression.GetConstantValue<IBsonSerializer>(expression);

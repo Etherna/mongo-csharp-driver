@@ -18,7 +18,6 @@ using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Operations;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
-using Etherna.MongoDB.Driver.Linq;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -30,20 +29,10 @@ namespace Etherna.MongoDB.Driver
             ChangeStreamOptions options,
             ReadConcern readConcern,
             MessageEncoderSettings messageEncoderSettings,
-            bool retryRequested)
+            bool retryRequested,
+            ExpressionTranslationOptions translationOptions)
         {
-            return CreateChangeStreamOperation(pipeline, LinqProvider.V3, options, readConcern, messageEncoderSettings, retryRequested);
-        }
-
-        public static ChangeStreamOperation<TResult> CreateChangeStreamOperation<TResult>(
-            PipelineDefinition<ChangeStreamDocument<BsonDocument>, TResult> pipeline,
-            LinqProvider linqProvider,
-            ChangeStreamOptions options,
-            ReadConcern readConcern,
-            MessageEncoderSettings messageEncoderSettings,
-            bool retryRequested)
-        {
-            var renderedPipeline = RenderPipeline(pipeline, BsonDocumentSerializer.Instance, linqProvider);
+            var renderedPipeline = RenderPipeline(pipeline, BsonDocumentSerializer.Instance, translationOptions);
 
             var operation = new ChangeStreamOperation<TResult>(
                 renderedPipeline.Documents,
@@ -63,21 +52,10 @@ namespace Etherna.MongoDB.Driver
             ChangeStreamOptions options,
             ReadConcern readConcern,
             MessageEncoderSettings messageEncoderSettings,
-            bool retryRequested)
+            bool retryRequested,
+            ExpressionTranslationOptions translationOptions)
         {
-            return CreateChangeStreamOperation(database, pipeline, LinqProvider.V3, options, readConcern, messageEncoderSettings, retryRequested);
-        }
-
-        public static ChangeStreamOperation<TResult> CreateChangeStreamOperation<TResult>(
-            IMongoDatabase database,
-            PipelineDefinition<ChangeStreamDocument<BsonDocument>, TResult> pipeline,
-            LinqProvider linqProvider,
-            ChangeStreamOptions options,
-            ReadConcern readConcern,
-            MessageEncoderSettings messageEncoderSettings,
-            bool retryRequested)
-        {
-            var renderedPipeline = RenderPipeline(pipeline, BsonDocumentSerializer.Instance, linqProvider);
+            var renderedPipeline = RenderPipeline(pipeline, BsonDocumentSerializer.Instance, translationOptions);
 
             var operation = new ChangeStreamOperation<TResult>(
                 database.DatabaseNamespace,
@@ -99,22 +77,10 @@ namespace Etherna.MongoDB.Driver
             ChangeStreamOptions options,
             ReadConcern readConcern,
             MessageEncoderSettings messageEncoderSettings,
-            bool retryRequested)
+            bool retryRequested,
+            ExpressionTranslationOptions translationOptions)
         {
-            return CreateChangeStreamOperation(collection, pipeline, documentSerializer, LinqProvider.V3, options, readConcern, messageEncoderSettings, retryRequested);
-        }
-
-        public static ChangeStreamOperation<TResult> CreateChangeStreamOperation<TResult, TDocument>(
-            IMongoCollection<TDocument> collection,
-            PipelineDefinition<ChangeStreamDocument<TDocument>, TResult> pipeline,
-            IBsonSerializer<TDocument> documentSerializer,
-            LinqProvider linqProvider,
-            ChangeStreamOptions options,
-            ReadConcern readConcern,
-            MessageEncoderSettings messageEncoderSettings,
-            bool retryRequested)
-        {
-            var renderedPipeline = RenderPipeline(pipeline, documentSerializer, linqProvider);
+            var renderedPipeline = RenderPipeline(pipeline, documentSerializer, translationOptions);
 
             var operation = new ChangeStreamOperation<TResult>(
                 collection.CollectionNamespace,
@@ -133,11 +99,11 @@ namespace Etherna.MongoDB.Driver
         private static RenderedPipelineDefinition<TResult> RenderPipeline<TResult, TDocument>(
             PipelineDefinition<ChangeStreamDocument<TDocument>, TResult> pipeline,
             IBsonSerializer<TDocument> documentSerializer,
-            LinqProvider linqProvider)
+            ExpressionTranslationOptions translationOptions)
         {
             var changeStreamDocumentSerializer = new ChangeStreamDocumentSerializer<TDocument>(documentSerializer);
             var serializerRegistry = BsonSerializer.GetSerializerRegistry();
-            return pipeline.Render(new(changeStreamDocumentSerializer, serializerRegistry, linqProvider));
+            return pipeline.Render(new(changeStreamDocumentSerializer, serializerRegistry, translationOptions: translationOptions));
         }
 
         private static void SetOperationOptions<TResult>(

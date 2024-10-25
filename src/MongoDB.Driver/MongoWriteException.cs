@@ -23,7 +23,6 @@ namespace Etherna.MongoDB.Driver
     /// <summary>
     /// Represents a write exception.
     /// </summary>
-    [Serializable]
     public class MongoWriteException : MongoServerException
     {
         // static

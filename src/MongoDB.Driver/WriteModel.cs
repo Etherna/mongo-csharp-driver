@@ -25,7 +25,6 @@ namespace Etherna.MongoDB.Driver
     /// Base class for a write model.
     /// </summary>
     /// <typeparam name="TDocument">The type of the document.</typeparam>
-    [Serializable]
     public abstract class WriteModel<TDocument>
     {
         // static methods

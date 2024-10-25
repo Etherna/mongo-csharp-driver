@@ -17,7 +17,6 @@ using System;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
 
@@ -136,9 +135,6 @@ namespace Etherna.MongoDB.Driver
                 MaxAwaitTime = _options.MaxAwaitTime,
                 MaxTime = _options.MaxTime,
                 Min = _options.Min,
-#pragma warning disable 618
-                Modifiers = _options.Modifiers,
-#pragma warning restore 618
                 NoCursorTimeout = _options.NoCursorTimeout,
 #pragma warning disable 618
                 OplogReplay = _options.OplogReplay,
@@ -148,6 +144,7 @@ namespace Etherna.MongoDB.Driver
                 ShowRecordId = _options.ShowRecordId,
                 Skip = _options.Skip,
                 Sort = _options.Sort,
+                TranslationOptions = _options.TranslationOptions
             };
             return new FindFluent<TDocument, TNewProjection>(_session, _collection, _filter, newOptions);
         }
@@ -190,13 +187,18 @@ namespace Etherna.MongoDB.Driver
 
         public override string ToString()
         {
+            return ToString(translationOptions: null);
+        }
+
+        public override string ToString(ExpressionTranslationOptions translationOptions)
+        {
             var sb = new StringBuilder("find(");
-            var renderedFilter = Render(_filter.Render);
+            var renderedFilter = Render(_filter.Render, translationOptions);
             sb.Append(renderedFilter.ToString());
 
             if (_options.Projection != null)
             {
-                var renderedProjection = Render(_options.Projection.Render, renderForFind: true);
+                var renderedProjection = Render(_options.Projection.Render, translationOptions, renderForFind: true);
                 if (renderedProjection.Document != null)
                 {
                     sb.Append(", " + renderedProjection.Document.ToString());
@@ -211,7 +213,7 @@ namespace Etherna.MongoDB.Driver
 
             if (_options.Sort != null)
             {
-                var renderedSort = Render(_options.Sort.Render);
+                var renderedSort = Render(_options.Sort.Render, translationOptions);
                 sb.Append(".sort(" + renderedSort.ToString() + ")");
             }
 
@@ -260,25 +262,6 @@ namespace Etherna.MongoDB.Driver
                 sb.Append("._addSpecial(\"$comment\", \"" + _options.Comment + "\")");
             }
 
-#pragma warning disable 618
-            if (_options.Modifiers != null)
-            {
-                foreach (var modifier in _options.Modifiers)
-#pragma warning restore 618
-                {
-                    sb.Append("._addSpecial(\"" + modifier.Name + "\", ");
-                    if (modifier.Value.BsonType == BsonType.String)
-                    {
-                        sb.Append("\"" + modifier.Value.ToString() + "\"");
-                    }
-                    else
-                    {
-                        sb.Append(modifier.Value.ToString());
-                    }
-                    sb.Append(")");
-                }
-            }
-
             return sb.ToString();
         }
 
@@ -288,22 +271,20 @@ namespace Etherna.MongoDB.Driver
             return new CountOptions
             {
                 Collation = _options.Collation,
-#pragma warning disable 618
-                Hint = _options.Hint ?? _options.Modifiers?.GetValue("$hint", null),
-#pragma warning restore 618
+                Hint = _options.Hint,
                 Limit = _options.Limit,
                 MaxTime = _options.MaxTime,
                 Skip = _options.Skip
             };
         }
 
-        private TRendered Render<TRendered>(Func<RenderArgs<TDocument>, TRendered> renderer, bool renderForFind = false)
+        private TRendered Render<TRendered>(Func<RenderArgs<TDocument>, TRendered> renderer, ExpressionTranslationOptions translationOptions, bool renderForFind = false)
         {
             var args = new RenderArgs<TDocument>(
                 _collection.DocumentSerializer,
                 _collection.Settings.SerializerRegistry,
-                _collection.Database.Client.Settings.LinqProvider,
-                renderForFind: renderForFind);
+                renderForFind: renderForFind,
+                translationOptions: translationOptions);
 
             return renderer(args);
         }

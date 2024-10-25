@@ -13,8 +13,8 @@
 * limitations under the License.
 */
 
-using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
@@ -26,6 +26,13 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class InjectMethodToFilterTranslator
     {
+        private readonly static MethodInfo __renderFilterMethodInfo;
+
+        static InjectMethodToFilterTranslator()
+        {
+            __renderFilterMethodInfo = typeof(InjectMethodToFilterTranslator).GetMethod(nameof(RenderFilter), BindingFlags.NonPublic | BindingFlags.Static);
+        }
+
         // public static methods
         public static AstFilter Translate(TranslationContext context, MethodCallExpression expression)
         {
@@ -38,20 +45,25 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var filterDefinition = filterExpression.GetConstantValue<object>(expression);
                 var filterDefinitionType = filterDefinition.GetType(); // we KNOW it's a FilterDefinition<TDocument> because of the Inject method signature
                 var documentType = filterDefinitionType.GetGenericArguments()[0];
+
                 var serializerRegistry = BsonSerializer.GetSerializerRegistry();
                 var documentSerializer = serializerRegistry.GetSerializer(documentType); // TODO: is this the right serializer?
-                var renderMethodArgumentTypes = new[]
-                {
-                    typeof(IBsonSerializer<>).MakeGenericType(documentType),
-                    typeof(IBsonSerializerRegistry),
-                    typeof(LinqProvider)
-                };
-                var renderMethod = filterDefinitionType.GetMethod("Render", renderMethodArgumentTypes);
-                var renderedFilter = (BsonDocument)renderMethod.Invoke(filterDefinition, new object[] { documentSerializer, serializerRegistry, LinqProvider.V3 });
+
+                var renderFilterMethod = __renderFilterMethodInfo.MakeGenericMethod(documentType);
+                var renderedFilter = (BsonDocument)renderFilterMethod.Invoke(null, new[] { filterDefinition, documentSerializer, serializerRegistry, context.TranslationOptions });
+
                 return AstFilter.Raw(renderedFilter);
             }
 
             throw new ExpressionNotSupportedException(expression);
         }
+
+        // private static methods
+        private static BsonDocument RenderFilter<TDocument>(
+            FilterDefinition<TDocument> filterDefinition,
+            IBsonSerializer<TDocument> documentSerializer,
+            IBsonSerializerRegistry serializerRegistry,
+            ExpressionTranslationOptions translationOptions) =>
+                filterDefinition.Render(new(documentSerializer, serializerRegistry, translationOptions: translationOptions));
     }
 }

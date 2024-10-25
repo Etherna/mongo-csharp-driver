@@ -13,8 +13,11 @@
 * limitations under the License.
 */
 
+using System;
+using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
@@ -33,21 +36,18 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 var firstExpression = arguments[0];
                 var pipeline = ExpressionToPipelineTranslator.Translate(context, firstExpression);
+                ClientSideProjectionHelper.ThrowIfClientSideProjection(expression, pipeline, method);
 
                 var secondExpression = arguments[1];
                 var secondValue = secondExpression.Evaluate();
-                if (secondValue is IMongoQueryable secondQueryable)
+                if (secondValue is IQueryable secondQueryable &&
+                    secondQueryable.Provider is IMongoQueryProviderInternal secondProvider &&
+                    secondProvider.CollectionNamespace is var secondCollectionNamespace &&
+                    secondCollectionNamespace != null)
                 {
-                    var secondProvider = (IMongoQueryProviderInternal)secondQueryable.Provider;
-                    var secondCollectionNamespace = secondProvider.CollectionNamespace;
-                    if (secondCollectionNamespace == null)
-                    {
-                        throw new ExpressionNotSupportedException(expression, because: "second argument must be an IMongoQueryable against a collection");
-                    }
-
                     var secondCollectionName = secondCollectionNamespace.CollectionName;
                     var secondPipelineInputSerializer = secondProvider.PipelineInputSerializer;
-                    var secondContext = TranslationContext.Create(secondQueryable.Expression, secondPipelineInputSerializer);
+                    var secondContext = TranslationContext.Create(secondQueryable.Expression, secondPipelineInputSerializer, context.TranslationOptions);
                     var secondPipeline = ExpressionToPipelineTranslator.Translate(secondContext, secondQueryable.Expression);
                     if (secondPipeline.Stages.Count == 0)
                     {
@@ -56,12 +56,14 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                     pipeline = pipeline.AddStages(
                         pipeline.OutputSerializer,
-                        AstStage.UnionWith(secondCollectionName, secondPipeline));
+                        AstStage.UnionWith(secondCollectionName, secondPipeline),
+                        AstStage.Group(AstExpression.RootVar, fields: Array.Empty<AstAccumulatorField>()),
+                        AstStage.ReplaceRoot(AstExpression.GetField(AstExpression.RootVar, "_id")));
 
                     return pipeline;
                 }
 
-                throw new ExpressionNotSupportedException(expression, because: "second argument must be IMongoQueryable");
+                throw new ExpressionNotSupportedException(expression, because: "second argument must be a MongoDB IQueryable against a collection");
             }
 
             throw new ExpressionNotSupportedException(expression);

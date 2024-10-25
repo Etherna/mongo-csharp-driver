@@ -18,7 +18,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Bson.Serialization.Options;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
@@ -100,22 +99,6 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
         public static bool IsWideningConvert(Type sourceType, Type targetType)
         {
             return __wideningConverts.Contains((sourceType, targetType));
-        }
-
-        public static Expression RemoveConvertToMongoQueryable(Expression expression)
-        {
-            if (expression.NodeType == ExpressionType.Convert)
-            {
-                var convertExpression = (UnaryExpression)expression;
-                var convertToType = convertExpression.Type;
-                if (convertToType.IsGenericType &&
-                    convertToType.GetGenericTypeDefinition() == typeof(IMongoQueryable<>))
-                {
-                    return convertExpression.Operand;
-                }
-            }
-
-            throw new ExpressionNotSupportedException(expression);
         }
 
         public static Expression RemoveConvertToEnumUnderlyingType(Expression expression)

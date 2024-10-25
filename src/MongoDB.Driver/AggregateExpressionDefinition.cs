@@ -69,19 +69,6 @@ namespace Etherna.MongoDB.Driver
         #endregion
 
         /// <summary>
-        /// Renders the aggregation expression.
-        /// </summary>
-        /// <param name="sourceSerializer">The source serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
-        /// <returns>The rendered aggregation expression.</returns>
-        [Obsolete("Use Render(RenderArgs<TSource> args) overload instead.")]
-        public virtual BsonValue Render(IBsonSerializer<TSource> sourceSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
-        {
-            return Render(new(sourceSerializer, serializerRegistry, linqProvider));
-        }
-
-        /// <summary>
         /// Renders the aggregation expression to a <see cref="BsonValue"/>.
         /// </summary>
         /// <param name="args">The render arguments.</param>
@@ -129,26 +116,22 @@ namespace Etherna.MongoDB.Driver
         // private fields
         private readonly TranslationContextData _contextData;
         private readonly Expression<Func<TSource, TResult>> _expression;
-        private readonly ExpressionTranslationOptions _translationOptions;
 
         // constructors
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpressionAggregateExpressionDefinition{TSource, TResult}" /> class.
         /// </summary>
         /// <param name="expression">The expression.</param>
-        /// <param name="translationOptions">The translation options.</param>
-        public ExpressionAggregateExpressionDefinition(Expression<Func<TSource, TResult>> expression, ExpressionTranslationOptions translationOptions)
-            : this(expression, translationOptions, null)
+        public ExpressionAggregateExpressionDefinition(Expression<Func<TSource, TResult>> expression)
+            : this(expression, null)
         {
         }
 
         internal ExpressionAggregateExpressionDefinition(
             Expression<Func<TSource, TResult>> expression,
-            ExpressionTranslationOptions translationOptions,
             TranslationContextData contextData)
         {
             _expression = Ensure.IsNotNull(expression, nameof(expression));
-            _translationOptions = translationOptions; // can be null
             _contextData = contextData; // can be null
         }
 
@@ -157,7 +140,7 @@ namespace Etherna.MongoDB.Driver
         public override BsonValue Render(RenderArgs<TSource> args)
         {
             var contextData = _contextData?.With("SerializerRegistry", args.SerializerRegistry);
-            return args.LinqProvider.GetAdapter().TranslateExpressionToAggregateExpression(_expression, args.DocumentSerializer, args.SerializerRegistry, _translationOptions, contextData);
+            return LinqProviderAdapter.TranslateExpressionToAggregateExpression(_expression, args.DocumentSerializer, args.SerializerRegistry, args.TranslationOptions, contextData);
         }
     }
 

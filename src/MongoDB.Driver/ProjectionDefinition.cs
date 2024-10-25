@@ -68,31 +68,6 @@ namespace Etherna.MongoDB.Driver
         /// <summary>
         /// Renders the projection to a <see cref="RenderedProjectionDefinition{TProjection}"/>.
         /// </summary>
-        /// <param name="sourceSerializer">The source serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <returns>A <see cref="BsonDocument"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TSource> args) overload instead.")]
-        public virtual BsonDocument Render(IBsonSerializer<TSource> sourceSerializer, IBsonSerializerRegistry serializerRegistry)
-        {
-            return Render(sourceSerializer, serializerRegistry, LinqProvider.V3);
-        }
-
-        /// <summary>
-        /// Renders the projection to a <see cref="RenderedProjectionDefinition{TProjection}"/>.
-        /// </summary>
-        /// <param name="sourceSerializer">The source serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
-        /// <returns>A <see cref="BsonDocument"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TSource> args) overload instead.")]
-        public virtual BsonDocument Render(IBsonSerializer<TSource> sourceSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
-        {
-            return Render(sourceSerializer, serializerRegistry, linqProvider);
-        }
-
-        /// <summary>
-        /// Renders the projection to a <see cref="RenderedProjectionDefinition{TProjection}"/>.
-        /// </summary>
         /// <param name="args">The render arguments.</param>
         /// <returns>A <see cref="BsonDocument"/>.</returns>
         public abstract BsonDocument Render(RenderArgs<TSource> args);
@@ -139,31 +114,6 @@ namespace Etherna.MongoDB.Driver
     /// <typeparam name="TProjection">The type of the projection.</typeparam>
     public abstract class ProjectionDefinition<TSource, TProjection>
     {
-        /// <summary>
-        /// Renders the projection to a <see cref="RenderedProjectionDefinition{TProjection}"/>.
-        /// </summary>
-        /// <param name="sourceSerializer">The source serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <returns>A <see cref="RenderedProjectionDefinition{TProjection}"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TSource> args) overload instead.")]
-        public virtual RenderedProjectionDefinition<TProjection> Render(IBsonSerializer<TSource> sourceSerializer, IBsonSerializerRegistry serializerRegistry)
-        {
-            return Render(sourceSerializer, serializerRegistry, LinqProvider.V3);
-        }
-
-        /// <summary>
-        /// Renders the projection to a <see cref="RenderedProjectionDefinition{TProjection}"/>.
-        /// </summary>
-        /// <param name="sourceSerializer">The source serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
-        /// <returns>A <see cref="RenderedProjectionDefinition{TProjection}"/>.</returns>
-        [Obsolete("Use Render(RenderArgs<TSource> args) overload instead.")]
-        public virtual RenderedProjectionDefinition<TProjection> Render(IBsonSerializer<TSource> sourceSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
-        {
-            return Render(sourceSerializer, serializerRegistry, linqProvider);
-        }
-
         /// <summary>
         /// Renders the projection to a <see cref="RenderedProjectionDefinition{TProjection}"/>.
         /// </summary>
@@ -325,15 +275,13 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc />
         public override RenderedProjectionDefinition<TProjection> Render(RenderArgs<TSource> args)
         {
-            if (args.LinqProvider == LinqProvider.V2 || args.RenderForFind)
+            if (args.RenderForFind)
             {
-                // this is slightly wrong because we're not actually rendering for a Find
-                // but this is required to avoid a regression with LINQ2
-                return args.LinqProvider.GetAdapter().TranslateExpressionToFindProjection(_expression, args.DocumentSerializer, args.SerializerRegistry);
+                return LinqProviderAdapter.TranslateExpressionToFindProjection(_expression, args.DocumentSerializer, args.SerializerRegistry, args.TranslationOptions);
             }
             else
             {
-                return args.LinqProvider.GetAdapter().TranslateExpressionToProjection(_expression, args.DocumentSerializer, args.SerializerRegistry, translationOptions: null);
+                return LinqProviderAdapter.TranslateExpressionToProjection(_expression, args.DocumentSerializer, args.SerializerRegistry, args.TranslationOptions);
             }
         }
     }

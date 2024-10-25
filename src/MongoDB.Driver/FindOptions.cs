@@ -37,11 +37,11 @@ namespace Etherna.MongoDB.Driver
         private TimeSpan? _maxAwaitTime;
         private TimeSpan? _maxTime;
         private BsonDocument _min;
-        private BsonDocument _modifiers;
         private bool? _noCursorTimeout;
         private bool? _oplogReplay;
         private bool? _returnKey;
         private bool? _showRecordId;
+        private ExpressionTranslationOptions _translationOptions;
 
         // constructors
         /// <summary>
@@ -162,16 +162,6 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
-        /// Gets or sets the modifiers.
-        /// </summary>
-        [Obsolete("Use individual properties instead.")]
-        public BsonDocument Modifiers
-        {
-            get { return _modifiers; }
-            set { _modifiers = value; }
-        }
-
-        /// <summary>
         /// Gets or sets whether a cursor will time out.
         /// </summary>
         public bool? NoCursorTimeout
@@ -206,6 +196,15 @@ namespace Etherna.MongoDB.Driver
         {
             get { return _showRecordId; }
             set { _showRecordId = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the translation options.
+        /// </summary>
+        public ExpressionTranslationOptions TranslationOptions
+        {
+            get { return _translationOptions; }
+            set { _translationOptions = value; }
         }
     }
 

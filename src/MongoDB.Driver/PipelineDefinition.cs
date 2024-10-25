@@ -81,29 +81,6 @@ namespace Etherna.MongoDB.Driver
         /// <summary>
         /// Renders the pipeline.
         /// </summary>
-        /// <param name="inputSerializer">The input serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <returns>A <see cref="RenderedPipelineDefinition{TOutput}"/></returns>
-        [Obsolete("Use Render(RenderArgs<TInput> args) overload instead.")]
-        public virtual RenderedPipelineDefinition<TOutput> Render(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry)
-        {
-            return Render(inputSerializer, serializerRegistry, LinqProvider.V3);
-        }
-
-        /// <summary>
-        /// Renders the pipeline.
-        /// </summary>
-        /// <param name="inputSerializer">The input serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
-        /// <returns>A <see cref="RenderedPipelineDefinition{TOutput}"/></returns>
-        [Obsolete("Use Render(RenderArgs<TInput> args) overload instead.")]
-        public virtual RenderedPipelineDefinition<TOutput> Render(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider) =>
-            Render(new (inputSerializer, serializerRegistry, linqProvider));
-
-        /// <summary>
-        /// Renders the pipeline.
-        /// </summary>
         /// <param name="args">The render arguments.</param>
         /// <returns>A <see cref="RenderedPipelineDefinition{TOutput}"/></returns>
         public abstract RenderedPipelineDefinition<TOutput> Render(RenderArgs<TInput> args);
@@ -111,21 +88,9 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc/>
         public override string ToString()
         {
-            return ToString(LinqProvider.V3);
-        }
-
-        /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
-        /// </summary>
-        /// <param name="linqProvider">The LINQ provider.</param>
-        /// <returns>
-        /// A <see cref="System.String" /> that represents this instance.
-        /// </returns>
-        public string ToString(LinqProvider linqProvider)
-        {
             var serializerRegistry = BsonSerializer.GetSerializerRegistry();
             var inputSerializer = serializerRegistry.GetSerializer<TInput>();
-            return ToString(inputSerializer, serializerRegistry, linqProvider);
+            return ToString(inputSerializer, serializerRegistry);
         }
 
         /// <summary>
@@ -136,23 +101,21 @@ namespace Etherna.MongoDB.Driver
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public string ToString(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry)
-        {
-            return ToString(inputSerializer, serializerRegistry, LinqProvider.V3);
-        }
+        public string ToString(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry) =>
+            ToString(inputSerializer, serializerRegistry, translationOptions: null);
 
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
         /// <param name="inputSerializer">The input serializer.</param>
         /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The LINQ provider.</param>
+        /// <param name="translationOptions">The translation options.</param>
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public string ToString(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
+        public string ToString(IBsonSerializer<TInput> inputSerializer, IBsonSerializerRegistry serializerRegistry, ExpressionTranslationOptions translationOptions)
         {
-            var renderedPipeline = Render(new(inputSerializer, serializerRegistry, linqProvider));
+            var renderedPipeline = Render(new(inputSerializer, serializerRegistry, translationOptions: translationOptions));
             return $"[{string.Join(", ", renderedPipeline.Documents.Select(stage => stage.ToJson()))}]";
         }
 
@@ -366,7 +329,7 @@ namespace Etherna.MongoDB.Driver
             IBsonSerializer currentSerializer = args.DocumentSerializer;
             foreach (var stage in _stages)
             {
-                var renderedStage = stage.Render(currentSerializer, args.SerializerRegistry, args.LinqProvider);
+                var renderedStage = stage.Render(currentSerializer, args.SerializerRegistry, args.TranslationOptions);
                 currentSerializer = renderedStage.OutputSerializer;
                 foreach (var document in renderedStage.Documents)
                 {

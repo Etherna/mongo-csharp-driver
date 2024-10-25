@@ -21,7 +21,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
     /// <summary>
     /// Represents a serializer for Versions.
     /// </summary>
-    public class VersionSerializer : SealedClassSerializerBase<Version>, IRepresentationConfigurable<VersionSerializer>
+    public sealed class VersionSerializer : SealedClassSerializerBase<Version>, IRepresentationConfigurable<VersionSerializer>
     {
         // private constants
         private static class Flags

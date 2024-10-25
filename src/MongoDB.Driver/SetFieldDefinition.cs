@@ -13,11 +13,8 @@
 * limitations under the License.
 */
 
-using System;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
-using Etherna.MongoDB.Driver.Linq;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 
 namespace Etherna.MongoDB.Driver
@@ -28,19 +25,6 @@ namespace Etherna.MongoDB.Driver
     /// <typeparam name="TDocument">The type of the document.</typeparam>
     public abstract class SetFieldDefinition<TDocument>
     {
-        /// <summary>
-        /// Renders the SetFieldDefinition.
-        /// </summary>
-        /// <param name="documentSerializer">The document serializer.</param>
-        /// <param name="serializerRegistry">The serializer registry.</param>
-        /// <param name="linqProvider">The linq provider.</param>
-        /// <returns>The rendered SetFieldDefinition.</returns>
-        [Obsolete("Use Render(RenderArgs<TDocument> args) overload instead.")]
-        public virtual BsonElement Render(IBsonSerializer<TDocument> documentSerializer, IBsonSerializerRegistry serializerRegistry, LinqProvider linqProvider)
-        {
-            return Render(new(documentSerializer, serializerRegistry, linqProvider));
-        }
-
         /// <summary>
         /// Renders the SetFieldDefinition.
         /// </summary>

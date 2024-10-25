@@ -51,10 +51,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
         // public methods
         public abstract IQueryable CreateQuery(Expression expression);
         public abstract IQueryable<TElement> CreateQuery<TElement>(Expression expression);
-        public abstract QueryableExecutionModel GetExecutionModel(Expression expression);
         public abstract object Execute(Expression expression);
         public abstract TResult Execute<TResult>(Expression expression);
         public abstract Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken);
+        public abstract ExpressionTranslationOptions GetTranslationOptions();
     }
 
     internal sealed class MongoQueryProvider<TDocument> : MongoQueryProvider
@@ -103,11 +103,6 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
             return new MongoQuery<TDocument, TOutput>(this, expression);
         }
 
-        public override QueryableExecutionModel GetExecutionModel(Expression expression)
-        {
-            throw new NotSupportedException("This method is only supported in LINQ2 and will be removed in the future.");
-        }
-
         public override object Execute(Expression expression)
         {
             throw new NotImplementedException();
@@ -115,7 +110,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
 
         public override TResult Execute<TResult>(Expression expression)
         {
-            var executableQuery = ExpressionToExecutableQueryTranslator.TranslateScalar<TDocument, TResult>(this, expression);
+            var translationOptions = GetTranslationOptions();
+            var executableQuery = ExpressionToExecutableQueryTranslator.TranslateScalar<TDocument, TResult>(this, expression, translationOptions);
             return Execute(executableQuery, CancellationToken.None);
         }
 
@@ -127,7 +123,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
 
         public override Task<TResult> ExecuteAsync<TResult>(Expression expression, CancellationToken cancellationToken)
         {
-            var executableQuery = ExpressionToExecutableQueryTranslator.TranslateScalar<TDocument, TResult>(this, expression);
+            var translationOptions = GetTranslationOptions();
+            var executableQuery = ExpressionToExecutableQueryTranslator.TranslateScalar<TDocument, TResult>(this, expression, translationOptions);
             return ExecuteAsync(executableQuery, cancellationToken);
         }
 
@@ -135,6 +132,13 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
         {
             _executedQuery = executableQuery;
             return executableQuery.ExecuteAsync(_session, cancellationToken);
+        }
+
+        public override ExpressionTranslationOptions GetTranslationOptions()
+        {
+            var translationOptions = _options?.TranslationOptions;
+            var database = _database ?? _collection.Database;
+            return translationOptions.AddMissingOptionsFrom(database.Client.Settings.TranslationOptions);
         }
     }
 }

@@ -20,10 +20,15 @@ using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Conventions;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.GeoJsonObjectModel;
 using Etherna.MongoDB.Driver.Linq;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -1891,7 +1896,7 @@ namespace Etherna.MongoDB.Driver
                     itemSerializer = args.SerializerRegistry.GetSerializer<TItem>();
                 }
 
-                var renderedFilter = _filter.Render(args.WithNewDocumentType(itemSerializer));
+                var renderedFilter = _filter.Render(args.WithNewDocumentType(itemSerializer) with { RenderForElemMatch = true });
 
                 return new BsonDocument(renderedField.FieldName, new BsonDocument("$elemMatch", renderedFilter));
             }
@@ -1905,7 +1910,7 @@ namespace Etherna.MongoDB.Driver
                 }
                 var itemSerializer = (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
 
-                var renderedFilter = _filter.Render(new(itemSerializer, args.SerializerRegistry, args.LinqProvider));
+                var renderedFilter = _filter.Render(new(itemSerializer, args.SerializerRegistry, renderForElemMatch: true));
 
                 return new BsonDocument("$elemMatch", renderedFilter);
             }
@@ -2169,24 +2174,40 @@ namespace Etherna.MongoDB.Driver
 
         public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var discriminatorConvention = BsonSerializer.LookupDiscriminatorConvention(typeof(TDocument));
-            if (discriminatorConvention == null)
-            {
-                var message = string.Format("OfType requires a discriminator convention for type: {0}.", BsonUtils.GetFriendlyTypeName(typeof(TDocument)));
-                throw new NotSupportedException(message);
-            }
+            var nominalType = typeof(TDocument);
+            var actualType = typeof(TDerived);
 
-            var discriminatorValue = discriminatorConvention.GetDiscriminator(typeof(TDocument), typeof(TDerived));
-            if (discriminatorValue == null)
+            AstFilter ofTypeFilter;
+            if (nominalType == actualType)
             {
-                throw new NotSupportedException($"OfType requires that documents of type {BsonUtils.GetFriendlyTypeName(typeof(TDerived))} have a discriminator value.");
+                ofTypeFilter = AstFilter.MatchesEverything();
             }
-            if (discriminatorValue.IsBsonArray)
+            else
             {
-                discriminatorValue = discriminatorValue.AsBsonArray.Last();
-            }
-            var renderedOfTypeFilter = new BsonDocument(discriminatorConvention.ElementName, discriminatorValue);
+                var discriminatorConvention = args.DocumentSerializer.GetDiscriminatorConvention();
+                if (discriminatorConvention == null)
+                {
+                    var message = string.Format("OfType requires a discriminator convention for type: {0}.", BsonUtils.GetFriendlyTypeName(typeof(TDocument)));
+                    throw new NotSupportedException(message);
+                }
 
+                var discriminator = discriminatorConvention.GetDiscriminator(typeof(TDocument), typeof(TDerived));
+                if (discriminator == null)
+                {
+                    throw new NotSupportedException($"OfType requires that documents of type {BsonUtils.GetFriendlyTypeName(typeof(TDerived))} have a discriminator value.");
+                }
+
+                var discriminatorField = new AstFilterField(discriminatorConvention.ElementName, BsonValueSerializer.Instance);
+                ofTypeFilter= discriminatorConvention switch
+                {
+                    IHierarchicalDiscriminatorConvention hierarchicalDiscriminatorConvention => DiscriminatorAstFilter.TypeIs(discriminatorField, hierarchicalDiscriminatorConvention, nominalType, actualType),
+                    IScalarDiscriminatorConvention scalarDiscriminatorConvention => DiscriminatorAstFilter.TypeIs(discriminatorField, scalarDiscriminatorConvention, nominalType, actualType),
+                    _ => throw new NotSupportedException("OfType is not supported with the configured discriminator convention.")
+                };
+            }
+            ofTypeFilter = AstSimplifier.SimplifyAndConvert(ofTypeFilter);
+
+            var renderedOfTypeFilter = (BsonDocument)ofTypeFilter.Render();
             if (_derivedDocumentFilter == null)
             {
                 return renderedOfTypeFilter;
@@ -2215,21 +2236,40 @@ namespace Etherna.MongoDB.Driver
 
         public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            var discriminatorConvention = BsonSerializer.LookupDiscriminatorConvention(typeof(TField));
-            if (discriminatorConvention == null)
-            {
-                var message = string.Format("OfType requires a discriminator convention for type: {0}.", BsonUtils.GetFriendlyTypeName(typeof(TField)));
-                throw new NotSupportedException(message);
-            }
-
+            var nominalType = typeof(TDocument);
+            var actualType = typeof(TDerived);
             var renderedField = _field.Render(args);
-            var discriminatorElementName = renderedField.FieldName + "." + discriminatorConvention.ElementName;
-            var discriminatorValue = discriminatorConvention.GetDiscriminator(typeof(TField), typeof(TDerived));
-            var renderedDiscriminatorFilter = new BsonDocument(discriminatorElementName, discriminatorValue);
 
+            AstFilter ofTypeFilter;
+            if (nominalType == actualType)
+            {
+                ofTypeFilter = AstFilter.MatchesEverything();
+            }
+            else
+            {
+                var discriminatorConvention = renderedField.FieldSerializer.GetDiscriminatorConvention();
+                if (discriminatorConvention == null)
+                {
+                    var message = string.Format("OfType requires a discriminator convention for type: {0}.", BsonUtils.GetFriendlyTypeName(typeof(TField)));
+                    throw new NotSupportedException(message);
+                }
+
+                var discriminatorElementName = renderedField.FieldName + "." + discriminatorConvention.ElementName;
+                var discriminatorField = new AstFilterField(discriminatorElementName, BsonValueSerializer.Instance);
+
+                ofTypeFilter = discriminatorConvention switch
+                {
+                    IHierarchicalDiscriminatorConvention hierarchicalDiscriminatorConvention => DiscriminatorAstFilter.TypeIs(discriminatorField, hierarchicalDiscriminatorConvention, nominalType, actualType),
+                    IScalarDiscriminatorConvention scalarDiscriminatorConvention => DiscriminatorAstFilter.TypeIs(discriminatorField, scalarDiscriminatorConvention, nominalType, actualType),
+                    _ => throw new NotSupportedException("OfType is not supported with the configured discriminator convention.")
+                };
+            }
+            ofTypeFilter = AstSimplifier.SimplifyAndConvert(ofTypeFilter);
+
+            var renderedOfTypeFilter = (BsonDocument)ofTypeFilter.Render();
             if (_derivedFieldFilter == null)
             {
-                return renderedDiscriminatorFilter;
+                return renderedOfTypeFilter;
             }
 
             var derivedDocumentRenderArgs = args.WithNewDocumentType(args.SerializerRegistry.GetSerializer<TDerived>());
@@ -2237,7 +2277,7 @@ namespace Etherna.MongoDB.Driver
             var renderedDerivedFilter = new BsonDocument(
                 unprefixedRenderedDerivedFilter.Select(e => new BsonElement(renderedField.FieldName + "." + e.Name, e.Value)));
             var combinedFilter = Builders<TDerived>.Filter.And(
-                new BsonDocumentFilterDefinition<TDerived>(renderedDiscriminatorFilter),
+                new BsonDocumentFilterDefinition<TDerived>(renderedOfTypeFilter),
                 new BsonDocumentFilterDefinition<TDerived>(renderedDerivedFilter));
             return combinedFilter.Render(derivedDocumentRenderArgs);
         }
