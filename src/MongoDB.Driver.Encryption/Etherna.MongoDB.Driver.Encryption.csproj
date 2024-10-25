@@ -118,7 +118,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="MongoDB.Driver.Encryption.targets">
+    <Content Include="Etherna.MongoDB.Driver.Encryption.targets">
       <Pack>true</Pack>
       <PackagePath>build</PackagePath>
     </Content>
