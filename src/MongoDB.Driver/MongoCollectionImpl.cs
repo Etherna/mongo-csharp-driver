@@ -787,7 +787,8 @@ namespace Etherna.MongoDB.Driver
                         CorrelationId = index,
                         Hint = replaceOneModel.Hint,
                         IsMulti = false,
-                        IsUpsert = replaceOneModel.IsUpsert
+                        IsUpsert = replaceOneModel.IsUpsert,
+                        Sort = replaceOneModel.Sort?.Render(renderArgs)
                     };
                 case WriteModelType.UpdateMany:
                     var updateManyModel = (UpdateManyModel<TDocument>)model;
@@ -815,7 +816,8 @@ namespace Etherna.MongoDB.Driver
                         CorrelationId = index,
                         Hint = updateOneModel.Hint,
                         IsMulti = false,
-                        IsUpsert = updateOneModel.IsUpsert
+                        IsUpsert = updateOneModel.IsUpsert,
+                        Sort = updateOneModel.Sort?.Render(renderArgs)
                     };
                 default:
                     throw new InvalidOperationException("Unknown type of WriteModel provided.");
@@ -1917,7 +1919,7 @@ namespace Etherna.MongoDB.Driver
 
             private CreateSearchIndexesOperation CreateCreateIndexesOperation(IEnumerable<CreateSearchIndexModel> models) =>
                 new(_collection._collectionNamespace,
-                    models.Select(m => new CreateSearchIndexRequest(m.Name, m.Definition)),
+                    models.Select(m => new CreateSearchIndexRequest(m.Name, m.Type, m.Definition)),
                     _collection._messageEncoderSettings);
 
             private string[] GetIndexNames(BsonDocument createSearchIndexesResponse) =>

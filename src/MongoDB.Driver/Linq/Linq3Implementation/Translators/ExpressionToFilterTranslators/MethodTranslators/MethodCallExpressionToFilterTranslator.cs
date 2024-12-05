@@ -46,6 +46,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case "StringIn":
                 case "StringNin":
                     return StringInOrNinMethodToFilterTranslator.Translate(context, expression);
+
+                case "IsMissing":
+                case "IsNullOrMissing":
+                    return IsMissingMethodToFilterTranslator.Translate(context, expression);
             }
 
             throw new ExpressionNotSupportedException(expression);

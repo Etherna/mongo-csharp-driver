@@ -59,7 +59,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var ast = AstExpression.Filter(
                     sourceTranslation.Ast,
                     predicateTranslation.Ast,
-                    predicateParameter.Name,
+                    @as: predicateSymbol.Var.Name,
                     limitTranslation?.Ast);
 
                 var resultSerializer = NestedAsQueryableSerializer.CreateIEnumerableOrNestedAsQueryableSerializer(expression.Type, itemSerializer);

@@ -1386,6 +1386,8 @@ namespace Etherna.MongoDB.Driver
                     renderedSearchDefinition.Add("returnStoredSource", searchOptions.ReturnStoredSource, searchOptions.ReturnStoredSource);
                     renderedSearchDefinition.Add("scoreDetails", searchOptions.ScoreDetails, searchOptions.ScoreDetails);
                     renderedSearchDefinition.Add("tracking", () => searchOptions.Tracking.Render(), searchOptions.Tracking != null);
+                    renderedSearchDefinition.Add("searchAfter", () => searchOptions.SearchAfter, searchOptions.SearchAfter != null);
+                    renderedSearchDefinition.Add("searchBefore", () => searchOptions.SearchBefore, searchOptions.SearchBefore != null);
 
                     var document = new BsonDocument(operatorName, renderedSearchDefinition);
                     return new RenderedPipelineStageDefinition<TInput>(operatorName, document, args.DocumentSerializer);
@@ -1984,6 +1986,7 @@ namespace Etherna.MongoDB.Driver
             Ensure.IsNotNull(field, nameof(field));
             Ensure.IsNotNull(queryVector, nameof(queryVector));
             Ensure.IsGreaterThanZero(limit, nameof(limit));
+            Ensure.That(options?.NumberOfCandidates is null || options.Exact == false, "Number of candidates must be omitted for exact nearest neighbour search (ENN).");
 
             const string operatorName = "$vectorSearch";
             var stage = new DelegatedPipelineStageDefinition<TInput, TInput>(
@@ -1996,9 +1999,10 @@ namespace Etherna.MongoDB.Driver
                         { "queryVector", queryVector.Array },
                         { "path", field.Render(args).FieldName },
                         { "limit", limit },
-                        { "numCandidates", options?.NumberOfCandidates ?? limit * 10 },
+                        { "numCandidates", options?.NumberOfCandidates ?? limit * 10, options?.Exact != true },
                         { "index", options?.IndexName ?? "default" },
-                        { "filter", () => options.Filter.Render(args with { RenderDollarForm = true }), options?.Filter != null },
+                        { "filter", () => options?.Filter.Render(args with { RenderDollarForm = true }), options?.Filter != null },
+                        { "exact", true, options?.Exact == true }
                     };
 
                     var document = new BsonDocument(operatorName, vectorSearchOperator);

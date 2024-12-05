@@ -19,6 +19,7 @@ using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
@@ -123,6 +124,15 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 asRoot ?
                     context.CreateSymbolWithVarName(parameterExpression, varName: "ROOT", parameterSerializer, isCurrent: true) :
                     context.CreateSymbol(parameterExpression, parameterSerializer, isCurrent: false);
+
+            return TranslateLambdaBody(context, lambdaExpression, parameterSymbol);
+        }
+
+        public static AggregationExpression TranslateLambdaBody(
+            TranslationContext context,
+            LambdaExpression lambdaExpression,
+            Symbol parameterSymbol)
+        {
             var lambdaContext = context.WithSymbol(parameterSymbol);
             var translatedBody = Translate(lambdaContext, lambdaExpression.Body);
 

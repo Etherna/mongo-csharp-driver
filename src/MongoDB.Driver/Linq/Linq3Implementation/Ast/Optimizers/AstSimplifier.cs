@@ -364,6 +364,16 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers
             }
         }
 
+        public override AstNode VisitNotFilterOperation(AstNotFilterOperation node)
+        {
+            if (node.Operation is AstExistsFilterOperation existsFilterOperation)
+            {
+                return new AstExistsFilterOperation(!existsFilterOperation.Exists);
+            }
+
+            return base.VisitNotFilterOperation(node);
+        }
+
         public override AstNode VisitUnaryExpression(AstUnaryExpression node)
         {
             // { $first : <arg> } => { $arrayElemAt : [<arg>, 0] } (or -1 for $last)

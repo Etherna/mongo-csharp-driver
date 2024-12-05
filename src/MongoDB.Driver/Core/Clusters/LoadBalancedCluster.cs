@@ -134,6 +134,9 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
                         _server.DescriptionChanged -= ServerDescriptionChangedHandler;
                         _server.Dispose();
                     }
+
+                    UpdateClusterDescription(Description.WithType(ClusterType.Unknown));
+
                     _eventLogger.LogAndPublish(new ClusterClosedEvent(ClusterId, stopwatch.Elapsed));
                 }
             }

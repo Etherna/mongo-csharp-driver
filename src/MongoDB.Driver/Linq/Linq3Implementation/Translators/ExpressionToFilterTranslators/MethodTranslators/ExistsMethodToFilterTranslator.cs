@@ -17,6 +17,7 @@ using System.Linq.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ToFilterFieldTranslators;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.MethodTranslators
 {
@@ -25,10 +26,18 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         public static AstFilter Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
+            var arguments = expression.Arguments;
 
             if (method.Is(ArrayMethod.Exists) || ListMethod.IsExistsMethod(method))
             {
                 return AllOrAnyMethodToFilterTranslator.Translate(context, expression);
+            }
+
+            if (method.Is(MqlMethod.Exists))
+            {
+                var fieldExpression = arguments[0];
+                var field = ExpressionToFilterFieldTranslator.Translate(context, fieldExpression);
+                return AstFilter.Exists(field);
             }
 
             throw new ExpressionNotSupportedException(expression);

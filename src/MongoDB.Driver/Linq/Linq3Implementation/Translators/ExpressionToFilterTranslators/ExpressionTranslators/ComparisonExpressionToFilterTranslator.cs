@@ -56,9 +56,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 return CountComparisonExpressionToFilterTranslator.Translate(context, expression, comparisonOperator, countExpression, sizeExpression);
             }
 
-            if (GetTypeComparisonExpressionToFilterTranslator.CanTranslate(leftExpression, rightExpression))
+            if (GetTypeComparisonExpressionToFilterTranslator.CanTranslate(leftExpression, comparisonOperator, rightExpression))
             {
-                return GetTypeComparisonExpressionToFilterTranslator.Translate(context, expression, (MethodCallExpression)leftExpression, (ConstantExpression)rightExpression);
+                return GetTypeComparisonExpressionToFilterTranslator.Translate(context, expression, (MethodCallExpression)leftExpression, comparisonOperator, (ConstantExpression)rightExpression);
             }
 
             if (ModuloComparisonExpressionToFilterTranslator.CanTranslate(leftExpression, rightExpression, out var moduloExpression, out var remainderExpression))

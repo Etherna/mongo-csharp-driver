@@ -15,6 +15,7 @@
 */
 
 using System;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 
 namespace Etherna.MongoDB.Driver.Linq
 {
@@ -33,7 +34,7 @@ namespace Etherna.MongoDB.Driver.Linq
         /// <returns>The NullableDateTime value converted to a string.</returns>
         public static string ToString(this DateTime? @this, string format, string timezone, string onNull)
         {
-            throw new InvalidOperationException("This DateTime.ToString method is only intended to be used in LINQ queries.");
+            throw CustomLinqExtensionMethodHelper.CreateNotSupportedException();
         }
     }
 }
