@@ -31,7 +31,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             return type.IsTuple() || type.IsValueTuple();
         }
 
-        public static AggregationExpression Translate(TranslationContext context, NewExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, NewExpression expression)
         {
             if (CanTranslate(expression))
             {
@@ -50,7 +50,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 var ast = AstExpression.ComputedArray(items);
                 var tupleSerializer = CreateTupleSerializer(tupleType, itemSerializers);
-                return new AggregationExpression(expression, ast, tupleSerializer);
+                return new TranslatedExpression(expression, ast, tupleSerializer);
             }
 
             throw new ExpressionNotSupportedException(expression);

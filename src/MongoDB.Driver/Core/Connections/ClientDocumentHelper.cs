@@ -89,8 +89,10 @@ namespace Etherna.MongoDB.Driver.Core.Connections
         internal static BsonDocument CreateDriverDocument(string driverVersion)
         {
             var driverName = "mongo-csharp-driver";
-            if (TryGetType("MongoDB.AspNetCore.OData.MongoEnableQueryAttribute, MongoDB.AspNetCore.OData", out _))
+            if (TryGetType("MongoDB.AspNetCore.OData.MongoEnableQueryAttribute, MongoDB.AspNetCore.OData", out var queryAttributeType))
             {
+                var odataVersion = GetAssemblyVersion(queryAttributeType.Assembly);
+                driverVersion = $"{driverVersion}|{odataVersion}";
                 driverName = $"{driverName}|odata";
             }
 

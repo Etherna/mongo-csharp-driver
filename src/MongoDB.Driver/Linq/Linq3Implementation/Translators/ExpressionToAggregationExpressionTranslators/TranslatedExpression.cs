@@ -21,7 +21,7 @@ using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
 {
-    internal class AggregationExpression
+    internal class TranslatedExpression
     {
         // private fields
         private readonly AstExpression _ast;
@@ -29,7 +29,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         private readonly IBsonSerializer _serializer;
 
         // constructors
-        public AggregationExpression(Expression expression, AstExpression ast, IBsonSerializer serializer)
+        public TranslatedExpression(Expression expression, AstExpression ast, IBsonSerializer serializer)
         {
             _expression = Ensure.IsNotNull(expression, nameof(expression));
             _ast = Ensure.IsNotNull(ast, nameof(ast));

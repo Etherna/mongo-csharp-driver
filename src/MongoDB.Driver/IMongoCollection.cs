@@ -23,6 +23,13 @@ using Etherna.MongoDB.Driver.Search;
 
 namespace Etherna.MongoDB.Driver
 {
+    internal interface IMongoCollection
+    {
+        CollectionNamespace CollectionNamespace { get; }
+
+        IBsonSerializer DocumentSerializer { get; }
+    }
+
     /// <summary>
     /// Represents a typed collection in MongoDB.
     /// </summary>
@@ -31,7 +38,7 @@ namespace Etherna.MongoDB.Driver
     /// <see cref="MongoCollectionBase{TDocument}"/>.
     /// </remarks>
     /// <typeparam name="TDocument">The type of the documents stored in the collection.</typeparam>
-    public interface IMongoCollection<TDocument>
+    public interface IMongoCollection<TDocument> // TODO: derive from IMongoCollection in 4.0
     {
         /// <summary>
         /// Gets the namespace of the collection.

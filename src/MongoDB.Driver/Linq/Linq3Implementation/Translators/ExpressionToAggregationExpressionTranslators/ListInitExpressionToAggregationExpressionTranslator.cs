@@ -20,7 +20,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class ListInitExpressionToAggregationExpressionTranslator
     {
-        public static AggregationExpression Translate(
+        public static TranslatedExpression Translate(
             TranslationContext context,
             ListInitExpression expression)
         {

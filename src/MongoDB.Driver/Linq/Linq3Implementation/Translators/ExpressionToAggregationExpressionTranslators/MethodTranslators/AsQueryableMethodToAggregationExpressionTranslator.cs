@@ -23,7 +23,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class AsQueryableMethodToAggregationExpressionTranslator
     {
-        public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
@@ -44,7 +44,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     serializer = NestedAsQueryableSerializer.Create(itemSerializer);
                 }
 
-                return new AggregationExpression(expression, sourceTranslation.Ast, serializer);
+                return new TranslatedExpression(expression, sourceTranslation.Ast, serializer);
             }
 
             throw new ExpressionNotSupportedException(expression);

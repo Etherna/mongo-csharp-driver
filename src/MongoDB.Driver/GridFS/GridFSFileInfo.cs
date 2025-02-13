@@ -14,7 +14,6 @@
 */
 
 using System;
-using System.Collections.Generic;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Attributes;

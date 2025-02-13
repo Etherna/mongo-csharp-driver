@@ -25,7 +25,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class HasValuePropertyToAggregationExpressionTranslator
     {
-        public static AggregationExpression Translate(TranslationContext context, MemberExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, MemberExpression expression)
         {
             if (expression.Member is PropertyInfo propertyInfo && propertyInfo.Is(NullableProperty.HasValue))
             {
@@ -33,7 +33,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var containerTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, containerExpression);
                 var ast = AstExpression.Ne(containerTranslation.Ast, BsonNull.Value);
                 var serializer = new BooleanSerializer();
-                return new AggregationExpression(expression, ast, serializer);
+                return new TranslatedExpression(expression, ast, serializer);
             }
 
             throw new ExpressionNotSupportedException(expression);

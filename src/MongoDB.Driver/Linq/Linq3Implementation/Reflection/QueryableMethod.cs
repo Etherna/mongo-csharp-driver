@@ -30,6 +30,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         private static readonly MethodInfo __all;
         private static readonly MethodInfo __any;
         private static readonly MethodInfo __anyWithPredicate;
+        private static readonly MethodInfo __append;
         private static readonly MethodInfo __asQueryable;
         private static readonly MethodInfo __averageDecimal;
         private static readonly MethodInfo __averageDecimalWithSelector;
@@ -86,6 +87,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         private static readonly MethodInfo __ofType;
         private static readonly MethodInfo __orderBy;
         private static readonly MethodInfo __orderByDescending;
+        private static readonly MethodInfo __prepend;
         private static readonly MethodInfo __reverse;
         private static readonly MethodInfo __select;
         private static readonly MethodInfo __selectMany;
@@ -93,6 +95,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         private static readonly MethodInfo __selectManyWithCollectionSelectorTakingIndexAndResultSelector;
         private static readonly MethodInfo __selectManyWithSelectorTakingIndex;
         private static readonly MethodInfo __selectWithSelectorTakingIndex;
+        private static readonly MethodInfo __sequenceEqual;
         private static readonly MethodInfo __single;
         private static readonly MethodInfo __singleOrDefault;
         private static readonly MethodInfo __singleOrDefaultWithPredicate;
@@ -135,6 +138,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
             __all = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, bool>> predicate) => source.All(predicate));
             __any = ReflectionInfo.Method((IQueryable<object> source) => source.Any());
             __anyWithPredicate = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, bool>> predicate) => source.Any(predicate));
+            __append = ReflectionInfo.Method((IQueryable<object> source, object element) => source.Append(element));
             __asQueryable = ReflectionInfo.Method((IEnumerable<object> source) => source.AsQueryable());
             __averageDecimal = ReflectionInfo.Method((IQueryable<decimal> source) => source.Average());
             __averageDecimalWithSelector = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, decimal>> selector) => source.Average(selector));
@@ -191,6 +195,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
             __ofType = ReflectionInfo.Method((IQueryable source) => source.OfType<object>());
             __orderBy = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, object>> keySelector) => source.OrderBy(keySelector));
             __orderByDescending = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, object>> keySelector) => source.OrderByDescending(keySelector));
+            __prepend = ReflectionInfo.Method((IQueryable<object> source, object element) => source.Prepend(element));
             __reverse = ReflectionInfo.Method((IQueryable<object> source) => source.Reverse());
             __select = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, object>> selector) => source.Select(selector));
             __selectMany = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, IEnumerable<object>>> selector) => source.SelectMany(selector));
@@ -198,6 +203,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
             __selectManyWithCollectionSelectorTakingIndexAndResultSelector = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, int, IEnumerable<object>>> collectionSelector, Expression<Func<object, object, object>> resultSelector) => source.SelectMany(collectionSelector, resultSelector));
             __selectManyWithSelectorTakingIndex = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, int, IEnumerable<object>>> selector) => source.SelectMany(selector));
             __selectWithSelectorTakingIndex = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, int, object>> selector) => source.Select(selector));
+            __sequenceEqual = ReflectionInfo.Method((IQueryable<object> source1, IEnumerable<object> source2) => source1.SequenceEqual(source2));
             __single = ReflectionInfo.Method((IQueryable<object> source) => source.Single());
             __singleOrDefault = ReflectionInfo.Method((IQueryable<object> source) => source.SingleOrDefault());
             __singleOrDefaultWithPredicate = ReflectionInfo.Method((IQueryable<object> source, Expression<Func<object, bool>> predicate) => source.SingleOrDefault(predicate));
@@ -239,6 +245,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo All => __all;
         public static MethodInfo Any => __any;
         public static MethodInfo AnyWithPredicate => __anyWithPredicate;
+        public static MethodInfo Append => __append;
         public static MethodInfo AsQueryable => __asQueryable;
         public static MethodInfo AverageDecimal => __averageDecimal;
         public static MethodInfo AverageDecimalWithSelector => __averageDecimalWithSelector;
@@ -295,6 +302,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo OfType => __ofType;
         public static MethodInfo OrderBy => __orderBy;
         public static MethodInfo OrderByDescending => __orderByDescending;
+        public static MethodInfo Prepend => __prepend;
         public static MethodInfo Reverse => __reverse;
         public static MethodInfo Select => __select;
         public static MethodInfo SelectMany => __selectMany;
@@ -302,6 +310,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo SelectManyWithCollectionSelectorTakingIndexAndResultSelector => __selectManyWithCollectionSelectorTakingIndexAndResultSelector;
         public static MethodInfo SelectManyWithSelectorTakingIndex => __selectManyWithSelectorTakingIndex;
         public static MethodInfo SelectWithSelectorTakingIndex => __selectWithSelectorTakingIndex;
+        public static MethodInfo SequenceEqual => __sequenceEqual;
         public static MethodInfo Single => __single;
         public static MethodInfo SingleOrDefault => __singleOrDefault;
         public static MethodInfo SingleOrDefaultWithPredicate => __singleOrDefaultWithPredicate;

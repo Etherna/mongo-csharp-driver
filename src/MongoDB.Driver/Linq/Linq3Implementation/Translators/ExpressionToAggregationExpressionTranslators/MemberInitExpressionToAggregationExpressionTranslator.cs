@@ -28,7 +28,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class MemberInitExpressionToAggregationExpressionTranslator
     {
-        public static AggregationExpression Translate(TranslationContext context, MemberInitExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, MemberInitExpression expression)
         {
             if (expression.Type == typeof(BsonDocument))
             {
@@ -38,7 +38,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             return Translate(context, expression, expression.NewExpression, expression.Bindings);
         }
 
-        public static AggregationExpression Translate(
+        public static TranslatedExpression Translate(
             TranslationContext context,
             Expression expression,
             NewExpression newExpression,
@@ -97,7 +97,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             var serializerType = typeof(BsonClassMapSerializer<>).MakeGenericType(newExpression.Type);
             var serializer = (IBsonSerializer)Activator.CreateInstance(serializerType, classMap);
 
-            return new AggregationExpression(expression, ast, serializer);
+            return new TranslatedExpression(expression, ast, serializer);
         }
 
         private static BsonClassMap CreateClassMap(Type classType, ConstructorInfo constructorInfo, out BsonCreatorMap creatorMap)

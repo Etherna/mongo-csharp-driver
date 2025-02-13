@@ -25,7 +25,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     internal static class SkipMethodToPipelineTranslator
     {
         // public static methods
-        public static AstPipeline Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedPipeline Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
@@ -44,9 +44,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     countExpression.GetConstantValue<long>(containingExpression: expression) :
                     countExpression.GetConstantValue<int>(containingExpression: expression);
 
-                pipeline = pipeline.AddStages(
-                    pipeline.OutputSerializer,
-                    AstStage.Skip(count));
+                pipeline = pipeline.AddStage(
+                    AstStage.Skip(count),
+                    pipeline.OutputSerializer);
 
                 return pipeline;
             }

@@ -26,7 +26,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     internal static class DensifyMethodToPipelineTranslator
     {
         // public static methods
-        public static AstPipeline Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedPipeline Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
@@ -69,7 +69,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 var stage = AstStage.Densify(fieldPath, range, partitionByFieldPaths);
 
-                pipeline = pipeline.AddStages(sourceSerializer, stage);
+                pipeline = pipeline.AddStage(stage, sourceSerializer);
                 return pipeline;
             }
 

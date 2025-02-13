@@ -81,7 +81,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             QueryableMethod.LastOrDefaultWithPredicate
         };
 
-        public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
@@ -126,7 +126,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     ast = method.Name == "First" ? AstExpression.First(sourceAst) : AstExpression.Last(sourceAst);
                 }
 
-                return new AggregationExpression(expression, ast, itemSerializer);
+                return new TranslatedExpression(expression, ast, itemSerializer);
             }
 
             if (WindowMethodToAggregationExpressionTranslator.CanTranslate(expression))

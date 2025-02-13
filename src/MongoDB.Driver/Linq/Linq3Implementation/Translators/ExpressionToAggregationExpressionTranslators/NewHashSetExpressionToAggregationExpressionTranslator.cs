@@ -25,7 +25,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class NewHashSetExpressionToAggregationExpressionTranslator
     {
-        public static AggregationExpression Translate(TranslationContext context, NewExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, NewExpression expression)
         {
             var hashSetType = expression.Type;
             var hashSetItemType = hashSetType.GetGenericArguments()[0];
@@ -47,7 +47,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                         var hashSetItemSerializer = ArraySerializerHelper.GetItemSerializer(collectionTranslation.Serializer);
                         var serializer = (IBsonSerializer)Activator.CreateInstance(serializerType, hashSetItemSerializer);
 
-                        return new AggregationExpression(expression, ast, serializer);
+                        return new TranslatedExpression(expression, ast, serializer);
                     }
                 }
             }

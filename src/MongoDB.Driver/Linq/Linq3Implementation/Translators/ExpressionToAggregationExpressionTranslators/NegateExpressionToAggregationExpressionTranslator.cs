@@ -21,7 +21,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class NegateExpressionToAggregationExpressionTranslator
     {
-        public static AggregationExpression Translate(TranslationContext context, UnaryExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, UnaryExpression expression)
         {
             if (expression.NodeType == ExpressionType.Negate)
             {
@@ -30,7 +30,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 SerializationHelper.EnsureRepresentationIsNumeric(expression, operandExpression, operandTranslation);
 
                 var ast = AstExpression.Subtract(0, operandTranslation.Ast);
-                return new AggregationExpression(expression, ast, operandTranslation.Serializer);
+                return new TranslatedExpression(expression, ast, operandTranslation.Serializer);
             }
 
             throw new ExpressionNotSupportedException(expression);

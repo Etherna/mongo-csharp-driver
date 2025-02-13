@@ -16,11 +16,18 @@
 using System;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Bson.Serialization.Serializers;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc
 {
     internal static class ArraySerializerHelper
     {
+        public static IBsonSerializer CreateSerializer(IBsonSerializer itemSerializer)
+        {
+            var arraySerializerType = typeof(ArraySerializer<>).MakeGenericType(itemSerializer.ValueType);
+            return (IBsonSerializer)Activator.CreateInstance(arraySerializerType, [itemSerializer]);
+        }
+
         public static IBsonSerializer GetItemSerializer(IBsonSerializer serializer)
         {
             if (serializer is IBsonArraySerializer arraySerializer)

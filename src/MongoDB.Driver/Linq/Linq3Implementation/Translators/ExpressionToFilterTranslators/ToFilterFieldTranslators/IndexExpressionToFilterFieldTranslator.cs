@@ -20,7 +20,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class IndexExpressionToFilterFieldTranslator
     {
-        public static AstFilterField Translate(TranslationContext context, IndexExpression expression)
+        public static TranslatedFilterField Translate(TranslationContext context, IndexExpression expression)
         {
             var fieldExpression = expression.Object;
             var method = expression.Indexer.GetMethod;

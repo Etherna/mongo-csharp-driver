@@ -38,7 +38,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             };
         }
 
-        public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
@@ -60,7 +60,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                         _ => throw new InvalidOperationException()
                     };
 
-                return new AggregationExpression(expression, ast, objectTranslation.Serializer);
+                return new TranslatedExpression(expression, ast, objectTranslation.Serializer);
             }
 
             throw new ExpressionNotSupportedException(expression);

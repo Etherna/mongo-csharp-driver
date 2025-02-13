@@ -25,7 +25,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     internal static class SampleMethodToPipelineTranslator
     {
         // public static methods
-        public static AstPipeline Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedPipeline Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
@@ -39,9 +39,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var sizeExpression = arguments[1];
                 var size = sizeExpression.GetConstantValue<long>(containingExpression: expression);
 
-                pipeline = pipeline.AddStages(
-                    pipeline.OutputSerializer,
-                    AstStage.Sample(size));
+                pipeline = pipeline.AddStage(
+                    AstStage.Sample(size),
+                    pipeline.OutputSerializer);
 
                 return pipeline;
             }

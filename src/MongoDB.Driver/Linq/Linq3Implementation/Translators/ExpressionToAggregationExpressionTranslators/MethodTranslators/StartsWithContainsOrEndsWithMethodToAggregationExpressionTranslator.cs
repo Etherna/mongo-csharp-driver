@@ -87,7 +87,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             return false;
         }
 
-        public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
@@ -112,13 +112,13 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 var objectTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, objectExpression);
                 var valueExpression = arguments[0];
-                AggregationExpression valueTranslation;
+                TranslatedExpression valueTranslation;
                 if (valueExpression.Type == typeof(char) &&
                     valueExpression is ConstantExpression constantValueExpression)
                 {
                     var c = (char)constantValueExpression.Value;
                     var value = new string(c, 1);
-                    valueTranslation = new AggregationExpression(valueExpression, value, objectTranslation.Serializer);
+                    valueTranslation = new TranslatedExpression(valueExpression, value, objectTranslation.Serializer);
                 }
                 else
                 {
@@ -149,7 +149,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     substringAst = AstExpression.ToLower(substringAst);
                 }
                 var ast = CreateAst(method.Name, stringAst, substringAst);
-                return new AggregationExpression(expression, ast, new BooleanSerializer());
+                return new TranslatedExpression(expression, ast, new BooleanSerializer());
             }
 
             throw new ExpressionNotSupportedException(expression);

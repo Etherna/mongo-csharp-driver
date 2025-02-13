@@ -23,7 +23,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class StandardDeviationMethodsToAggregationExpressionTranslator
     {
-        public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
@@ -34,6 +34,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 {
                     var sourceExpression = arguments[0];
                     var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);
+                    NestedAsQueryableHelper.EnsureQueryableMethodHasNestedAsQueryableSource(expression, sourceTranslation);
 
                     if (arguments.Count == 2)
                     {
@@ -48,12 +49,12 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                             @as: selectorParameterSymbol.Var,
                             @in: selectorTranslation.Ast);
                         var selectorResultSerializer = BsonSerializer.LookupSerializer(selectorLambda.ReturnType);
-                        sourceTranslation = new AggregationExpression(selectorLambda, selectorAst, selectorResultSerializer);
+                        sourceTranslation = new TranslatedExpression(selectorLambda, selectorAst, selectorResultSerializer);
                     }
 
                     var ast = AstExpression.StdDev(stddevOperator, sourceTranslation.Ast);
                     var serializer = BsonSerializer.LookupSerializer(expression.Type);
-                    return new AggregationExpression(expression, ast, serializer);
+                    return new TranslatedExpression(expression, ast, serializer);
                 }
             }
 

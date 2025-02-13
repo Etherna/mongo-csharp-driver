@@ -24,7 +24,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     internal static class ContainsMethodToAggregationExpressionTranslator
     {
         // public methods
-        public static AggregationExpression Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
             if (StartsWithContainsOrEndsWithMethodToAggregationExpressionTranslator.CanTranslate(expression))
             {
@@ -73,13 +73,15 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             return false;
         }
 
-        private static AggregationExpression TranslateEnumerableContains(TranslationContext context, MethodCallExpression expression, Expression sourceExpression, Expression valueExpression)
+        private static TranslatedExpression TranslateEnumerableContains(TranslationContext context, MethodCallExpression expression, Expression sourceExpression, Expression valueExpression)
         {
             var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);
             NestedAsQueryableHelper.EnsureQueryableMethodHasNestedAsQueryableSource(expression, sourceTranslation);
+
             var valueTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, valueExpression);
             var ast = AstExpression.In(valueTranslation.Ast, sourceTranslation.Ast);
-            return new AggregationExpression(expression, ast, BooleanSerializer.Instance);
+
+            return new TranslatedExpression(expression, ast, BooleanSerializer.Instance);
         }
     }
 }

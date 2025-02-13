@@ -131,8 +131,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 else
                 {
                     Ensure.That(sourceSerializer is IWrappedValueSerializer, "Expected sourceSerializer to be an IWrappedValueSerializer.", nameof(sourceSerializer));
-                    var rootVar = AstExpression.Var("ROOT", isCurrent: true);
-                    valueAst = AstExpression.GetField(rootVar, "_v");
+                    valueAst = AstExpression.GetField(AstExpression.RootVar, "_v");
                 }
 
                 var outputValueType = expression.GetResultType();
@@ -140,11 +139,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var outputWrappedValueSerializer = WrappedValueSerializer.Create("_v", outputValueSerializer);
 
                 pipeline = pipeline.AddStages(
-                    outputWrappedValueSerializer,
                     AstStage.Group(
                         id: BsonNull.Value,
                         fields: AstExpression.AccumulatorField("_v", AstUnaryAccumulatorOperator.Sum, valueAst)),
-                    AstStage.Project(AstProject.ExcludeId()));
+                    AstStage.Project(AstProject.ExcludeId()),
+                    outputWrappedValueSerializer);
 
                 return ExecutableQuery.Create(
                     provider,

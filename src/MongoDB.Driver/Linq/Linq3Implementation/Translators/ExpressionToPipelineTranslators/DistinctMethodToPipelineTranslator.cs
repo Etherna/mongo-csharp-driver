@@ -26,7 +26,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     internal static class DistinctMethodToPipelineTranslator
     {
         // public static methods
-        public static AstPipeline Translate(TranslationContext context, MethodCallExpression expression)
+        public static TranslatedPipeline Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
@@ -37,12 +37,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var pipeline = ExpressionToPipelineTranslator.Translate(context, sourceExpression);
                 ClientSideProjectionHelper.ThrowIfClientSideProjection(expression, pipeline, method);
 
-                var rootVar = AstExpression.Var("ROOT", isCurrent: true);
-
                 pipeline = pipeline.AddStages(
-                    pipeline.OutputSerializer,
-                    AstStage.Group(rootVar, Enumerable.Empty<AstAccumulatorField>()),
-                    AstStage.ReplaceRoot(AstExpression.GetField(rootVar, "_id")));
+                    AstStage.Group(AstExpression.RootVar, Enumerable.Empty<AstAccumulatorField>()),
+                    AstStage.ReplaceRoot(AstExpression.GetField(AstExpression.RootVar, "_id")),
+                    pipeline.OutputSerializer);
 
                 return pipeline;
             }
