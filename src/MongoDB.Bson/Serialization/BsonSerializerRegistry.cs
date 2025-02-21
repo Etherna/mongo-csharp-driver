@@ -117,6 +117,25 @@ namespace Etherna.MongoDB.Bson.Serialization
             _serializationProviders.Push(serializationProvider);
         }
 
+        /// <inheritdoc/>
+        public IBsonSerializer TryGetSerializer(Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException("type");
+            }
+            var typeInfo = type.GetTypeInfo();
+            if (typeInfo.IsGenericType && typeInfo.ContainsGenericParameters)
+            {
+                var message = string.Format("Generic type {0} has unassigned type parameters.", BsonUtils.GetFriendlyTypeName(type));
+                throw new ArgumentException(message, "type");
+            }
+
+            if(_cache.TryGetValue(type, out var serializer))
+                return serializer;
+            return null;
+        }
+
         /// <summary>
         /// Tries to register the serializer.
         /// </summary>

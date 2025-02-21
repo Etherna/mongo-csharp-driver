@@ -35,5 +35,15 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <typeparam name="T">The value type of the serializer.</typeparam>
         /// <returns>The serializer.</returns>
         IBsonSerializer<T> GetSerializer<T>();
+
+        /// <summary>
+        /// Tries to get the serializer for the specified <paramref name="type" />.
+        /// If none is already registered, null is returned.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <returns>
+        /// The serializer, or null.
+        /// </returns>
+        IBsonSerializer TryGetSerializer(Type type);
     }
 }
