@@ -15,6 +15,7 @@
 
 using System;
 using System.Runtime.Serialization;
+using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 

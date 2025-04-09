@@ -16,11 +16,11 @@
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Core;
 using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver
 {
-
     /// <summary>
     /// A serializer for ChangeStreamDocument instances.
     /// </summary>
@@ -42,12 +42,12 @@ namespace Etherna.MongoDB.Driver
 
             RegisterMember("ClusterTime", "clusterTime", BsonTimestampSerializer.Instance);
             RegisterMember("CollectionNamespace", "ns", ChangeStreamDocumentCollectionNamespaceSerializer.Instance);
-            RegisterMember("CollectionUuid", "ui", GuidSerializer.StandardInstance);
+            RegisterMember("CollectionUuid", "collectionUUID", GuidSerializer.StandardInstance);
             RegisterMember("DatabaseNamespace", "ns", ChangeStreamDocumentDatabaseNamespaceSerializer.Instance);
-            RegisterMember("DisambiguatedPaths", "disambiguatedPaths", BsonDocumentSerializer.Instance);
             RegisterMember("DocumentKey", "documentKey", BsonDocumentSerializer.Instance);
             RegisterMember("FullDocument", "fullDocument", _documentSerializer);
             RegisterMember("FullDocumentBeforeChange", "fullDocumentBeforeChange", _documentSerializer);
+            RegisterMember("NamespaceType", "nsType", ChangeStreamNamespaceTypeSerializer.Instance);
             RegisterMember("OperationDescription", "operationDescription", BsonDocumentSerializer.Instance);
             RegisterMember("OperationType", "operationType", ChangeStreamOperationTypeSerializer.Instance);
             RegisterMember("RenameTo", "to", ChangeStreamDocumentCollectionNamespaceSerializer.Instance);

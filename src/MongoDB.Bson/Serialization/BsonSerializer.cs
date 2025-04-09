@@ -768,6 +768,37 @@ namespace Etherna.MongoDB.Bson.Serialization
             }
         }
 
+        // internal static methods
+        internal static BsonValue[] GetDiscriminatorsForTypeAndSubTypes(Type type)
+        {
+            // note: EnsureKnownTypesAreRegistered handles its own locking so call from outside any lock
+            EnsureKnownTypesAreRegistered(type);
+
+            var discriminators = new List<BsonValue>();
+
+            __configLock.EnterReadLock();
+            try
+            {
+                foreach (var entry in __discriminators)
+                {
+                    var discriminator = entry.Key;
+                    var actualTypes = entry.Value;
+
+                    var matchingType = actualTypes.SingleOrDefault(t => t == type || t.IsSubclassOf(type));
+                    if (matchingType != null)
+                    {
+                        discriminators.Add(discriminator);
+                    }
+                }
+            }
+            finally
+            {
+                __configLock.ExitReadLock();
+            }
+
+            return discriminators.OrderBy(x => x).ToArray();
+        }
+
         /// <summary>
         /// Try to register the discriminator convention for a type.
         /// </summary>

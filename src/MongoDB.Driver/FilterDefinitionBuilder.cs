@@ -24,10 +24,9 @@ using Etherna.MongoDB.Bson.Serialization.Conventions;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.GeoJsonObjectModel;
-using Etherna.MongoDB.Driver.Linq;
-using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators;
 
 namespace Etherna.MongoDB.Driver
@@ -474,6 +473,30 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
+        /// Creates an element match filter for an array value.
+        /// </summary>
+        /// <remarks>TDocument must implement IEnumerable{TITem} when using this overload of ElemMatch.</remarks>
+        /// <param name="impliedElementFilter">The implied element filter.</param>
+        /// <returns>An element match filter.</returns>
+        public FilterDefinition<TDocument> ElemMatch<TItem>(FilterDefinition<TItem> impliedElementFilter)
+            // where TDocument : IEnumerable<TItem> (can only be checked at runtime)
+        {
+            return new ElementMatchFilterDefinition<TDocument, TItem>(impliedElementFilter);
+        }
+
+        /// <summary>
+        /// Creates an element match filter for an array value.
+        /// </summary>
+        /// <remarks>TDocument must implement IEnumerable{TITem} when using this overload of ElemMatch.</remarks>
+        /// <param name="impliedElementFilter">The implied element filter.</param>
+        /// <returns>An element match filter.</returns>
+        public FilterDefinition<TDocument> ElemMatch<TItem>(Expression<Func<TItem, bool>> impliedElementFilter)
+            // where TDocument : IEnumerable<TItem> (can only be checked at runtime)
+        {
+            return ElemMatch(new ExpressionFilterDefinition<TItem>(impliedElementFilter));
+        }
+
+        /// <summary>
         /// Creates an element match filter for an array field.
         /// </summary>
         /// <typeparam name="TItem">The type of the item.</typeparam>
@@ -481,6 +504,7 @@ namespace Etherna.MongoDB.Driver
         /// <param name="filter">The filter.</param>
         /// <returns>An element match filter.</returns>
         public FilterDefinition<TDocument> ElemMatch<TItem>(FieldDefinition<TDocument> field, FilterDefinition<TItem> filter)
+            // where TField : IEnumerable<TItem> (can only be checked at runtime)
         {
             return new ElementMatchFilterDefinition<TDocument, TItem>(field, filter);
         }
@@ -493,6 +517,7 @@ namespace Etherna.MongoDB.Driver
         /// <param name="filter">The filter.</param>
         /// <returns>An element match filter.</returns>
         public FilterDefinition<TDocument> ElemMatch<TItem>(Expression<Func<TDocument, IEnumerable<TItem>>> field, FilterDefinition<TItem> filter)
+            // where TField : IEnumerable<TItem> (can only be checked at runtime)
         {
             return ElemMatch(new ExpressionFieldDefinition<TDocument>(field), filter);
         }
@@ -507,16 +532,6 @@ namespace Etherna.MongoDB.Driver
         public FilterDefinition<TDocument> ElemMatch<TItem>(Expression<Func<TDocument, IEnumerable<TItem>>> field, Expression<Func<TItem, bool>> filter)
         {
             return ElemMatch(new ExpressionFieldDefinition<TDocument>(field), new ExpressionFilterDefinition<TItem>(filter));
-        }
-
-        /// <summary>
-        /// Creates an element match filter for an array field.
-        /// </summary>
-        /// <param name="filter">The filter.</param>
-        /// <returns>An element match filter.</returns>
-        public FilterDefinition<TDocument> ElemMatch<TItem>(FilterDefinition<TItem> filter)
-        {
-            return new ElementMatchFilterDefinition<TDocument, TItem>(filter);
         }
 
         /// <summary>
@@ -1862,58 +1877,66 @@ namespace Etherna.MongoDB.Driver
         private readonly FieldDefinition<TDocument> _field;
         private readonly FilterDefinition<TItem> _filter;
 
+        public ElementMatchFilterDefinition(FilterDefinition<TItem> filter)
+            // where TDocument : IEnumerable<TItem> (can only be checked at runtime)
+        {
+            _filter = filter;
+
+            // TODO: CSHARP-5517 validate type constraint
+        }
+
         public ElementMatchFilterDefinition(FieldDefinition<TDocument> field, FilterDefinition<TItem> filter)
+            // where TField : IEnumerable<TItem> (checked in Render)
         {
             _field = Ensure.IsNotNull(field, nameof(field));
             _filter = filter;
-        }
 
-        public ElementMatchFilterDefinition(FilterDefinition<TItem> filter)
-        {
-            _filter = filter;
+            // TODO: CSHARP-5517 validate type constraint
         }
 
         public override BsonDocument Render(RenderArgs<TDocument> args)
         {
-            if (_field != null)
+            string fieldName = null;
+            IBsonSerializer enumerableSerializer;
+
+            if (_field == null)
             {
-                var renderedField = _field.Render(args);
-
-                IBsonSerializer<TItem> itemSerializer;
-                if (renderedField.FieldSerializer != null)
-                {
-                    var arraySerializer = renderedField.FieldSerializer as IBsonArraySerializer;
-                    BsonSerializationInfo itemSerializationInfo;
-                    if (arraySerializer == null || !arraySerializer.TryGetItemSerializationInfo(out itemSerializationInfo))
-                    {
-                        var message = string.Format("The serializer for field '{0}' must implement IBsonArraySerializer and provide item serialization info.", renderedField.FieldName);
-                        throw new InvalidOperationException(message);
-                    }
-                    itemSerializer = (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
-                }
-                else
-                {
-                    itemSerializer = args.SerializerRegistry.GetSerializer<TItem>();
-                }
-
-                var renderedFilter = _filter.Render(args.WithNewDocumentType(itemSerializer) with { RenderForElemMatch = true });
-
-                return new BsonDocument(renderedField.FieldName, new BsonDocument("$elemMatch", renderedFilter));
+                enumerableSerializer = args.DocumentSerializer; // note that TDocument : IEnumerable<TItem>
             }
             else
             {
-                if (args.DocumentSerializer is not IBsonArraySerializer arraySerializer ||
-                    !arraySerializer.TryGetItemSerializationInfo(out var itemSerializationInfo))
+                var renderedField = _field.Render(args);
+                fieldName = renderedField.FieldName;
+                enumerableSerializer = renderedField.FieldSerializer; // note that TField : IEnumerable<TItem>
+            }
+
+            IBsonSerializer<TItem> itemSerializer;
+            if (enumerableSerializer != null)
+            {
+                var arraySerializer = enumerableSerializer as IBsonArraySerializer;
+                BsonSerializationInfo itemSerializationInfo;
+                if (arraySerializer == null || !arraySerializer.TryGetItemSerializationInfo(out itemSerializationInfo))
                 {
-                    var message = "The serializer must implement IBsonArraySerializer and provide item serialization info.";
+                    var message = fieldName == null
+                        ? $"The serializer '{enumerableSerializer.GetType()}' must implement IBsonArraySerializer and provide item serialization info."
+                        : $"The serializer for field '{fieldName}' must implement IBsonArraySerializer and provide item serialization info.";
                     throw new InvalidOperationException(message);
                 }
-                var itemSerializer = (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
 
-                var renderedFilter = _filter.Render(new(itemSerializer, args.SerializerRegistry, renderForElemMatch: true));
-
-                return new BsonDocument("$elemMatch", renderedFilter);
+                itemSerializer = (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
             }
+            else
+            {
+                itemSerializer = args.SerializerRegistry.GetSerializer<TItem>();
+            }
+
+            var renderedFilter =
+                _filter.Render(args.WithNewDocumentType(itemSerializer) with { RenderForElemMatch = true });
+            var renderedElemMatchOperation = new BsonDocument("$elemMatch", renderedFilter);
+
+            return fieldName == null
+                ? renderedElemMatchOperation
+                : new BsonDocument(fieldName, renderedElemMatchOperation);
         }
     }
 

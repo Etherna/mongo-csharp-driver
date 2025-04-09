@@ -13,9 +13,7 @@
 * limitations under the License.
 */
 
-using System.Linq;
 using System.Linq.Expressions;
-using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Conventions;
 using Etherna.MongoDB.Bson.Serialization.Serializers;

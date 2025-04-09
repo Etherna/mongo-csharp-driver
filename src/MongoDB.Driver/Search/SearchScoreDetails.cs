@@ -19,7 +19,7 @@ using Etherna.MongoDB.Bson.Serialization.Attributes;
 namespace Etherna.MongoDB.Driver.Search
 {
     /// <summary>
-    /// Represents the scoreDetails object for a document in the result.
+    /// Represents the scoreDetails object for a document from a $search result.
     /// </summary>
     public sealed class SearchScoreDetails
     {

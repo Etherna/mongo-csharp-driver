@@ -47,6 +47,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __createIndexCommitQuorum = new Feature("CreateIndexCommitQuorum", WireVersion.Server44);
         private static readonly Feature __createIndexesUsingInsertOperations = new Feature("CreateIndexesUsingInsertOperations", WireVersion.Zero, WireVersion.Server42);
         private static readonly Feature __csfleRangeAlgorithm = new Feature("CsfleRangeAlgorithm", WireVersion.Server62);
+        private static readonly Feature __csfle2Qev2Lookup = new Feature("csfle2Qev2Lookup", WireVersion.Server81);
         private static readonly Feature __csfle2Qev2RangeAlgorithm = new Feature("csfle2Qev2RangeAlgorithm", WireVersion.Server80);
         private static readonly Feature __csfle2 = new Feature("Csfle2", WireVersion.Server60);
         private static readonly Feature __csfle2Qev2 = new Feature("Csfle2Qev2", WireVersion.Server70, notSupportedMessage: "Driver support of Queryable Encryption is incompatible with server. Upgrade server to use Queryable Encryption.");
@@ -81,6 +82,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __loookupDocuments= new Feature("LoookupDocuments", WireVersion.Server60);
         private static readonly Feature __mmapV1StorageEngine = new Feature("MmapV1StorageEngine", WireVersion.Zero, WireVersion.Server42);
         private static readonly Feature __pickAccumulatorsNewIn52 = new Feature("PickAccumulatorsNewIn52", WireVersion.Server52);
+        private static readonly Feature __rankFusionStage = new Feature("RankFusionStage", WireVersion.Server81);
         private static readonly Feature __regexMatch = new Feature("RegexMatch", WireVersion.Server42);
         private static readonly Feature __round = new Feature("Round", WireVersion.Server42);
         private static readonly Feature __scramSha256Authentication = new Feature("ScramSha256Authentication", WireVersion.Server40);
@@ -90,6 +92,7 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         private static readonly Feature __setWindowFields = new Feature("SetWindowFields", WireVersion.Server50);
         private static readonly Feature __setWindowFieldsLocf = new Feature("SetWindowFieldsLocf", WireVersion.Server52);
         private static readonly Feature __shardedTransactions = new Feature("ShardedTransactions", WireVersion.Server42);
+        private static readonly Feature __sigmoidOperator = new Feature("SigmoidOperator", WireVersion.Server81);
         private static readonly Feature __snapshotReads = new Feature("SnapshotReads", WireVersion.Server50, notSupportedMessage: "Snapshot reads require MongoDB 5.0 or later");
         private static readonly Feature __sortArrayOperator = new Feature("SortArrayOperator", WireVersion.Server52);
         private static readonly Feature __speculativeAuthentication = new Feature("SpeculativeAuthentication", WireVersion.Server44);
@@ -216,6 +219,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// Gets the client side field level encryption 2 queryable encryption v2 feature.
         /// </summary>
         public static Feature Csfle2QEv2 => __csfle2Qev2;
+
+        /// <summary>
+        /// Gets the csfle2 $lookup support feature.
+        /// </summary>
+        public static Feature Csfle2QEv2Lookup => __csfle2Qev2Lookup;
 
         /// <summary>
         /// Gets the csfle2 range algorithm feature.
@@ -381,6 +389,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         public static Feature PickAccumulatorsNewIn52 => __pickAccumulatorsNewIn52;
 
         /// <summary>
+        /// Gets the $rankFusion feature.
+        /// </summary>
+        public static Feature RankFusionStage => __rankFusionStage;
+
+        /// <summary>
         /// Gets the regex match feature.
         /// </summary>
         public static Feature RegexMatch => __regexMatch;
@@ -424,6 +437,11 @@ namespace Etherna.MongoDB.Driver.Core.Misc
         /// Gets the sharded transactions feature.
         /// </summary>
         public static Feature ShardedTransactions => __shardedTransactions;
+
+        /// <summary>
+        /// Gets the $sigmoid operator feature.
+        /// </summary>
+        public static Feature SigmoidOperator => __sigmoidOperator;
 
         /// <summary>
         /// Gets the snapshot reads feature.
