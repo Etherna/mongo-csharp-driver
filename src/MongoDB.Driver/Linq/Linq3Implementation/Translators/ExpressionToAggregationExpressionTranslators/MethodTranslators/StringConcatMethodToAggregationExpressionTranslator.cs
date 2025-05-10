@@ -129,11 +129,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 }
                 else
                 {
-                    if (astExpression is AstConstantExpression constantAstExpression)
+                    if (astExpression.IsConstant(out var constant))
                     {
-                        var value = constantAstExpression.Value;
-                        var stringValue = ValueToString(translatedExpression.Expression, value);
-                        return AstExpression.Constant(stringValue);
+                        var stringConstant = ValueToString(translatedExpression.Expression, constant);
+                        return AstExpression.Constant(stringConstant);
                     }
                     else
                     {

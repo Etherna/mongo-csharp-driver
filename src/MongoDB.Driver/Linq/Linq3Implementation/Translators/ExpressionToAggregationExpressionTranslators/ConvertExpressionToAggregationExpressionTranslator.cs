@@ -154,7 +154,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
         private static bool IsConvertToDerivedType(Type sourceType, Type targetType)
         {
-            return targetType.IsSubclassOf(sourceType);
+            return sourceType.IsAssignableFrom(targetType); // targetType either derives from sourceType or implements sourceType interface
         }
 
         private static bool IsConvertToNullableType(Type targetType)

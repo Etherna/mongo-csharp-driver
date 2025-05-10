@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver.Search
@@ -113,7 +114,7 @@ namespace Etherna.MongoDB.Driver.Search
         }
 
         public override BsonValue Render(RenderArgs<TDocument> args) =>
-            new BsonDocument()
+            new BsonDocument
             {
                 {  "value", RenderField(_field, args) },
                 {  "multi", _analyzerName }
@@ -144,6 +145,9 @@ namespace Etherna.MongoDB.Driver.Search
 
         public override BsonValue Render(RenderArgs<TDocument> args) =>
             RenderField(_field, args);
+
+        internal override BsonValue RenderAndGetFieldSerializer(RenderArgs<TDocument> args, out IBsonSerializer fieldSerializer)
+            => RenderField(_field, args, out fieldSerializer);
     }
 
     internal sealed class WildcardSearchPathDefinition<TDocument> : SearchPathDefinition<TDocument>

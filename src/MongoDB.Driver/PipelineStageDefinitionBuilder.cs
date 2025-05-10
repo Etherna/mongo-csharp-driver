@@ -21,8 +21,8 @@ using System.Reflection;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Conventions;
-using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.GeoJsonObjectModel;
 using Etherna.MongoDB.Driver.Linq;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
@@ -603,6 +603,74 @@ namespace Etherna.MongoDB.Driver
             params AggregateFacet<TInput>[] facets)
         {
             return Facet<TInput, TOutput>((IEnumerable<AggregateFacet<TInput>>)facets);
+        }
+
+        internal static PipelineStageDefinition<TInput, TOutput> GeoNear<TInput, TPoint, TOutput>(
+            TPoint near,
+            GeoNearOptions<TInput, TOutput> options = null)
+            // where TPoint is either a GeoJsonPoint or a legacy coordinate array
+        {
+            const string operatorName = "$geoNear";
+            var stage = new DelegatedPipelineStageDefinition<TInput, TOutput>(
+                operatorName,
+                args =>
+                {
+                    ClientSideProjectionHelper.ThrowIfClientSideProjection(args.DocumentSerializer, operatorName);
+                    var pointSerializer = args.SerializerRegistry.GetSerializer<TPoint>();
+                    var outputSerializer = options?.OutputSerializer ?? args.GetSerializer<TOutput>();
+                    var outputRenderArgs = args.WithNewDocumentType(outputSerializer);
+                    var geoNearOptions = new BsonDocument
+                    {
+                        { "near", pointSerializer.ToBsonValue(near)},
+                        { "distanceField", options?.DistanceField?.Render(outputRenderArgs).FieldName, options?.DistanceField != null },
+                        { "maxDistance", options?.MaxDistance, options?.MaxDistance != null },
+                        { "minDistance", options?.MinDistance, options?.MinDistance != null },
+                        { "distanceMultiplier", options?.DistanceMultiplier, options?.DistanceMultiplier != null },
+                        { "key", options?.Key, options?.Key != null },
+                        { "query", options?.Query?.Render(args), options?.Query != null },
+                        { "includeLocs", options?.IncludeLocs?.Render(outputRenderArgs).FieldName, options?.IncludeLocs != null },
+                        { "spherical", options?.Spherical, options?.Spherical != null }
+                    };
+
+                    return new RenderedPipelineStageDefinition<TOutput>(operatorName, new BsonDocument(operatorName, geoNearOptions), outputSerializer);
+                });
+
+            return stage;
+        }
+
+        /// <summary>
+        /// Creates a $geoNear stage.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input documents.</typeparam>
+        /// <typeparam name="TOutput">The type of the output documents.</typeparam>
+        /// <typeparam name="TCoordinates">The type of the coordinates for the point.</typeparam>
+        /// <param name="near">The point for which to find the closest documents.</param>
+        /// <param name="options">The options.</param>
+        /// <returns>The stage.</returns>
+        public static PipelineStageDefinition<TInput, TOutput> GeoNear<TInput, TCoordinates, TOutput>(
+            GeoJsonPoint<TCoordinates> near,
+            GeoNearOptions<TInput, TOutput> options = null)
+            where TCoordinates : GeoJsonCoordinates
+        {
+            Ensure.IsNotNull(near, nameof(near));
+            return GeoNear<TInput, GeoJsonPoint<TCoordinates>, TOutput>(near, options);
+        }
+
+        /// <summary>
+        /// Creates a $geoNear stage.
+        /// </summary>
+        /// <typeparam name="TInput">The type of the input documents.</typeparam>
+        /// <typeparam name="TOutput">The type of the output documents.</typeparam>
+        /// <param name="near">The point for which to find the closest documents.</param>
+        /// <param name="options">The options.</param>
+        /// <returns>The stage.</returns>
+        public static PipelineStageDefinition<TInput, TOutput> GeoNear<TInput, TOutput>(
+            double[] near,
+            GeoNearOptions<TInput, TOutput> options = null)
+        {
+            Ensure.IsNotNull(near, nameof(near));
+            Ensure.That(near.Length, len => len is 2 or 3, nameof(near), "Legacy coordinates array should have 2 or 3 coordinates.");
+            return GeoNear<TInput, double[], TOutput>(near, options);
         }
 
         /// <summary>
