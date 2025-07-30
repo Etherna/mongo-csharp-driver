@@ -39,7 +39,7 @@ namespace Etherna.MongoDB.Bson.Serialization
         private static Dictionary<Type, IIdGenerator> __idGenerators = new Dictionary<Type, IIdGenerator>();
         private static Dictionary<Type, IDiscriminatorConvention> __discriminatorConventions = new Dictionary<Type, IDiscriminatorConvention>();
         private static Dictionary<BsonValue, HashSet<Type>> __discriminators = new Dictionary<BsonValue, HashSet<Type>>();
-        private static HashSet<Type> __discriminatedTypes = new HashSet<Type>();
+        private static ConcurrentDictionary<Type, bool> __discriminatedTypes = new ();
         private static ISerializationContextAccessor __serializationContextAccessor;
         private static BsonSerializerRegistry __serializerRegistry;
         private static TypeMappingSerializationProvider __typeMappingSerializationProvider;
@@ -327,8 +327,7 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <returns>True if the type is discriminated.</returns>
         public static bool IsTypeDiscriminated(Type type)
         {
-            var typeInfo = type.GetTypeInfo();
-            return typeInfo.IsInterface || __discriminatedTypes.Contains(type);
+            return type.IsInterface || __discriminatedTypes.ContainsKey(type);
         }
 
         /// <summary>
@@ -588,7 +587,8 @@ namespace Etherna.MongoDB.Bson.Serialization
                     // mark all base types as discriminated (so we know that it's worth reading a discriminator)
                     for (var baseType = typeInfo.BaseType; baseType != null; baseType = baseType.GetTypeInfo().BaseType)
                     {
-                        __discriminatedTypes.Add(baseType);
+                        // We expect that TryAdd will always return true, so no need to check the return value.
+                        __discriminatedTypes.TryAdd(baseType, true);
                     }
                 }
             }
