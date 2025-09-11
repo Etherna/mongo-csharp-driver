@@ -1055,7 +1055,7 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
                     {
                         throw new MongoConfigurationException("Multiple proxyHost options are not allowed.");
                     }
-                    
+
                     _proxyHost = value;
                     if (_proxyHost.Length == 0)
                     {

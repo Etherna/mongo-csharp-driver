@@ -1917,12 +1917,11 @@ namespace Etherna.MongoDB.Driver
                 BsonSerializationInfo itemSerializationInfo;
                 if (arraySerializer == null || !arraySerializer.TryGetItemSerializationInfo(out itemSerializationInfo))
                 {
-                    var message = fieldName == null
-                        ? $"The serializer '{enumerableSerializer.GetType()}' must implement IBsonArraySerializer and provide item serialization info."
-                        : $"The serializer for field '{fieldName}' must implement IBsonArraySerializer and provide item serialization info.";
+                    var message = fieldName == null ?
+                        $"The serializer '{enumerableSerializer.GetType()}' must implement IBsonArraySerializer and provide item serialization info." :
+                        $"The serializer for field '{fieldName}' must implement IBsonArraySerializer and provide item serialization info.";
                     throw new InvalidOperationException(message);
                 }
-
                 itemSerializer = (IBsonSerializer<TItem>)itemSerializationInfo.Serializer;
             }
             else
@@ -1930,13 +1929,12 @@ namespace Etherna.MongoDB.Driver
                 itemSerializer = args.SerializerRegistry.GetSerializer<TItem>();
             }
 
-            var renderedFilter =
-                _filter.Render(args.WithNewDocumentType(itemSerializer) with { RenderForElemMatch = true });
+            var renderedFilter = _filter.Render(args.WithNewDocumentType(itemSerializer) with { RenderForElemMatch = true });
             var renderedElemMatchOperation = new BsonDocument("$elemMatch", renderedFilter);
 
-            return fieldName == null
-                ? renderedElemMatchOperation
-                : new BsonDocument(fieldName, renderedElemMatchOperation);
+            return fieldName == null ?
+                renderedElemMatchOperation :
+                new BsonDocument(fieldName, renderedElemMatchOperation);
         }
     }
 
