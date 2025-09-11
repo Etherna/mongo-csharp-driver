@@ -13,6 +13,7 @@
 * limitations under the License.
 */
 
+using System;
 using Etherna.MongoDB.Bson;
 
 namespace Etherna.MongoDB.Driver
@@ -25,6 +26,19 @@ namespace Etherna.MongoDB.Driver
         /// <summary>
         /// The id of the inserted document.
         /// </summary>
-        public BsonValue InsertedId { get; init; }
+        [Obsolete("InsertedId is deprecated and will be removed in future versions. Use DocumentId instead.")]
+        public BsonValue InsertedId
+        {
+            get => BsonValue.Create(DocumentId);
+            init
+            {
+                DocumentId = value;
+            }
+        }
+
+        /// <summary>
+        /// The id of the inserted document.
+        /// </summary>
+        public object DocumentId { get; init; }
     }
 }

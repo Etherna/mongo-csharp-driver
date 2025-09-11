@@ -14,7 +14,6 @@
 */
 
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
@@ -36,6 +35,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public int Limit { get; init; }
 
         // public methods
-        public override bool IsRetryable(ConnectionDescription connectionDescription) => Limit != 0;
+        public override bool IsRetryable() => Limit != 0;
     }
 }

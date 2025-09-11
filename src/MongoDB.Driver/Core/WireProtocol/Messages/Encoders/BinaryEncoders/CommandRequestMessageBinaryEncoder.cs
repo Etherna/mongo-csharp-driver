@@ -33,7 +33,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             bool forceStaticSerializerRegistry = false)
         {
             var wrappedMessage = (CommandMessage)_wrappedEncoder.ReadMessage(forceStaticSerializerRegistry);
-            return new CommandRequestMessage(wrappedMessage, null);
+            return new CommandRequestMessage(wrappedMessage);
         }
 
         public void WriteMessage(

@@ -13,7 +13,10 @@
 * limitations under the License.
  *
 */
+
+using System;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -26,6 +29,7 @@ namespace Etherna.MongoDB.Driver
         private bool? _bypassDocumentValidation;
         private BsonValue _comment;
         private bool _isOrdered;
+        private TimeSpan? _timeout;
 
         // constructors
         /// <summary>
@@ -62,6 +66,16 @@ namespace Etherna.MongoDB.Driver
         {
             get { return _isOrdered; }
             set { _isOrdered = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the operation timeout.
+        /// </summary>
+        // TODO: CSOT: Make it public when CSOT will be ready for GA
+        internal TimeSpan? Timeout
+        {
+            get => _timeout;
+            set => _timeout = Ensure.IsNullOrValidTimeout(value, nameof(Timeout));
         }
     }
 }

@@ -1,4 +1,4 @@
-/* Copyright 2013-present MongoDB Inc.
+/* Copyright 2010-present MongoDB Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 using System;
 using System.Buffers.Binary;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,19 +56,24 @@ namespace Etherna.MongoDB.Driver.Core.Connections
         private CompressorType? _sendCompressorType;
         private readonly SemaphoreSlim _sendLock;
         private readonly ConnectionSettings _settings;
+        private readonly TimeSpan _socketReadTimeout;
+        private readonly TimeSpan _socketWriteTimeout;
         private readonly InterlockedInt32 _state;
         private Stream _stream;
         private readonly IStreamFactory _streamFactory;
         private readonly EventLogger<LogCategories.Connection> _eventLogger;
 
         // constructors
-        public BinaryConnection(ServerId serverId,
+        public BinaryConnection(
+            ServerId serverId,
             EndPoint endPoint,
             ConnectionSettings settings,
             IStreamFactory streamFactory,
             IConnectionInitializer connectionInitializer,
             IEventSubscriber eventSubscriber,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            TimeSpan socketReadTimeout,
+            TimeSpan socketWriteTimeout)
         {
             Ensure.IsNotNull(serverId, nameof(serverId));
             _endPoint = Ensure.IsNotNull(endPoint, nameof(endPoint));
@@ -87,6 +90,8 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             _compressorSource = new CompressorSource(settings.Compressors);
             _eventLogger = loggerFactory.CreateEventLogger<LogCategories.Connection>(eventSubscriber);
             _commandEventHelper = new CommandEventHelper(loggerFactory.CreateEventLogger<LogCategories.Command>(eventSubscriber));
+            _socketReadTimeout = socketReadTimeout;
+            _socketWriteTimeout = socketWriteTimeout;
         }
 
         // properties
@@ -205,9 +210,9 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        public void Open(CancellationToken cancellationToken)
+        public void Open(OperationContext operationContext)
         {
-            ThrowIfCancelledOrDisposed(cancellationToken);
+            ThrowIfCancelledOrDisposed(operationContext);
 
             TaskCompletionSource<bool> taskCompletionSource = null;
             var connecting = false;
@@ -227,7 +232,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             {
                 try
                 {
-                    OpenHelper(cancellationToken);
+                    OpenHelper(operationContext);
                     taskCompletionSource.TrySetResult(true);
                 }
                 catch (Exception ex)
@@ -242,82 +247,98 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        public Task OpenAsync(CancellationToken cancellationToken)
+        public Task OpenAsync(OperationContext operationContext)
         {
-            ThrowIfCancelledOrDisposed(cancellationToken);
+            ThrowIfCancelledOrDisposed(operationContext);
 
             lock (_openLock)
             {
                 if (_state.TryChange(State.Initial, State.Connecting))
                 {
                     _openedAtUtc = DateTime.UtcNow;
-                    _openTask = OpenHelperAsync(cancellationToken);
+                    _openTask = OpenHelperAsync(operationContext);
                 }
                 return _openTask;
             }
         }
 
-        private void OpenHelper(CancellationToken cancellationToken)
+        private void OpenHelper(OperationContext operationContext)
         {
             var helper = new OpenConnectionHelper(this);
             ConnectionDescription handshakeDescription = null;
             try
             {
                 helper.OpeningConnection();
-                _stream = _streamFactory.CreateStream(_endPoint, cancellationToken);
+#pragma warning disable CS0618 // Type or member is obsolete
+                _stream = _streamFactory.CreateStream(_endPoint, operationContext.CombinedCancellationToken);
+#pragma warning restore CS0618 // Type or member is obsolete
                 helper.InitializingConnection();
-                _connectionInitializerContext = _connectionInitializer.SendHello(this, cancellationToken);
+                _connectionInitializerContext = _connectionInitializer.SendHello(operationContext, this);
                 handshakeDescription = _connectionInitializerContext.Description;
-                _connectionInitializerContext = _connectionInitializer.Authenticate(this, _connectionInitializerContext, cancellationToken);
+                _connectionInitializerContext = _connectionInitializer.Authenticate(operationContext, this, _connectionInitializerContext);
                 _description = _connectionInitializerContext.Description;
                 _sendCompressorType = ChooseSendCompressorTypeIfAny(_description);
 
                 helper.OpenedConnection();
             }
+            catch (OperationCanceledException) when (operationContext.IsTimedOut())
+            {
+                // OperationCanceledException could be thrown because of CombinedCancellationToken (see line 273),
+                // if we face it and operation context is timed out we should throw TimeoutException instead.
+                throw new TimeoutException();
+            }
             catch (Exception ex)
             {
                 _description ??= handshakeDescription;
-                var wrappedException = WrapExceptionIfRequired(ex, "opening a connection to the server");
+                var wrappedException = WrapExceptionIfRequired(operationContext, ex, "opening a connection to the server");
                 helper.FailedOpeningConnection(wrappedException ?? ex);
                 if (wrappedException == null) { throw; } else { throw wrappedException; }
             }
         }
 
-        private async Task OpenHelperAsync(CancellationToken cancellationToken)
+        private async Task OpenHelperAsync(OperationContext operationContext)
         {
             var helper = new OpenConnectionHelper(this);
             ConnectionDescription handshakeDescription = null;
             try
             {
                 helper.OpeningConnection();
-                _stream = await _streamFactory.CreateStreamAsync(_endPoint, cancellationToken).ConfigureAwait(false);
+#pragma warning disable CS0618 // Type or member is obsolete
+                _stream = await _streamFactory.CreateStreamAsync(_endPoint, operationContext.CombinedCancellationToken).ConfigureAwait(false);
+#pragma warning restore CS0618 // Type or member is obsolete
                 helper.InitializingConnection();
-                _connectionInitializerContext = await _connectionInitializer.SendHelloAsync(this, cancellationToken).ConfigureAwait(false);
+                _connectionInitializerContext = await _connectionInitializer.SendHelloAsync(operationContext, this).ConfigureAwait(false);
                 handshakeDescription = _connectionInitializerContext.Description;
-                _connectionInitializerContext = await _connectionInitializer.AuthenticateAsync(this, _connectionInitializerContext, cancellationToken).ConfigureAwait(false);
+                _connectionInitializerContext = await _connectionInitializer.AuthenticateAsync(operationContext, this, _connectionInitializerContext).ConfigureAwait(false);
                 _description = _connectionInitializerContext.Description;
                 _sendCompressorType = ChooseSendCompressorTypeIfAny(_description);
                 helper.OpenedConnection();
             }
+            catch (OperationCanceledException) when (operationContext.IsTimedOut())
+            {
+                // OperationCanceledException could be thrown because of CombinedCancellationToken (see line 307),
+                // if we face it and operation context is timed out we should throw TimeoutException instead.
+                throw new TimeoutException();
+            }
             catch (Exception ex)
             {
                 _description ??= handshakeDescription;
-                var wrappedException = WrapExceptionIfRequired(ex, "opening a connection to the server");
+                var wrappedException = WrapExceptionIfRequired(operationContext, ex, "opening a connection to the server");
                 helper.FailedOpeningConnection(wrappedException ?? ex);
                 if (wrappedException == null) { throw; } else { throw wrappedException; }
             }
         }
 
-        public void Reauthenticate(CancellationToken cancellationToken)
+        public void Reauthenticate(OperationContext operationContext)
         {
             InvalidateAuthenticator();
-            _connectionInitializerContext = _connectionInitializer.Authenticate(this, _connectionInitializerContext, cancellationToken);
+            _connectionInitializerContext = _connectionInitializer.Authenticate(operationContext, this, _connectionInitializerContext);
         }
 
-        public async Task ReauthenticateAsync(CancellationToken cancellationToken)
+        public async Task ReauthenticateAsync(OperationContext operationContext)
         {
             InvalidateAuthenticator();
-            _connectionInitializerContext = await _connectionInitializer.AuthenticateAsync(this, _connectionInitializerContext, cancellationToken).ConfigureAwait(false);
+            _connectionInitializerContext = await _connectionInitializer.AuthenticateAsync(operationContext, this, _connectionInitializerContext).ConfigureAwait(false);
         }
 
         private void InvalidateAuthenticator()
@@ -328,34 +349,34 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        private IByteBuffer ReceiveBuffer(CancellationToken cancellationToken)
+        private IByteBuffer ReceiveBuffer(OperationContext operationContext)
         {
             try
             {
                 var messageSizeBytes = new byte[4];
-                _stream.ReadBytes(messageSizeBytes, 0, 4, cancellationToken);
+                _stream.ReadBytes(operationContext, messageSizeBytes, 0, 4, _socketReadTimeout);
                 var messageSize = BinaryPrimitives.ReadInt32LittleEndian(messageSizeBytes);
                 EnsureMessageSizeIsValid(messageSize);
                 var inputBufferChunkSource = new InputBufferChunkSource(BsonChunkPool.Default);
                 var buffer = ByteBufferFactory.Create(inputBufferChunkSource, messageSize);
                 buffer.Length = messageSize;
                 buffer.SetBytes(0, messageSizeBytes, 0, 4);
-                _stream.ReadBytes(buffer, 4, messageSize - 4, cancellationToken);
+                _stream.ReadBytes(operationContext, buffer, 4, messageSize - 4, _socketReadTimeout);
                 _lastUsedAtUtc = DateTime.UtcNow;
                 buffer.MakeReadOnly();
                 return buffer;
             }
             catch (Exception ex)
             {
-                var wrappedException = WrapExceptionIfRequired(ex, "receiving a message from the server");
+                var wrappedException = WrapExceptionIfRequired(operationContext, ex, "receiving a message from the server");
                 ConnectionFailed(wrappedException ?? ex);
                 if (wrappedException == null) { throw; } else { throw wrappedException; }
             }
         }
 
-        private IByteBuffer ReceiveBuffer(int responseTo, CancellationToken cancellationToken)
+        private IByteBuffer ReceiveBuffer(OperationContext operationContext, int responseTo)
         {
-            using (var receiveLockRequest = new SemaphoreSlimRequest(_receiveLock, cancellationToken))
+            using (var receiveLockRequest = new SemaphoreSlimRequest(_receiveLock, operationContext.RemainingTimeout, operationContext.CancellationToken))
             {
                 var messageTask = _dropbox.GetMessageAsync(responseTo);
                 try
@@ -371,7 +392,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                     {
                         try
                         {
-                            var buffer = ReceiveBuffer(cancellationToken);
+                            var buffer = ReceiveBuffer(operationContext);
                             _dropbox.AddMessage(buffer);
                         }
                         catch (Exception ex)
@@ -384,7 +405,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                             return _dropbox.RemoveMessage(responseTo); // also propagates exception if any
                         }
 
-                        cancellationToken.ThrowIfCancellationRequested();
+                        operationContext.ThrowIfTimedOutOrCanceled();
                     }
                 }
                 catch
@@ -397,35 +418,34 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        private async Task<IByteBuffer> ReceiveBufferAsync(CancellationToken cancellationToken)
+        private async Task<IByteBuffer> ReceiveBufferAsync(OperationContext operationContext)
         {
             try
             {
                 var messageSizeBytes = new byte[4];
-                var readTimeout = _stream.CanTimeout ? TimeSpan.FromMilliseconds(_stream.ReadTimeout) : Timeout.InfiniteTimeSpan;
-                await _stream.ReadBytesAsync(messageSizeBytes, 0, 4, readTimeout, cancellationToken).ConfigureAwait(false);
+                await _stream.ReadBytesAsync(operationContext, messageSizeBytes, 0, 4, _socketReadTimeout).ConfigureAwait(false);
                 var messageSize = BinaryPrimitives.ReadInt32LittleEndian(messageSizeBytes);
                 EnsureMessageSizeIsValid(messageSize);
                 var inputBufferChunkSource = new InputBufferChunkSource(BsonChunkPool.Default);
                 var buffer = ByteBufferFactory.Create(inputBufferChunkSource, messageSize);
                 buffer.Length = messageSize;
                 buffer.SetBytes(0, messageSizeBytes, 0, 4);
-                await _stream.ReadBytesAsync(buffer, 4, messageSize - 4, readTimeout, cancellationToken).ConfigureAwait(false);
+                await _stream.ReadBytesAsync(operationContext, buffer, 4, messageSize - 4, _socketReadTimeout).ConfigureAwait(false);
                 _lastUsedAtUtc = DateTime.UtcNow;
                 buffer.MakeReadOnly();
                 return buffer;
             }
             catch (Exception ex)
             {
-                var wrappedException = WrapExceptionIfRequired(ex, "receiving a message from the server");
+                var wrappedException = WrapExceptionIfRequired(operationContext, ex, "receiving a message from the server");
                 ConnectionFailed(wrappedException ?? ex);
                 if (wrappedException == null) { throw; } else { throw wrappedException; }
             }
         }
 
-        private async Task<IByteBuffer> ReceiveBufferAsync(int responseTo, CancellationToken cancellationToken)
+        private async Task<IByteBuffer> ReceiveBufferAsync(OperationContext operationContext, int responseTo)
         {
-            using (var receiveLockRequest = new SemaphoreSlimRequest(_receiveLock, cancellationToken))
+            using (var receiveLockRequest = new SemaphoreSlimRequest(_receiveLock, operationContext.RemainingTimeout, operationContext.CancellationToken))
             {
                 var messageTask = _dropbox.GetMessageAsync(responseTo);
                 try
@@ -436,12 +456,12 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                         return _dropbox.RemoveMessage(responseTo); // also propagates exception if any
                     }
 
-                    receiveLockRequest.Task.GetAwaiter().GetResult(); // propagate exceptions
+                    await receiveLockRequest.Task.ConfigureAwait(false); // propagate exceptions
                     while (true)
                     {
                         try
                         {
-                            var buffer = await ReceiveBufferAsync(cancellationToken).ConfigureAwait(false);
+                            var buffer = await ReceiveBufferAsync(operationContext).ConfigureAwait(false);
                             _dropbox.AddMessage(buffer);
                         }
                         catch (Exception ex)
@@ -454,7 +474,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                             return _dropbox.RemoveMessage(responseTo); // also propagates exception if any
                         }
 
-                        cancellationToken.ThrowIfCancellationRequested();
+                        operationContext.ThrowIfTimedOutOrCanceled();
                     }
                 }
                 catch
@@ -468,21 +488,21 @@ namespace Etherna.MongoDB.Driver.Core.Connections
         }
 
         public ResponseMessage ReceiveMessage(
+            OperationContext operationContext,
             int responseTo,
             IMessageEncoderSelector encoderSelector,
-            MessageEncoderSettings messageEncoderSettings,
-            CancellationToken cancellationToken)
+            MessageEncoderSettings messageEncoderSettings)
         {
             Ensure.IsNotNull(encoderSelector, nameof(encoderSelector));
-            ThrowIfCancelledOrDisposedOrNotOpen(cancellationToken);
+            ThrowIfCancelledOrDisposedOrNotOpen(operationContext);
 
             var helper = new ReceiveMessageHelper(this, responseTo, messageEncoderSettings, _compressorSource);
             try
             {
                 helper.ReceivingMessage();
-                using (var buffer = ReceiveBuffer(responseTo, cancellationToken))
+                using (var buffer = ReceiveBuffer(operationContext, responseTo))
                 {
-                    var message = helper.DecodeMessage(buffer, encoderSelector, cancellationToken);
+                    var message = helper.DecodeMessage(operationContext, buffer, encoderSelector);
                     helper.ReceivedMessage(buffer, message);
                     return message;
                 }
@@ -495,22 +515,20 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        public async Task<ResponseMessage> ReceiveMessageAsync(
-            int responseTo,
+        public async Task<ResponseMessage> ReceiveMessageAsync(OperationContext operationContext, int responseTo,
             IMessageEncoderSelector encoderSelector,
-            MessageEncoderSettings messageEncoderSettings,
-            CancellationToken cancellationToken)
+            MessageEncoderSettings messageEncoderSettings)
         {
             Ensure.IsNotNull(encoderSelector, nameof(encoderSelector));
-            ThrowIfCancelledOrDisposedOrNotOpen(cancellationToken);
+            ThrowIfCancelledOrDisposedOrNotOpen(operationContext);
 
             var helper = new ReceiveMessageHelper(this, responseTo, messageEncoderSettings, _compressorSource);
             try
             {
                 helper.ReceivingMessage();
-                using (var buffer = await ReceiveBufferAsync(responseTo, cancellationToken).ConfigureAwait(false))
+                using (var buffer = await ReceiveBufferAsync(operationContext, responseTo).ConfigureAwait(false))
                 {
-                    var message = helper.DecodeMessage(buffer, encoderSelector, cancellationToken);
+                    var message = helper.DecodeMessage(operationContext, buffer, encoderSelector);
                     helper.ReceivedMessage(buffer, message);
                     return message;
                 }
@@ -523,9 +541,9 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        private void SendBuffer(IByteBuffer buffer, CancellationToken cancellationToken)
+        private void SendBuffer(OperationContext operationContext, IByteBuffer buffer)
         {
-            _sendLock.Wait(cancellationToken);
+            _sendLock.Wait(operationContext.RemainingTimeout, operationContext.CancellationToken);
             try
             {
                 if (_state.Value == State.Failed)
@@ -535,12 +553,12 @@ namespace Etherna.MongoDB.Driver.Core.Connections
 
                 try
                 {
-                    _stream.WriteBytes(buffer, 0, buffer.Length, cancellationToken);
+                    _stream.WriteBytes(operationContext, buffer, 0, buffer.Length, _socketWriteTimeout);
                     _lastUsedAtUtc = DateTime.UtcNow;
                 }
                 catch (Exception ex)
                 {
-                    var wrappedException = WrapExceptionIfRequired(ex, "sending a message to the server");
+                    var wrappedException = WrapExceptionIfRequired(operationContext, ex, "sending a message to the server");
                     ConnectionFailed(wrappedException ?? ex);
                     if (wrappedException == null) { throw; } else { throw wrappedException; }
                 }
@@ -551,9 +569,9 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        private async Task SendBufferAsync(IByteBuffer buffer, CancellationToken cancellationToken)
+        private async Task SendBufferAsync(OperationContext operationContext, IByteBuffer buffer)
         {
-            await _sendLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await _sendLock.WaitAsync(operationContext.RemainingTimeout, operationContext.CancellationToken).ConfigureAwait(false);
             try
             {
                 if (_state.Value == State.Failed)
@@ -563,13 +581,12 @@ namespace Etherna.MongoDB.Driver.Core.Connections
 
                 try
                 {
-                    var writeTimeout = _stream.CanTimeout ? TimeSpan.FromMilliseconds(_stream.WriteTimeout) : Timeout.InfiniteTimeSpan;
-                    await _stream.WriteBytesAsync(buffer, 0, buffer.Length, writeTimeout, cancellationToken).ConfigureAwait(false);
+                    await _stream.WriteBytesAsync(operationContext, buffer, 0, buffer.Length, _socketWriteTimeout).ConfigureAwait(false);
                     _lastUsedAtUtc = DateTime.UtcNow;
                 }
                 catch (Exception ex)
                 {
-                    var wrappedException = WrapExceptionIfRequired(ex, "sending a message to the server");
+                    var wrappedException = WrapExceptionIfRequired(operationContext, ex, "sending a message to the server");
                     ConnectionFailed(wrappedException ?? ex);
                     if (wrappedException == null) { throw; } else { throw wrappedException; }
                 }
@@ -580,90 +597,84 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        public void SendMessages(IEnumerable<RequestMessage> messages, MessageEncoderSettings messageEncoderSettings, CancellationToken cancellationToken)
+        public void SendMessage(OperationContext operationContext, RequestMessage message, MessageEncoderSettings messageEncoderSettings)
         {
-            Ensure.IsNotNull(messages, nameof(messages));
-            ThrowIfCancelledOrDisposedOrNotOpen(cancellationToken);
+            Ensure.IsNotNull(message, nameof(message));
+            ThrowIfCancelledOrDisposedOrNotOpen(operationContext);
 
-            var helper = new SendMessagesHelper(this, messages, messageEncoderSettings);
+            var helper = new SendMessageHelper(this, message, messageEncoderSettings);
             try
             {
-                helper.EncodingMessages();
-                using (var uncompressedBuffer = helper.EncodeMessages(cancellationToken, out var sentMessages))
+                helper.EncodingMessage();
+                using (var uncompressedBuffer = helper.EncodeMessage(operationContext, out var sentMessage))
                 {
-                    helper.SendingMessages(uncompressedBuffer);
+                    helper.SendingMessage(uncompressedBuffer);
                     int sentLength;
-                    if (AnyMessageNeedsToBeCompressed(sentMessages))
+                    if (ShouldBeCompressed(sentMessage))
                     {
-                        using (var compressedBuffer = CompressMessages(sentMessages, uncompressedBuffer, messageEncoderSettings))
+                        using (var compressedBuffer = CompressMessage(sentMessage, uncompressedBuffer, messageEncoderSettings))
                         {
-                            SendBuffer(compressedBuffer, cancellationToken);
+                            SendBuffer(operationContext, compressedBuffer);
                             sentLength = compressedBuffer.Length;
                         }
                     }
                     else
                     {
-                        SendBuffer(uncompressedBuffer, cancellationToken);
+                        SendBuffer(operationContext, uncompressedBuffer);
                         sentLength = uncompressedBuffer.Length;
                     }
-                    helper.SentMessages(sentLength);
+                    helper.SentMessage(sentLength);
                 }
             }
             catch (Exception ex)
             {
-                helper.FailedSendingMessages(ex);
+                helper.FailedSendingMessage(ex);
                 ThrowOperationCanceledExceptionIfRequired(ex);
                 throw;
             }
         }
 
-        public async Task SendMessagesAsync(IEnumerable<RequestMessage> messages, MessageEncoderSettings messageEncoderSettings, CancellationToken cancellationToken)
+        public async Task SendMessageAsync(OperationContext operationContext, RequestMessage message, MessageEncoderSettings messageEncoderSettings)
         {
-            Ensure.IsNotNull(messages, nameof(messages));
-            ThrowIfCancelledOrDisposedOrNotOpen(cancellationToken);
+            Ensure.IsNotNull(message, nameof(message));
+            ThrowIfCancelledOrDisposedOrNotOpen(operationContext);
 
-            var helper = new SendMessagesHelper(this, messages, messageEncoderSettings);
+            var helper = new SendMessageHelper(this, message, messageEncoderSettings);
             try
             {
-                helper.EncodingMessages();
-                using (var uncompressedBuffer = helper.EncodeMessages(cancellationToken, out var sentMessages))
+                helper.EncodingMessage();
+                using (var uncompressedBuffer = helper.EncodeMessage(operationContext, out var sentMessage))
                 {
-                    helper.SendingMessages(uncompressedBuffer);
+                    helper.SendingMessage(uncompressedBuffer);
                     int sentLength;
-                    if (AnyMessageNeedsToBeCompressed(sentMessages))
+                    if (ShouldBeCompressed(sentMessage))
                     {
-                        using (var compressedBuffer = CompressMessages(sentMessages, uncompressedBuffer, messageEncoderSettings))
+                        using (var compressedBuffer = CompressMessage(sentMessage, uncompressedBuffer, messageEncoderSettings))
                         {
-                            await SendBufferAsync(compressedBuffer, cancellationToken).ConfigureAwait(false);
+                            await SendBufferAsync(operationContext, compressedBuffer).ConfigureAwait(false);
                             sentLength = compressedBuffer.Length;
                         }
                     }
                     else
                     {
-                        await SendBufferAsync(uncompressedBuffer, cancellationToken).ConfigureAwait(false);
+                        await SendBufferAsync(operationContext, uncompressedBuffer).ConfigureAwait(false);
                         sentLength = uncompressedBuffer.Length;
                     }
-                    helper.SentMessages(sentLength);
+                    helper.SentMessage(sentLength);
                 }
             }
             catch (Exception ex)
             {
-                helper.FailedSendingMessages(ex);
+                helper.FailedSendingMessage(ex);
                 ThrowOperationCanceledExceptionIfRequired(ex);
                 throw;
             }
-        }
-
-        public void SetReadTimeout(TimeSpan timeout)
-        {
-            ThrowIfDisposed();
-            _stream.ReadTimeout = (int)timeout.TotalMilliseconds;
         }
 
         // private methods
-        private bool AnyMessageNeedsToBeCompressed(IEnumerable<RequestMessage> messages)
+        private bool ShouldBeCompressed(RequestMessage message)
         {
-            return _sendCompressorType.HasValue && messages.Any(m => m.MayBeCompressed);
+            return _sendCompressorType.HasValue && message.MayBeCompressed;
         }
 
         private CompressorType? ChooseSendCompressorTypeIfAny(ConnectionDescription connectionDescription)
@@ -672,8 +683,8 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             return availableCompressors.Count > 0 ? (CompressorType?)availableCompressors[0] : null;
         }
 
-        private IByteBuffer CompressMessages(
-            IEnumerable<RequestMessage> messages,
+        private IByteBuffer CompressMessage(
+            RequestMessage message,
             IByteBuffer uncompressedBuffer,
             MessageEncoderSettings messageEncoderSettings)
         {
@@ -683,24 +694,22 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             using (var uncompressedStream = new ByteBufferStream(uncompressedBuffer, ownsBuffer: false))
             using (var compressedStream = new ByteBufferStream(compressedBuffer, ownsBuffer: false))
             {
-                foreach (var message in messages)
-                {
-                    var uncompressedMessageLength = uncompressedStream.ReadInt32();
-                    uncompressedStream.Position -= 4;
+                var uncompressedMessageLength = uncompressedStream.ReadInt32();
+                uncompressedStream.Position -= 4;
 
-                    using (var uncompressedMessageSlice = uncompressedBuffer.GetSlice((int)uncompressedStream.Position, uncompressedMessageLength))
-                    using (var uncompressedMessageStream = new ByteBufferStream(uncompressedMessageSlice, ownsBuffer: false))
+                using (var uncompressedMessageSlice = uncompressedBuffer.GetSlice((int)uncompressedStream.Position, uncompressedMessageLength))
+                using (var uncompressedMessageStream = new ByteBufferStream(uncompressedMessageSlice, ownsBuffer: false))
+                {
+                    if (message.MayBeCompressed)
                     {
-                        if (message.MayBeCompressed)
-                        {
-                            CompressMessage(message, uncompressedMessageStream, compressedStream, messageEncoderSettings);
-                        }
-                        else
-                        {
-                            uncompressedMessageStream.EfficientCopyTo(compressedStream);
-                        }
+                        CompressMessage(message, uncompressedMessageStream, compressedStream, messageEncoderSettings);
+                    }
+                    else
+                    {
+                        uncompressedMessageStream.EfficientCopyTo(compressedStream);
                     }
                 }
+
                 compressedBuffer.Length = (int)compressedStream.Length;
             }
 
@@ -719,15 +728,15 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             compressedMessageEncoder.WriteMessage(compressedMessage);
         }
 
-        private void ThrowIfCancelledOrDisposed(CancellationToken cancellationToken = default)
+        private void ThrowIfCancelledOrDisposed(OperationContext operationContext)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            operationContext.ThrowIfTimedOutOrCanceled();
             ThrowIfDisposed();
         }
 
-        private void ThrowIfCancelledOrDisposedOrNotOpen(CancellationToken cancellationToken)
+        private void ThrowIfCancelledOrDisposedOrNotOpen(OperationContext operationContext)
         {
-            ThrowIfCancelledOrDisposed(cancellationToken);
+            ThrowIfCancelledOrDisposed(operationContext);
             if (_state.Value == State.Failed)
             {
                 throw new MongoConnectionClosedException(_connectionId);
@@ -746,10 +755,14 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        private Exception WrapExceptionIfRequired(Exception ex, string action)
+        private Exception WrapExceptionIfRequired(OperationContext operationContext, Exception ex, string action)
         {
-            if (
-                ex is ThreadAbortException ||
+            if (ex is TimeoutException && operationContext.IsRootContextTimeoutConfigured())
+            {
+                return null;
+            }
+
+            if (ex is ThreadAbortException ||
                 ex is StackOverflowException ||
                 ex is MongoAuthenticationException ||
                 ex is OutOfMemoryException ||
@@ -758,11 +771,9 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             {
                 return null;
             }
-            else
-            {
-                var message = string.Format("An exception occurred while {0}.", action);
-                return new MongoConnectionException(_connectionId, message, ex);
-            }
+
+            var message = string.Format("An exception occurred while {0}.", action);
+            return new MongoConnectionException(_connectionId, message, ex);
         }
 
         private void ThrowOperationCanceledExceptionIfRequired(Exception exception)
@@ -907,9 +918,9 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                 _messageEncoderSettings = messageEncoderSettings;
             }
 
-            public ResponseMessage DecodeMessage(IByteBuffer buffer, IMessageEncoderSelector encoderSelector, CancellationToken cancellationToken)
+            public ResponseMessage DecodeMessage(OperationContext operationContext, IByteBuffer buffer, IMessageEncoderSelector encoderSelector)
             {
-                cancellationToken.ThrowIfCancellationRequested();
+                operationContext.ThrowIfTimedOutOrCanceled();
 
                 _stopwatch.Stop();
                 _networkDuration = _stopwatch.Elapsed;
@@ -976,30 +987,28 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
-        private class SendMessagesHelper
+        private class SendMessageHelper
         {
             private readonly Stopwatch _commandStopwatch;
             private readonly BinaryConnection _connection;
             private readonly MessageEncoderSettings _messageEncoderSettings;
-            private readonly List<RequestMessage> _messages;
-            private Lazy<List<int>> _requestIds;
+            private readonly RequestMessage _message;
             private TimeSpan _serializationDuration;
             private Stopwatch _networkStopwatch;
 
-            public SendMessagesHelper(BinaryConnection connection, IEnumerable<RequestMessage> messages, MessageEncoderSettings messageEncoderSettings)
+            public SendMessageHelper(BinaryConnection connection, RequestMessage message, MessageEncoderSettings messageEncoderSettings)
             {
                 _connection = connection;
-                _messages = messages.ToList();
+                _message = message;
                 _messageEncoderSettings = messageEncoderSettings;
 
                 _commandStopwatch = Stopwatch.StartNew();
-                _requestIds = new Lazy<List<int>>(() => _messages.Select(m => m.RequestId).ToList());
             }
 
-            public IByteBuffer EncodeMessages(CancellationToken cancellationToken, out List<RequestMessage> sentMessages)
+            public IByteBuffer EncodeMessage(OperationContext operationContext, out RequestMessage sentMessage)
             {
-                sentMessages = new List<RequestMessage>();
-                cancellationToken.ThrowIfCancellationRequested();
+                sentMessage = null;
+                operationContext.ThrowIfTimedOutOrCanceled();
 
                 var serializationStopwatch = Stopwatch.StartNew();
                 var outputBufferChunkSource = new OutputBufferChunkSource(BsonChunkPool.Default);
@@ -1007,21 +1016,17 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                 using (var stream = new ByteBufferStream(buffer, ownsBuffer: false))
                 {
                     var encoderFactory = new BinaryMessageEncoderFactory(stream, _messageEncoderSettings, compressorSource: null);
-                    foreach (var message in _messages)
-                    {
-                        if (message.ShouldBeSent == null || message.ShouldBeSent())
-                        {
-                            var encoder = message.GetEncoder(encoderFactory);
-                            encoder.WriteMessage(message, true);
-                            message.WasSent = true;
-                            sentMessages.Add(message);
-                        }
 
-                        // Encoding messages includes serializing the
-                        // documents, so encoding message could be expensive
-                        // and worthy of us honoring cancellation here.
-                        cancellationToken.ThrowIfCancellationRequested();
-                    }
+                    var encoder = _message.GetEncoder(encoderFactory);
+                    encoder.WriteMessage(_message, true);
+                    _message.WasSent = true;
+                    sentMessage = _message;
+
+                    // Encoding messages includes serializing the
+                    // documents, so encoding message could be expensive
+                    // and worthy of us honoring cancellation here.
+                    operationContext.ThrowIfTimedOutOrCanceled();
+
                     buffer.Length = (int)stream.Length;
                     buffer.MakeReadOnly();
                 }
@@ -1031,42 +1036,42 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                 return buffer;
             }
 
-            public void EncodingMessages()
+            public void EncodingMessage()
             {
-                _connection._eventLogger.LogAndPublish(new ConnectionSendingMessagesEvent(_connection.ConnectionId, _requestIds.Value, EventContext.OperationId));
+                _connection._eventLogger.LogAndPublish(new ConnectionSendingMessagesEvent(_connection.ConnectionId, _message.RequestId, EventContext.OperationId));
             }
 
-            public void FailedSendingMessages(Exception ex)
+            public void FailedSendingMessage(Exception ex)
             {
                 if (_connection._commandEventHelper.ShouldCallErrorSending)
                 {
-                    _connection._commandEventHelper.ErrorSending(_messages, _connection._connectionId, _connection._description?.ServiceId, ex, _connection.IsInitializing);
+                    _connection._commandEventHelper.ErrorSending(_message, _connection._connectionId, _connection._description?.ServiceId, ex, _connection.IsInitializing);
                 }
 
-                _connection._eventLogger.LogAndPublish(new ConnectionSendingMessagesFailedEvent(_connection.ConnectionId, _requestIds.Value, ex, EventContext.OperationId));
+                _connection._eventLogger.LogAndPublish(new ConnectionSendingMessagesFailedEvent(_connection.ConnectionId, _message.RequestId, ex, EventContext.OperationId));
             }
 
-            public void SendingMessages(IByteBuffer buffer)
+            public void SendingMessage(IByteBuffer buffer)
             {
                 if (_connection._commandEventHelper.ShouldCallBeforeSending)
                 {
-                    _connection._commandEventHelper.BeforeSending(_messages, _connection.ConnectionId, _connection.Description?.ServiceId, buffer, _messageEncoderSettings, _commandStopwatch, _connection.IsInitializing);
+                    _connection._commandEventHelper.BeforeSending(_message, _connection.ConnectionId, _connection.Description?.ServiceId, buffer, _messageEncoderSettings, _commandStopwatch, _connection.IsInitializing);
                 }
 
                 _networkStopwatch = Stopwatch.StartNew();
             }
 
-            public void SentMessages(int bufferLength)
+            public void SentMessage(int bufferLength)
             {
                 _networkStopwatch.Stop();
                 var networkDuration = _networkStopwatch.Elapsed;
 
                 if (_connection._commandEventHelper.ShouldCallAfterSending)
                 {
-                    _connection._commandEventHelper.AfterSending(_messages, _connection._connectionId, _connection.Description?.ServiceId, _connection.IsInitializing);
+                    _connection._commandEventHelper.AfterSending(_message, _connection._connectionId, _connection.Description?.ServiceId, _connection.IsInitializing);
                 }
 
-                _connection._eventLogger.LogAndPublish(new ConnectionSentMessagesEvent(_connection.ConnectionId, _requestIds.Value, bufferLength, networkDuration, _serializationDuration, EventContext.OperationId));
+                _connection._eventLogger.LogAndPublish(new ConnectionSentMessagesEvent(_connection.ConnectionId, _message.RequestId, bufferLength, networkDuration, _serializationDuration, EventContext.OperationId));
             }
         }
 

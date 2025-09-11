@@ -32,7 +32,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.JsonEncoder
         public CommandRequestMessage ReadMessage()
         {
             var wrappedMessage = (CommandMessage)_wrappedEncoder.ReadMessage();
-            return new CommandRequestMessage(wrappedMessage, null);
+            return new CommandRequestMessage(wrappedMessage);
         }
 
         public void WriteMessage(

@@ -14,7 +14,6 @@
 */
 
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
@@ -32,6 +31,6 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public BsonDocument Document { get; }
 
         // public methods
-        public override bool IsRetryable(ConnectionDescription connectionDescription) => true;
+        public override bool IsRetryable() => true;
     }
 }

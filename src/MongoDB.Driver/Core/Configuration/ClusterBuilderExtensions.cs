@@ -23,6 +23,7 @@ using System.Security.Cryptography.X509Certificates;
 using Etherna.MongoDB.Driver.Authentication;
 using Etherna.MongoDB.Driver.Authentication.Gssapi;
 using Etherna.MongoDB.Driver.Authentication.Oidc;
+using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events.Diagnostics;
 using Etherna.MongoDB.Driver.Core.Misc;
 
@@ -116,6 +117,15 @@ namespace Etherna.MongoDB.Driver.Core.Configuration
             if (connectionString.Ipv6.HasValue && connectionString.Ipv6.Value)
             {
                 builder = builder.ConfigureTcp(s => s.With(addressFamily: AddressFamily.InterNetworkV6));
+            }
+
+            if (connectionString.ProxyHost != null)
+            {
+                builder = builder.ConfigureSocks5Proxy(s => s.With(Socks5ProxySettings.Create(
+                        connectionString.ProxyHost,
+                        connectionString.ProxyPort,
+                        connectionString.ProxyUsername,
+                        connectionString.ProxyPassword)));
             }
 
             if (connectionString.SocketTimeout != null)

@@ -16,14 +16,11 @@
 #if NET472
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Net;
 using System.Reflection;
-using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events.Diagnostics.PerformanceCounters;
 using Etherna.MongoDB.Driver.Core.Servers;
-using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
 
 namespace Etherna.MongoDB.Driver.Core.Events.Diagnostics
 {
@@ -169,7 +166,7 @@ namespace Etherna.MongoDB.Driver.Core.Events.Diagnostics
             ConnectionPerformanceRecorder recorder;
             if (_connectionRecorders.TryGetValue(@event.ConnectionId, out recorder))
             {
-                recorder.PacketSent(@event.RequestIds.Count, @event.Length);
+                recorder.PacketSent(1, @event.Length);
             }
         }
 

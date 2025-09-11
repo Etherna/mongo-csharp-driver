@@ -117,12 +117,6 @@ Task("Test")
         items: GetFiles("./**/*.Tests.csproj").Where(name => !name.ToString().Contains("Atlas")),
         action: (BuildConfig buildConfig, Path testProject) =>
     {
-        if (Environment.GetEnvironmentVariable("MONGODB_API_VERSION") != null &&
-            testProject.ToString().Contains("Legacy"))
-        {
-            return; // Legacy tests are exempt from Version API testing
-        }
-
         var mongoX509ClientCertificatePath = Environment.GetEnvironmentVariable("MONGO_X509_CLIENT_CERTIFICATE_PATH");
         if (mongoX509ClientCertificatePath != null)
         {
@@ -134,7 +128,7 @@ Task("Test")
             Console.WriteLine($"MONGO_X509_CLIENT_CERTIFICATE_PASSWORD={mongoX509ClientCertificatePassword}");
         }
 
-        RunTests(buildConfig, testProject);
+        RunTests(buildConfig, testProject, filter: "Category=\"Integration\"");
     })
     .DeferOnError();
 
@@ -208,17 +202,6 @@ Task("TestMongoDbOidc")
         action: (BuildConfig buildConfig, Path testProject) =>
             RunTests(buildConfig, testProject, filter: "Category=\"MongoDbOidc\""));
 
-Task("TestServerless")
-    .IsDependentOn("Build")
-    .DoesForEach(
-        items: GetFiles("./**/MongoDB.Driver.Tests.csproj"),
-        action: (BuildConfig buildConfig, Path testProject) =>
-            RunTests(buildConfig, testProject, filter: "Category=\"Serverless\""));
-
-Task("TestServerlessNet472").IsDependentOn("TestServerless");
-Task("TestServerlessNetStandard21").IsDependentOn("TestServerless");
-Task("TestServerlessNet60").IsDependentOn("TestServerless");
-
 Task("TestLibMongoCrypt")
     .IsDependentOn("Build")
     .DoesForEach(
@@ -234,6 +217,10 @@ Task("TestLoadBalanced")
 
 Task("TestLoadBalancedNetStandard21").IsDependentOn("TestLoadBalanced");
 Task("TestLoadBalancedNet60").IsDependentOn("TestLoadBalanced");
+
+Task("TestSocks5ProxyNet472").IsDependentOn("TestSocks5Proxy");
+Task("TestSocks5ProxyNetStandard21").IsDependentOn("TestSocks5Proxy");
+Task("TestSocks5ProxyNet60").IsDependentOn("TestSocks5Proxy");
 
 Task("TestCsfleWithMockedKms")
     .IsDependentOn("TestLibMongoCrypt")
@@ -270,6 +257,22 @@ Task("TestCsfleWithGcpKms")
         items: GetFiles("./**/*.Tests.csproj"),
         action: (BuildConfig buildConfig, Path testProject) =>
             RunTests(buildConfig, testProject, filter: "Category=\"CsfleGCPKMS\""));
+
+Task("TestX509")
+    .IsDependentOn("Build")
+    .DoesForEach(
+        items: GetFiles("./**/MongoDB.Driver.Tests.csproj"),
+        action: (BuildConfig buildConfig, Path testProject) =>
+            RunTests(buildConfig, testProject, filter: "Category=\"X509\""));
+
+Task("TestX509Net60").IsDependentOn("TestX509");
+
+Task("TestSocks5Proxy")
+    .IsDependentOn("Build")
+    .DoesForEach(
+        items: GetFiles("./**/*.Tests.csproj"),
+        action: (BuildConfig buildConfig, Path testProject) =>
+            RunTests(buildConfig, testProject, filter: "Category=\"Socks5Proxy\""));
 
 Task("Package")
     .IsDependentOn("PackageNugetPackages");

@@ -14,7 +14,6 @@
 */
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.Connections;
@@ -27,8 +26,8 @@ namespace Etherna.MongoDB.Driver.Core.ConnectionPools
         int Generation { get; }
         ServerId ServerId { get; }
 
-        IConnectionHandle AcquireConnection(CancellationToken cancellationToken);
-        Task<IConnectionHandle> AcquireConnectionAsync(CancellationToken cancellationToken);
+        IConnectionHandle AcquireConnection(OperationContext operationContext);
+        Task<IConnectionHandle> AcquireConnectionAsync(OperationContext operationContext);
         void Clear(bool closeInUseConnections = false);
         void Clear(ObjectId serviceId);
         int GetGeneration(ObjectId? serviceId);

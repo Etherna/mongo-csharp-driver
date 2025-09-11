@@ -14,7 +14,6 @@
 */
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Servers;
@@ -64,13 +63,13 @@ namespace Etherna.MongoDB.Driver.Core.Bindings
             }
         }
 
-        public IChannelHandle GetChannel(CancellationToken cancellationToken)
+        public IChannelHandle GetChannel(OperationContext operationContext)
         {
             ThrowIfDisposed();
             return GetChannelHelper();
         }
 
-        public Task<IChannelHandle> GetChannelAsync(CancellationToken cancellationToken)
+        public Task<IChannelHandle> GetChannelAsync(OperationContext operationContext)
         {
             ThrowIfDisposed();
             return Task.FromResult(GetChannelHelper());

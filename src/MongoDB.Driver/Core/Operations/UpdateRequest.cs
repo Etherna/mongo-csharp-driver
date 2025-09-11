@@ -16,7 +16,6 @@
 using System;
 using System.Collections.Generic;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver.Core.Operations
@@ -44,7 +43,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public UpdateType UpdateType { get; init; }
 
         // public methods
-        public override bool IsRetryable(ConnectionDescription connectionDescription) => !IsMulti;
+        public override bool IsRetryable() => !IsMulti;
 
         // private methods
         private static BsonValue EnsureUpdateIsValid(BsonValue update, UpdateType updateType)

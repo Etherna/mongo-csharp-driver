@@ -14,7 +14,6 @@
 */
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors;
@@ -62,8 +61,8 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
 
         void Initialize();
 
-        IServer SelectServer(IServerSelector selector, CancellationToken cancellationToken);
-        Task<IServer> SelectServerAsync(IServerSelector selector, CancellationToken cancellationToken);
+        IServer SelectServer(OperationContext operationContext, IServerSelector selector);
+        Task<IServer> SelectServerAsync(OperationContext operationContext, IServerSelector selector);
 
         ICoreSessionHandle StartSession(CoreSessionOptions options = null);
     }

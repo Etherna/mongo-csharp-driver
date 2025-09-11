@@ -319,7 +319,8 @@ namespace Etherna.MongoDB.Driver
             return new CreateManyIndexesOptions
             {
                 CommitQuorum = options?.CommitQuorum,
-                MaxTime = options?.MaxTime
+                MaxTime = options?.MaxTime,
+                Timeout = options?.Timeout,
             };
         }
     }

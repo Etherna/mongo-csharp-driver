@@ -15,7 +15,6 @@
 
 using System;
 using System.Text;
-using Etherna.MongoDB.Bson;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -24,6 +23,7 @@ namespace Etherna.MongoDB.Driver
         ReadConcern ReadConcern { get; }
         UTF8Encoding ReadEncoding { get; }
         ReadPreference ReadPreference { get; }
+        TimeSpan? Timeout { get; }
         WriteConcern WriteConcern { get; }
         UTF8Encoding WriteEncoding { get; }
     }

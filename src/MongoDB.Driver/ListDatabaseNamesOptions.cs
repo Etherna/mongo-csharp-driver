@@ -1,4 +1,4 @@
-﻿/* Copyright 2020-present MongoDB Inc.
+﻿/* Copyright 2010-present MongoDB Inc.
 *
 * Licensed under the Apache License, Version 2.0 (the "License");
 * you may not use this file except in compliance with the License.
@@ -13,7 +13,9 @@
 * limitations under the License.
 */
 
+using System;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Driver.Core.Misc;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -26,6 +28,7 @@ namespace Etherna.MongoDB.Driver
         private bool? _authorizedDatabases;
         private BsonValue _comment;
         private FilterDefinition<BsonDocument> _filter;
+        private TimeSpan? _timeout;
 
         // properties
         /// <summary>
@@ -53,6 +56,16 @@ namespace Etherna.MongoDB.Driver
         {
             get { return _filter; }
             set { _filter = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the operation timeout.
+        /// </summary>
+        // TODO: CSOT: Make it public when CSOT will be ready for GA
+        internal TimeSpan? Timeout
+        {
+            get => _timeout;
+            set => _timeout = Ensure.IsNullOrValidTimeout(value, nameof(Timeout));
         }
     }
 }
