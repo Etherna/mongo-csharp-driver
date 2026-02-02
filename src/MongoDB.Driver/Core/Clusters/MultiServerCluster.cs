@@ -90,6 +90,8 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             }
         }
 
+        public override IEnumerable<IClusterableServer> Servers => _servers;
+
         public override void Initialize()
         {
             base.Initialize();

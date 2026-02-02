@@ -66,7 +66,7 @@ namespace Etherna.MongoDB.Driver
         }
 
         /// <summary>
-        /// Get or sets the start after.
+        /// Gets or sets the start after.
         /// </summary>
         /// <value>
         /// The start after.

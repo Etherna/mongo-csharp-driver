@@ -102,7 +102,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 for (var i = 0; i < members.Count; i++)
                 {
                     var member = members[i];
-                    var valueExpression = PartialEvaluator.EvaluatePartially(arguments[i]);
+                    var valueExpression = LinqExpressionPreprocessor.Preprocess(arguments[i]);
                     var computedField = CreateComputedField(context, documentSerializer, member, valueExpression);
                     fields.Add(computedField);
                 }
@@ -127,7 +127,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     }
 
                     var member = binding.Member;
-                    var valueExpression = PartialEvaluator.EvaluatePartially(assignment.Expression);
+                    var valueExpression = LinqExpressionPreprocessor.Preprocess(assignment.Expression);
                     var computedField = CreateComputedField(context, documentSerializer, member, valueExpression);
                     fields.Add(computedField);
                 }

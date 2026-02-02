@@ -20,11 +20,12 @@ using System.Reflection;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
-using Etherna.MongoDB.Driver.Support;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 
 namespace Etherna.MongoDB.Driver
 {
-    internal static class FieldValueSerializerHelper
+#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
+    public static class FieldValueSerializerHelper
     {
         public static IBsonSerializer GetSerializerForValueType(IBsonSerializer fieldSerializer, IBsonSerializerRegistry serializerRegistry, Type valueType)
         {
@@ -63,7 +64,7 @@ namespace Etherna.MongoDB.Driver
             var fieldSerializerInterfaceType = typeof(IBsonSerializer<>).MakeGenericType(fieldType);
 
             // synthesize a NullableSerializer using the field serializer
-            if (valueType.IsNullable() && valueType.GetNullableUnderlyingType() == fieldType)
+            if (valueType.IsNullable(out var nonNullableValueType) && nonNullableValueType == fieldType)
             {
                 var nullableSerializerType = typeof(NullableSerializer<>).MakeGenericType(fieldType);
                 var nullableSerializerConstructor = nullableSerializerType.GetTypeInfo().GetConstructor(new[] { fieldSerializerInterfaceType });
@@ -80,24 +81,21 @@ namespace Etherna.MongoDB.Driver
                     return (IBsonSerializer)enumConvertingSerializerConstructor.Invoke(new object[] { fieldSerializer });
                 }
 
-                if (valueType.IsNullable() && valueType.GetNullableUnderlyingType().IsConvertibleToEnum())
+                if (valueType.IsNullable(out nonNullableValueType) && nonNullableValueType.IsConvertibleToEnum())
                 {
-                    var underlyingValueType = valueType.GetNullableUnderlyingType();
-                    var underlyingValueSerializerInterfaceType = typeof(IBsonSerializer<>).MakeGenericType(underlyingValueType);
-                    var enumConvertingSerializerType = typeof(EnumConvertingSerializer<,>).MakeGenericType(underlyingValueType, fieldType);
+                    var nonNullableValueSerializerInterfaceType = typeof(IBsonSerializer<>).MakeGenericType(nonNullableValueType);
+                    var enumConvertingSerializerType = typeof(EnumConvertingSerializer<,>).MakeGenericType(nonNullableValueType, fieldType);
                     var enumConvertingSerializerConstructor = enumConvertingSerializerType.GetTypeInfo().GetConstructor(new[] { fieldSerializerInterfaceType });
                     var enumConvertingSerializer = enumConvertingSerializerConstructor.Invoke(new object[] { fieldSerializer });
-                    var nullableSerializerType = typeof(NullableSerializer<>).MakeGenericType(underlyingValueType);
-                    var nullableSerializerConstructor = nullableSerializerType.GetTypeInfo().GetConstructor(new[] { underlyingValueSerializerInterfaceType });
+                    var nullableSerializerType = typeof(NullableSerializer<>).MakeGenericType(nonNullableValueType);
+                    var nullableSerializerConstructor = nullableSerializerType.GetTypeInfo().GetConstructor(new[] { nonNullableValueSerializerInterfaceType });
                     return (IBsonSerializer)nullableSerializerConstructor.Invoke(new object[] { enumConvertingSerializer });
                 }
             }
 
             // synthesize a NullableEnumConvertingSerializer using the field serializer
-            if (fieldType.IsNullableEnum() && valueType.IsNullable())
+            if (fieldType.IsNullableEnum(out var nonNullableFieldType) && valueType.IsNullable(out nonNullableValueType))
             {
-                var nonNullableFieldType = fieldType.GetNullableUnderlyingType();
-                var nonNullableValueType = valueType.GetNullableUnderlyingType();
                 var nonNullableFieldSerializer = ((IChildSerializerConfigurable)fieldSerializer).ChildSerializer;
                 var nonNullableFieldSerializerInterfaceType = typeof(IBsonSerializer<>).MakeGenericType(nonNullableFieldType);
                 var nullableEnumConvertingSerializerType = typeof(NullableEnumConvertingSerializer<,>).MakeGenericType(nonNullableValueType, nonNullableFieldType);
@@ -106,18 +104,15 @@ namespace Etherna.MongoDB.Driver
             }
 
             // synthesize an IEnumerableSerializer serializer using the item serializer from the field serializer
-            Type fieldIEnumerableInterfaceType;
-            Type valueIEnumerableInterfaceType;
-            Type itemType;
             if (
-                (fieldIEnumerableInterfaceType = fieldType.FindIEnumerable()) != null &&
-                (valueIEnumerableInterfaceType = valueType.FindIEnumerable()) != null &&
-                (itemType = fieldIEnumerableInterfaceType.GetSequenceElementType()) == valueIEnumerableInterfaceType.GetSequenceElementType() &&
+                fieldType.ImplementsIEnumerable(out var fieldItemType) &&
+                valueType.ImplementsIEnumerable(out var valueItemType) &&
+                fieldItemType == valueItemType &&
                 fieldSerializer is IChildSerializerConfigurable)
             {
                 var itemSerializer = ((IChildSerializerConfigurable)fieldSerializer).ChildSerializer;
-                var itemSerializerInterfaceType = typeof(IBsonSerializer<>).MakeGenericType(itemType);
-                var ienumerableSerializerType = typeof(IEnumerableSerializer<>).MakeGenericType(itemType);
+                var itemSerializerInterfaceType = typeof(IBsonSerializer<>).MakeGenericType(fieldItemType);
+                var ienumerableSerializerType = typeof(IEnumerableSerializer<>).MakeGenericType(fieldItemType);
                 var ienumerableSerializerConstructor = ienumerableSerializerType.GetTypeInfo().GetConstructor(new[] { itemSerializerInterfaceType });
                 return (IBsonSerializer)ienumerableSerializerConstructor.Invoke(new object[] { itemSerializer });
             }
@@ -381,4 +376,5 @@ namespace Etherna.MongoDB.Driver
             }
         }
     }
+#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

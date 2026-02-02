@@ -29,7 +29,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             Expression expression,
             ExpressionTranslationOptions translationOptions)
         {
-            expression = PartialEvaluator.EvaluatePartially(expression);
+            expression = LinqExpressionPreprocessor.Preprocess(expression);
 
             var context = TranslationContext.Create(translationOptions);
             var pipeline = ExpressionToPipelineTranslator.Translate(context, expression);
@@ -45,7 +45,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             Expression expression,
             ExpressionTranslationOptions translationOptions)
         {
-            expression = PartialEvaluator.EvaluatePartially(expression);
+            expression = LinqExpressionPreprocessor.Preprocess(expression);
 
             var context = TranslationContext.Create(translationOptions);
             var methodCallExpression = (MethodCallExpression)expression;

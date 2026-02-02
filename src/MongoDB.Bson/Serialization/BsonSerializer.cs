@@ -655,6 +655,35 @@ namespace Etherna.MongoDB.Bson.Serialization
         }
 
         /// <summary>
+        /// Registers a serialization provider.
+        /// </summary>
+        /// <param name="provider">The serialization provider.</param>
+        public static void RegisterSerializationProvider(IBsonSerializationProvider provider)
+        {
+            __serializerRegistry.RegisterSerializationProvider(provider);
+        }
+
+        /// <summary>
+        /// Registers a serializer for a type.
+        /// </summary>
+        /// <typeparam name="T">The type.</typeparam>
+        /// <param name="serializer">The serializer.</param>
+        public static void RegisterSerializer<T>(IBsonSerializer<T> serializer)
+        {
+            RegisterSerializer(typeof(T), serializer);
+        }
+
+        /// <summary>
+        /// Registers a serializer for a type.
+        /// </summary>
+        /// <param name="type">The type.</param>
+        /// <param name="serializer">The serializer.</param>
+        public static void RegisterSerializer(Type type, IBsonSerializer serializer)
+        {
+            __serializerRegistry.RegisterSerializer(type, serializer);
+        }
+
+        /// <summary>
         /// Serializes a value.
         /// </summary>
         /// <typeparam name="TNominalType">The nominal type of the object.</typeparam>
@@ -797,24 +826,6 @@ namespace Etherna.MongoDB.Bson.Serialization
             }
 
             return discriminators.OrderBy(x => x).ToArray();
-        }
-
-        /// <summary>
-        /// Try to register the discriminator convention for a type.
-        /// </summary>
-        /// <param name="type">Type type.</param>
-        /// <param name="convention">The discriminator convention.</param>
-        public static bool TryRegisterDiscriminatorConvention(Type type, IDiscriminatorConvention convention)
-        {
-            try
-            {
-                RegisterDiscriminatorConvention(type, convention);
-                return true;
-            }
-            catch (BsonSerializationException)
-            {
-                return false;
-            }
         }
 
         // private static methods

@@ -21,8 +21,8 @@ using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToExecutableQueryTranslators;
-using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
 {
@@ -105,7 +105,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation
         // public methods
         public override IQueryable CreateQuery(Expression expression)
         {
-            var outputType = expression.Type.GetSequenceElementType();
+            if (!expression.Type.ImplementsIQueryable(out var outputType))
+            {
+                throw new ExpressionNotSupportedException(expression, because: "expression type does not implement IQueryable");
+            }
+
             var queryType = typeof(MongoQuery<,>).MakeGenericType(typeof(TDocument), outputType);
             return (IQueryable)Activator.CreateInstance(queryType, new object[] { this, expression });
         }

@@ -89,6 +89,8 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             }
         }
 
+        public abstract IEnumerable<IClusterableServer> Servers { get; }
+
         public ClusterSettings Settings
         {
             get { return _settings; }
@@ -487,7 +489,14 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
                 {
                     if (--_serverSelectionWaitQueueSize == 0)
                     {
-                        _rapidHeartbeatTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                        try
+                        {
+                            _rapidHeartbeatTimer.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
+                        }
+                        catch (ObjectDisposedException)
+                        {
+                            // Ignore ObjectDisposedException here, as ExitServerSelectionWaitQueue could be done after the WaitQueue was disposed.
+                        }
                     }
                 }
             }

@@ -153,7 +153,8 @@ namespace Etherna.MongoDB.Driver.Search
             Regex,
             Span,
             Text,
-            Wildcard
+            Wildcard,
+            VectorSearch
         }
 
         private readonly OperatorType _operatorType;

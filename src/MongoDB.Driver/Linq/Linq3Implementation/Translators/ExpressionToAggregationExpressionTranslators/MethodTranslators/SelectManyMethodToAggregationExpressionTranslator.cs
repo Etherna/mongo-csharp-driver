@@ -19,6 +19,7 @@ using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators.MethodTranslators
 {
@@ -47,6 +48,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var selectorParameterSymbol = context.CreateSymbol(selectorParameter, selectorParameterSerializer);
                 var selectorContext = context.WithSymbol(selectorParameterSymbol);
                 var selectorTranslation = ExpressionToAggregationExpressionTranslator.Translate(selectorContext, selectorLambda.Body);
+                var itemSerializer = ArraySerializerHelper.GetItemSerializer(selectorTranslation.Serializer);
 
                 var asVar = selectorParameterSymbol.Var;
                 var valueVar = AstExpression.Var("value");
@@ -59,7 +61,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     initialValue: new BsonArray(),
                     @in: AstExpression.ConcatArrays(valueVar, thisVar));
 
-                return new TranslatedExpression(expression, ast, selectorTranslation.Serializer);
+                var ienumerableSerializer = IEnumerableSerializer.Create(itemSerializer);
+                return new TranslatedExpression(expression, ast, ienumerableSerializer);
             }
 
             throw new ExpressionNotSupportedException(expression);

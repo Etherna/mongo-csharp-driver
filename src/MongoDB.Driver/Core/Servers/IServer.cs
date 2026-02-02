@@ -18,6 +18,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Clusters;
+using Etherna.MongoDB.Driver.Core.ConnectionPools;
 using Etherna.MongoDB.Driver.Core.Connections;
 
 namespace Etherna.MongoDB.Driver.Core.Servers
@@ -40,6 +41,7 @@ namespace Etherna.MongoDB.Driver.Core.Servers
 
     internal interface IClusterableServer : IServer, IDisposable
     {
+        IConnectionPool ConnectionPool { get; }
         bool IsInitialized { get; }
         int OutstandingOperationsCount { get; }
 
