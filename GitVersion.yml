@@ -3,8 +3,9 @@ branches:
   main:
     regex: ^main$|^etherna/main$
   etherna:
-    regex: ^etherna/v
+    regex: ^etherna$
     mode: ContinuousDeployment
-    label: eth
+    label: ''
     increment: None
     source-branches: [ 'main' ]
+    is-release-branch: true
