@@ -828,7 +828,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                     else
                     {
                         var encoder = encoderSelector.GetEncoder(encoderFactory);
-                        message = (ResponseMessage)encoder.ReadMessage();
+                        message = (ResponseMessage)encoder.ReadMessage(forceStaticSerializerRegistry: true);
                     }
                 }
                 _stopwatch.Stop();
@@ -905,7 +905,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
                     var encoderFactory = new BinaryMessageEncoderFactory(stream, _messageEncoderSettings, compressorSource: null);
 
                     var encoder = _message.GetEncoder(encoderFactory);
-                    encoder.WriteMessage(_message);
+                    encoder.WriteMessage(_message, forceStaticSerializerRegistry: true);
                     _message.WasSent = true;
                     sentMessage = _message;
 
