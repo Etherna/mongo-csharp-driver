@@ -14,6 +14,7 @@
 */
 
 using System.Collections.Generic;
+using System.Linq;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
 
@@ -45,6 +46,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             return new RetryableDeleteCommandOperation(CollectionNamespace, batch.Requests, MessageEncoderSettings)
             {
                 Comment = Comment,
+                IsOperationRetryable = batch.Requests.Items.All(r => r.IsRetryable()),
                 IsOrdered = IsOrdered,
                 Let = _let,
                 MaxBatchCount = MaxBatchCount,

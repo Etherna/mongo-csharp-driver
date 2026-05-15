@@ -28,22 +28,6 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     internal class ClientSideProjectionRewriter: ExpressionVisitor
     {
         #region static
-        private readonly static MethodInfo[] __orderByMethods =
-        [
-            EnumerableMethod.OrderBy,
-            EnumerableMethod.OrderByDescending,
-            QueryableMethod.OrderBy,
-            QueryableMethod.OrderByDescending
-        ];
-
-        private readonly static MethodInfo[] __thenByMethods =
-        [
-            EnumerableMethod.ThenBy,
-            EnumerableMethod.ThenByDescending,
-            QueryableMethod.ThenBy,
-            QueryableMethod.ThenByDescending
-        ];
-
         public static (TranslatedExpression[], LambdaExpression) RewriteProjection(TranslationContext context, LambdaExpression projectionLambda, IBsonSerializer sourceSerializer)
         {
             var rootParameter = projectionLambda.Parameters.Single();
@@ -108,7 +92,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
             // don't split OrderBy/ThenBy across the client/server boundary
-            if (node.Method.IsOneOf(__thenByMethods))
+            if (node.Method.IsOneOf(EnumerableOrQueryableMethod.ThenByOverloads))
             {
                 return VisitThenBy(node);
             }
@@ -126,13 +110,13 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 var sourceMethod = sourceMethodCallExpression.Method;
 
-                if (sourceMethod.IsOneOf(__thenByMethods))
+                if (sourceMethod.IsOneOf(EnumerableOrQueryableMethod.ThenByOverloads))
                 {
                     var rewrittenSourceExpression = VisitThenBy(sourceMethodCallExpression);
                     return node.Update(node.Object, [rewrittenSourceExpression, keySelectorExpression]);
                 }
 
-                if (sourceMethod.IsOneOf(__orderByMethods))
+                if (sourceMethod.IsOneOf(EnumerableOrQueryableMethod.OrderByOverloads))
                 {
                     var rewrittenSourceExpression = VisitOrderBy(sourceMethodCallExpression);
                     return node.Update(node.Object, [rewrittenSourceExpression, keySelectorExpression]);

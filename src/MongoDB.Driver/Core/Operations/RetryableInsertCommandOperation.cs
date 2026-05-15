@@ -56,6 +56,8 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             get { return _collectionNamespace; }
         }
 
+        public override string OperationName => null;
+
         public BatchableSource<TDocument> Documents
         {
             get { return _documents; }
@@ -66,7 +68,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             get { return _documentSerializer; }
         }
 
-        protected override BsonDocument CreateCommand(OperationContext operationContext, ICoreSessionHandle session, int attempt, long? transactionNumber)
+        protected override BsonDocument CreateCommand(OperationContext operationContext, ICoreSessionHandle session, long? transactionNumber)
         {
             var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(operationContext, session, WriteConcern);
             return new BsonDocument

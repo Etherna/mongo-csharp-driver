@@ -30,6 +30,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         private static readonly MethodInfo __aggregateWithSeedAndFunc;
         private static readonly MethodInfo __aggregateWithSeedFuncAndResultSelector;
         private static readonly MethodInfo __all;
+        private static readonly MethodInfo __allWithPredicate;
         private static readonly MethodInfo __any;
         private static readonly MethodInfo __anyWithPredicate;
         private static readonly MethodInfo __append;
@@ -74,7 +75,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         private static readonly MethodInfo __firstOrDefault;
         private static readonly MethodInfo __firstOrDefaultWithPredicate;
         private static readonly MethodInfo __firstWithPredicate;
-        private static readonly MethodInfo __groupBy;
+        private static readonly MethodInfo __groupByWithKeySelector;
         private static readonly MethodInfo __groupByWithKeySelectorAndElementSelector;
         private static readonly MethodInfo __groupByWithKeySelectorAndResultSelector;
         private static readonly MethodInfo __groupByWithKeySelectorElementSelectorAndResultSelector;
@@ -144,8 +145,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         private static readonly MethodInfo __range;
         private static readonly MethodInfo __repeat;
         private static readonly MethodInfo __reverse;
+        private static readonly MethodInfo __reverseWithArray; // will be null on target frameworks that don't have this method
         private static readonly MethodInfo __select;
-        private static readonly MethodInfo __selectMany;
+        private static readonly MethodInfo __selectManyWithSelector;
         private static readonly MethodInfo __selectManyWithCollectionSelectorAndResultSelector;
         private static readonly MethodInfo __selectManyWithCollectionSelectorTakingIndexAndResultSelector;
         private static readonly MethodInfo __selectManyWithSelectorTakingIndex;
@@ -158,6 +160,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         private static readonly MethodInfo __singleWithPredicate;
         private static readonly MethodInfo __skip;
         private static readonly MethodInfo __skipWhile;
+        private static readonly MethodInfo __skipWhileWithPredicateTakingIndex;
         private static readonly MethodInfo __sumDecimal;
         private static readonly MethodInfo __sumDecimalWithSelector;
         private static readonly MethodInfo __sumDouble;
@@ -180,6 +183,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         private static readonly MethodInfo __sumSingleWithSelector;
         private static readonly MethodInfo __take;
         private static readonly MethodInfo __takeWhile;
+        private static readonly MethodInfo __takeWhileWithPredicateTakingIndex;
         private static readonly MethodInfo __thenBy;
         private static readonly MethodInfo __thenByDescending;
         private static readonly MethodInfo __toArray;
@@ -192,13 +196,23 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         private static readonly MethodInfo __whereWithPredicateTakingIndex;
         private static readonly MethodInfo __zip;
 
+        // sets of methods
+        private static readonly IReadOnlyMethodInfoSet __pickOverloads;
+        private static readonly IReadOnlyMethodInfoSet __pickOverloadsThatCanOnlyBeUsedAsGroupByAccumulators;
+        private static readonly IReadOnlyMethodInfoSet __pickWithComputedNOverloads;
+        private static readonly IReadOnlyMethodInfoSet __pickWithNOverloads;
+        private static readonly IReadOnlyMethodInfoSet __pickWithSortByOverloads;
+        private static readonly IReadOnlyMethodInfoSet __reverseOverloads;
+
         // static constructor
         static EnumerableMethod()
         {
+            // initialize methods before sets of methods
             __aggregateWithFunc = ReflectionInfo.Method((IEnumerable<object> source, Func<object, object, object> func) => source.Aggregate(func));
             __aggregateWithSeedAndFunc = ReflectionInfo.Method((IEnumerable<object> source, object seed, Func<object, object, object> func) => source.Aggregate(seed, func));
             __aggregateWithSeedFuncAndResultSelector = ReflectionInfo.Method((IEnumerable<object> source, object seed, Func<object, object, object> func, Func<object, object> resultSelector) => source.Aggregate(seed, func, resultSelector));
             __all = ReflectionInfo.Method((IEnumerable<object> source, Func<object, bool> predicate) => source.All(predicate));
+            __allWithPredicate = ReflectionInfo.Method((IEnumerable<object> source, Func<object, bool> predicate) => source.All(predicate));
             __any = ReflectionInfo.Method((IEnumerable<object> source) => source.Any());
             __anyWithPredicate = ReflectionInfo.Method((IEnumerable<object> source, Func<object, bool> predicate) => source.Any(predicate));
             __append = ReflectionInfo.Method((IEnumerable<object> source, object element) => source.Append(element));
@@ -243,7 +257,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
             __firstOrDefault = ReflectionInfo.Method((IEnumerable<object> source) => source.FirstOrDefault());
             __firstOrDefaultWithPredicate = ReflectionInfo.Method((IEnumerable<object> source, Func<object, bool> predicate) => source.FirstOrDefault(predicate));
             __firstWithPredicate = ReflectionInfo.Method((IEnumerable<object> source, Func<object, bool> predicate) => source.First(predicate));
-            __groupBy = ReflectionInfo.Method((IEnumerable<object> source, Func<object, object> keySelector) => source.GroupBy(keySelector));
+            __groupByWithKeySelector = ReflectionInfo.Method((IEnumerable<object> source, Func<object, object> keySelector) => source.GroupBy(keySelector));
             __groupByWithKeySelectorAndElementSelector = ReflectionInfo.Method((IEnumerable<object> source, Func<object, object> keySelector, Func<object, object> elementSelector) => source.GroupBy(keySelector, elementSelector));
             __groupByWithKeySelectorAndResultSelector = ReflectionInfo.Method((IEnumerable<object> source, Func<object, object> keySelector, Func<object, object, object> resultSelector) => source.GroupBy(keySelector, resultSelector));
             __groupByWithKeySelectorElementSelectorAndResultSelector = ReflectionInfo.Method((IEnumerable<object> source, Func<object, object> keySelector, Func<object, object> elementSelector, Func<object, IEnumerable<object>, object> resultSelector) => source.GroupBy(keySelector, elementSelector, resultSelector));
@@ -313,8 +327,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
             __range = ReflectionInfo.Method((int start, int count) => Enumerable.Range(start, count));
             __repeat = ReflectionInfo.Method((object element, int count) => Enumerable.Repeat(element, count));
             __reverse = ReflectionInfo.Method((IEnumerable<object> source) => source.Reverse());
+            __reverseWithArray = GetReverseWithArrayMethodInfo(); // support users running net10 even though we don't target net10 yet
             __select = ReflectionInfo.Method((IEnumerable<object> source, Func<object, object> selector) => source.Select(selector));
-            __selectMany = ReflectionInfo.Method((IEnumerable<object> source, Func<object, IEnumerable<object>> selector) => source.SelectMany(selector));
+            __selectManyWithSelector = ReflectionInfo.Method((IEnumerable<object> source, Func<object, IEnumerable<object>> selector) => source.SelectMany(selector));
             __selectManyWithCollectionSelectorAndResultSelector = ReflectionInfo.Method((IEnumerable<object> source, Func<object, IEnumerable<object>> collectionSelector, Func<object, object, object> resultSelector) => source.SelectMany(collectionSelector, resultSelector));
             __selectManyWithCollectionSelectorTakingIndexAndResultSelector = ReflectionInfo.Method((IEnumerable<object> source, Func<object, int, IEnumerable<object>> collectionSelector, Func<object, object, object> resultSelector) => source.SelectMany(collectionSelector, resultSelector));
             __selectManyWithSelectorTakingIndex = ReflectionInfo.Method((IEnumerable<object> source, Func<object, int, IEnumerable<object>> selector) => source.SelectMany(selector));
@@ -327,6 +342,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
             __singleWithPredicate = ReflectionInfo.Method((IEnumerable<object> source, Func<object, bool> predicate) => source.Single(predicate));
             __skip = ReflectionInfo.Method((IEnumerable<object> source, int count) => source.Skip(count));
             __skipWhile = ReflectionInfo.Method((IEnumerable<object> source, Func<object, bool> predicate) => source.SkipWhile(predicate));
+            __skipWhileWithPredicateTakingIndex = ReflectionInfo.Method((IEnumerable<object> source, Func<object, int, bool> predicate) => source.SkipWhile(predicate));
             __sumDecimal = ReflectionInfo.Method((IEnumerable<decimal> source) => source.Sum());
             __sumDecimalWithSelector = ReflectionInfo.Method((IEnumerable<object> source, Func<object, decimal> selector) => source.Sum(selector));
             __sumDouble = ReflectionInfo.Method((IEnumerable<double> source) => source.Sum());
@@ -349,6 +365,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
             __sumSingleWithSelector = ReflectionInfo.Method((IEnumerable<object> source, Func<object, float> selector) => source.Sum(selector));
             __take = ReflectionInfo.Method((IEnumerable<object> source, int count) => source.Take(count));
             __takeWhile = ReflectionInfo.Method((IEnumerable<object> source, Func<object, bool> predicate) => source.TakeWhile(predicate));
+            __takeWhileWithPredicateTakingIndex = ReflectionInfo.Method((IEnumerable<object> source, Func<object, int, bool> predicate) => source.TakeWhile(predicate));
             __thenBy = ReflectionInfo.Method((IOrderedEnumerable<object> source, Func<object, object> keySelector) => source.ThenBy(keySelector));
             __thenByDescending = ReflectionInfo.Method((IOrderedEnumerable<object> source, Func<object, object> keySelector) => source.ThenByDescending(keySelector));
             __toArray = ReflectionInfo.Method((IEnumerable<object> source) => source.ToArray());
@@ -360,6 +377,75 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
             __where = ReflectionInfo.Method((IEnumerable<object> source, Func<object, bool> predicate) => source.Where(predicate));
             __whereWithPredicateTakingIndex = ReflectionInfo.Method((IEnumerable<object> source, Func<object, int, bool> predicate) => source.Where(predicate));
             __zip = ReflectionInfo.Method((IEnumerable<object> first, IEnumerable<object> second, Func<object, object, object> resultSelector) => first.Zip(second, resultSelector));
+
+            // initialize sets of methods after methods
+            __pickOverloads = MethodInfoSet.Create(
+            [
+                __bottom,
+                __bottomN,
+                __bottomNWithComputedN,
+                __firstN,
+                __firstNWithComputedN,
+                __lastN,
+                __lastNWithComputedN,
+                __maxN,
+                __maxNWithComputedN,
+                __minN,
+                __minNWithComputedN,
+                __top,
+                __topN,
+                __topNWithComputedN
+            ]);
+
+            __pickOverloadsThatCanOnlyBeUsedAsGroupByAccumulators = MethodInfoSet.Create(
+            [
+                __bottom,
+                __bottomN,
+                __bottomNWithComputedN,
+                __firstNWithComputedN,
+                __lastNWithComputedN,
+                __maxNWithComputedN,
+                __minNWithComputedN,
+                __top,
+                __topN,
+                __topNWithComputedN
+            ]);
+
+            __pickWithComputedNOverloads = MethodInfoSet.Create(
+            [
+                __bottomNWithComputedN,
+                __firstNWithComputedN,
+                __lastNWithComputedN,
+                __maxNWithComputedN,
+                __minNWithComputedN,
+                __topNWithComputedN
+            ]);
+
+            __pickWithNOverloads = MethodInfoSet.Create(
+            [
+                __bottomN,
+                __firstN,
+                __lastN,
+                __maxN,
+                __minN,
+                __topN
+            ]);
+
+            __pickWithSortByOverloads = MethodInfoSet.Create(
+            [
+                __bottom,
+                __bottomN,
+                __bottomNWithComputedN,
+                __top,
+                __topN,
+                __topNWithComputedN
+            ]);
+
+            __reverseOverloads = MethodInfoSet.Create(
+            [
+                __reverse,
+                __reverseWithArray
+            ]);
         }
 
         // public properties
@@ -367,6 +453,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo AggregateWithSeedAndFunc => __aggregateWithSeedAndFunc;
         public static MethodInfo AggregateWithSeedFuncAndResultSelector => __aggregateWithSeedFuncAndResultSelector;
         public static MethodInfo All => __all;
+        public static MethodInfo AllWithPredicate => __allWithPredicate;
         public static MethodInfo Any => __any;
         public static MethodInfo AnyWithPredicate => __anyWithPredicate;
         public static MethodInfo Append => __append;
@@ -411,7 +498,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo FirstOrDefault => __firstOrDefault;
         public static MethodInfo FirstOrDefaultWithPredicate => __firstOrDefaultWithPredicate;
         public static MethodInfo FirstWithPredicate => __firstWithPredicate;
-        public static MethodInfo GroupBy => __groupBy;
+        public static MethodInfo GroupByWithKeySelector => __groupByWithKeySelector;
         public static MethodInfo GroupByWithKeySelectorAndElementSelector => __groupByWithKeySelectorAndElementSelector;
         public static MethodInfo GroupByWithKeySelectorAndResultSelector => __groupByWithKeySelectorAndResultSelector;
         public static MethodInfo GroupByWithKeySelectorElementSelectorAndResultSelector => __groupByWithKeySelectorElementSelectorAndResultSelector;
@@ -481,10 +568,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo Range => __range;
         public static MethodInfo Repeat => __repeat;
         public static MethodInfo Reverse => __reverse;
+        public static MethodInfo ReverseWithArray => __reverseWithArray;
         public static MethodInfo Select => __select;
-        public static MethodInfo SelectMany => __selectMany;
+        public static MethodInfo SelectManyWithSelector => __selectManyWithSelector;
         public static MethodInfo SelectManyWithCollectionSelectorAndResultSelector => __selectManyWithCollectionSelectorAndResultSelector;
-        public static MethodInfo SelectManyWithCollectionSelectorTakingIndexAndResultSelector => __selectManyWithCollectionSelectorTakingIndexAndResultSelector;
+        public static MethodInfo SelectManyWithCollectionSelectorTakingIndexAndResultSelector => __selectManyWithCollectionSelectorTakingIndexAndResultSelector; // TODO CSHARP-5978: not yet supported in nested expressions
         public static MethodInfo SelectManyWithSelectorTakingIndex => __selectManyWithSelectorTakingIndex;
         public static MethodInfo SelectWithSelectorTakingIndex => __selectWithSelectorTakingIndex;
         public static MethodInfo SequenceEqual => __sequenceEqual;
@@ -495,6 +583,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo SingleWithPredicate => __singleWithPredicate;
         public static MethodInfo Skip => __skip;
         public static MethodInfo SkipWhile => __skipWhile;
+        public static MethodInfo SkipWhileWithPredicateTakingIndex => __skipWhileWithPredicateTakingIndex;
         public static MethodInfo SumDecimal => __sumDecimal;
         public static MethodInfo SumDecimalWithSelector => __sumDecimalWithSelector;
         public static MethodInfo SumDouble => __sumDouble;
@@ -517,6 +606,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo SumSingleWithSelector => __sumSingleWithSelector;
         public static MethodInfo Take => __take;
         public static MethodInfo TakeWhile => __takeWhile;
+        public static MethodInfo TakeWhileWithPredicateTakingIndex => __takeWhileWithPredicateTakingIndex;
         public static MethodInfo ThenBy => __thenBy;
         public static MethodInfo ThenByDescending => __thenByDescending;
         public static MethodInfo ToArray => __toArray;
@@ -528,6 +618,14 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo Where => __where;
         public static MethodInfo WhereWithPredicateTakingIndex => __whereWithPredicateTakingIndex;
         public static MethodInfo Zip => __zip;
+
+        // sets of methods
+        public static IReadOnlyMethodInfoSet PickOverloads => __pickOverloads;
+        public static IReadOnlyMethodInfoSet PickOverloadsThatCanOnlyBeUsedAsGroupByAccumulators => __pickOverloadsThatCanOnlyBeUsedAsGroupByAccumulators;
+        public static IReadOnlyMethodInfoSet PickWithComputedNOverloads => __pickWithComputedNOverloads;
+        public static IReadOnlyMethodInfoSet PickWithNOverloads => __pickWithNOverloads;
+        public static IReadOnlyMethodInfoSet PickWithSortByOverloads => __pickWithSortByOverloads;
+        public static IReadOnlyMethodInfoSet ReverseOverloads => __reverseOverloads;
 
         // public methods
         public static bool IsContainsMethod(MethodCallExpression methodCallExpression, out Expression sourceExpression, out Expression valueExpression)
@@ -612,6 +710,27 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection
         public static MethodInfo MakeWhere(Type tsource)
         {
             return __where.MakeGenericMethod(tsource);
+        }
+
+        private static MethodInfo GetReverseWithArrayMethodInfo()
+        {
+            // returns null on target frameworks that don't have this method
+            return
+                typeof(Enumerable)
+                .GetMethods()
+                .SingleOrDefault(m =>
+                    m.IsPublic &&
+                    m.IsStatic &&
+                    m.Name == "Reverse" &&
+                    m.IsGenericMethodDefinition &&
+                    m.GetGenericArguments() is var genericArguments &&
+                    genericArguments.Length == 1 &&
+                    genericArguments[0] is var tsource &&
+                    m.ReturnType == typeof(IEnumerable<>).MakeGenericType(tsource) &&
+                    m.GetParameters() is var parameters &&
+                    parameters.Length == 1 &&
+                    parameters[0] is var sourceParameter &&
+                    sourceParameter.ParameterType == tsource.MakeArrayType());
         }
     }
 }

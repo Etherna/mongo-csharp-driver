@@ -14,12 +14,10 @@
 */
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Driver;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers;
@@ -61,7 +59,8 @@ namespace Etherna.MongoDB.Driver.Linq
             TranslationContextData contextData = null)
         {
             expression = (Expression<Func<TSource, TResult>>)LinqExpressionPreprocessor.Preprocess(expression);
-            var context = TranslationContext.Create(translationOptions, contextData);
+            var parameter = expression.Parameters.Single();
+            var context = TranslationContext.Create(expression, initialNode: parameter, initialSerializer: sourceSerializer, translationOptions: translationOptions, data: contextData);
             var translation = ExpressionToAggregationExpressionTranslator.TranslateLambdaBody(context, expression, sourceSerializer, asRoot: true);
             var simplifiedAst = AstSimplifier.Simplify(translation.Ast);
 
@@ -72,17 +71,20 @@ namespace Etherna.MongoDB.Driver.Linq
             LambdaExpression expression,
             IBsonSerializer<TDocument> documentSerializer,
             IBsonSerializerRegistry serializerRegistry,
-            ExpressionTranslationOptions translationOptions)
+            ExpressionTranslationOptions translationOptions,
+            string subPathRoot)
         {
             expression = (LambdaExpression)LinqExpressionPreprocessor.Preprocess(expression);
             var parameter = expression.Parameters.Single();
-            var context = TranslationContext.Create(translationOptions);
+            var context = TranslationContext.Create(expression, initialNode: parameter, initialSerializer: documentSerializer, translationOptions: translationOptions);
             var symbol = context.CreateSymbol(parameter, documentSerializer, isCurrent: true);
             context = context.WithSymbol(symbol);
             var body = RemovePossibleConvertToObject(expression.Body);
             var fieldTranslation = ExpressionToFilterFieldTranslator.Translate(context, body);
 
-            return new RenderedFieldDefinition(fieldTranslation.Ast.Path, fieldTranslation.Serializer);
+            var fieldName = RenderedFieldDefinition.RemoveSubPathRoot(fieldTranslation.Ast.Path, subPathRoot);
+
+            return new RenderedFieldDefinition(fieldName, fieldTranslation.Serializer);
 
             static Expression RemovePossibleConvertToObject(Expression expression)
             {
@@ -102,11 +104,12 @@ namespace Etherna.MongoDB.Driver.Linq
             IBsonSerializer<TDocument> documentSerializer,
             IBsonSerializerRegistry serializerRegistry,
             ExpressionTranslationOptions translationOptions,
-            bool allowScalarValueForArrayField)
+            bool allowScalarValueForArrayField,
+            string subPathRoot)
         {
             expression = (Expression<Func<TDocument, TField>>)LinqExpressionPreprocessor.Preprocess(expression);
             var parameter = expression.Parameters.Single();
-            var context = TranslationContext.Create(translationOptions);
+            var context = TranslationContext.Create(expression, initialNode: parameter, initialSerializer: documentSerializer, translationOptions: translationOptions);
             var symbol = context.CreateSymbol(parameter, documentSerializer, isCurrent: true);
             context = context.WithSymbol(symbol);
             var fieldTranslation = ExpressionToFilterFieldTranslator.Translate(context, expression.Body);
@@ -115,7 +118,9 @@ namespace Etherna.MongoDB.Driver.Linq
             var fieldSerializer = underlyingSerializer as IBsonSerializer<TField>;
             var valueSerializer = (IBsonSerializer<TField>)FieldValueSerializerHelper.GetSerializerForValueType(underlyingSerializer, serializerRegistry, typeof(TField), allowScalarValueForArrayField);
 
-            return new RenderedFieldDefinition<TField>(fieldTranslation.Ast.Path, fieldSerializer, valueSerializer, underlyingSerializer);
+            var fieldName = RenderedFieldDefinition.RemoveSubPathRoot(fieldTranslation.Ast.Path, subPathRoot);
+
+            return new RenderedFieldDefinition<TField>(fieldName, fieldSerializer, valueSerializer, underlyingSerializer);
         }
 
         internal static BsonDocument TranslateExpressionToElemMatchFilter<TElement>(
@@ -125,8 +130,8 @@ namespace Etherna.MongoDB.Driver.Linq
             ExpressionTranslationOptions translationOptions)
         {
             expression = (Expression<Func<TElement, bool>>)LinqExpressionPreprocessor.Preprocess(expression);
-            var context = TranslationContext.Create(translationOptions);
             var parameter = expression.Parameters.Single();
+            var context = TranslationContext.Create(expression, initialNode: parameter, initialSerializer: elementSerializer, translationOptions: translationOptions);
             var symbol = context.CreateSymbol(parameter, "@<elem>", elementSerializer);  // @<elem> represents the implied element
             context = context.WithSingleSymbol(symbol); // @<elem> is the only symbol visible inside an $elemMatch
             var filter = ExpressionToFilterTranslator.Translate(context, expression.Body, exprOk: false);
@@ -142,7 +147,8 @@ namespace Etherna.MongoDB.Driver.Linq
             ExpressionTranslationOptions translationOptions)
         {
             expression = (Expression<Func<TDocument, bool>>)LinqExpressionPreprocessor.Preprocess(expression);
-            var context = TranslationContext.Create(translationOptions);
+            var parameter = expression.Parameters.Single();
+            var context = TranslationContext.Create(expression,  initialNode: parameter, initialSerializer: documentSerializer, translationOptions: translationOptions);
             var filter = ExpressionToFilterTranslator.TranslateLambda(context, expression, documentSerializer, asRoot: true);
             filter = AstSimplifier.SimplifyAndConvert(filter);
 
@@ -176,7 +182,8 @@ namespace Etherna.MongoDB.Driver.Linq
             }
 
             expression = (Expression<Func<TInput, TOutput>>)LinqExpressionPreprocessor.Preprocess(expression);
-            var context = TranslationContext.Create(translationOptions);
+            var parameter = expression.Parameters.Single();
+            var context = TranslationContext.Create(expression, initialNode: parameter, initialSerializer: inputSerializer, translationOptions: translationOptions);
 
             var simplifier = forFind ? new AstFindProjectionSimplifier() : new AstSimplifier();
             try
@@ -215,11 +222,9 @@ namespace Etherna.MongoDB.Driver.Linq
             IBsonSerializerRegistry serializerRegistry,
             ExpressionTranslationOptions translationOptions)
         {
-            var context = TranslationContext.Create(translationOptions); // do not partially evaluate expression
-            var parameter = expression.Parameters.Single();
-            var symbol = context.CreateRootSymbol(parameter, documentSerializer);
-            context = context.WithSymbol(symbol);
-            var setStage = ExpressionToSetStageTranslator.Translate(context, documentSerializer, expression);
+            // Pass the expression through without pre-processing here; value expressions in the $set translation
+            // will be partially evaluated while the members translation by ExpressionToSetStageTranslator.
+            var setStage = ExpressionToSetStageTranslator.Translate(documentSerializer, expression, translationOptions);
             var simplifiedSetStage = AstSimplifier.SimplifyAndConvert(setStage);
             return simplifiedSetStage.Render().AsBsonDocument;
         }

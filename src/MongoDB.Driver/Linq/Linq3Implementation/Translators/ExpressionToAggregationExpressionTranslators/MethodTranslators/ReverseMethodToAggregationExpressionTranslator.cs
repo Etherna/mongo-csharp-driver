@@ -14,7 +14,6 @@
 */
 
 using System.Linq.Expressions;
-using System.Reflection;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
@@ -24,18 +23,12 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 {
     internal static class ReverseMethodToAggregationExpressionTranslator
     {
-        private static readonly MethodInfo[] __reverseMethods =
-        {
-            EnumerableMethod.Reverse,
-            QueryableMethod.Reverse
-        };
-
         public static TranslatedExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
             var method = expression.Method;
             var arguments = expression.Arguments;
 
-            if (method.IsOneOf(__reverseMethods))
+            if (method.IsOneOf(EnumerableOrQueryableMethod.ReverseOverloads))
             {
                 var sourceExpression = arguments[0];
                 var sourceTranslation = ExpressionToAggregationExpressionTranslator.TranslateEnumerable(context, sourceExpression);

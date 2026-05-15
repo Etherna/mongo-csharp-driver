@@ -68,6 +68,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             IConnectionInitializer connectionInitializer,
             IEventSubscriber eventSubscriber,
             ILoggerFactory loggerFactory,
+            TracingOptions tracingOptions,
             TimeSpan socketReadTimeout,
             TimeSpan socketWriteTimeout)
         {
@@ -83,7 +84,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
 
             _compressorSource = new CompressorSource(settings.Compressors);
             _eventLogger = loggerFactory.CreateEventLogger<LogCategories.Connection>(eventSubscriber);
-            _commandEventHelper = new CommandEventHelper(loggerFactory.CreateEventLogger<LogCategories.Command>(eventSubscriber));
+            _commandEventHelper = new CommandEventHelper(loggerFactory.CreateEventLogger<LogCategories.Command>(eventSubscriber), tracingOptions);
             _socketReadTimeout = socketReadTimeout;
             _socketWriteTimeout = socketWriteTimeout;
         }
@@ -154,7 +155,11 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             {
                 _failedEventHasBeenRaised = true;
                 _eventLogger.LogAndPublish(new ConnectionFailedEvent(_connectionId, exception));
-                _commandEventHelper.ConnectionFailed(_connectionId, _description?.ServiceId, exception, IsInitializing);
+
+                if (_commandEventHelper.ShouldCallConnectionFailed)
+                {
+                    _commandEventHelper.ConnectionFailed(_connectionId, _description?.ServiceId, exception, IsInitializing);
+                }
             }
         }
 
@@ -592,20 +597,34 @@ namespace Etherna.MongoDB.Driver.Core.Connections
             }
         }
 
+        public void CompleteCommandActivityWithException(Exception exception)
+        {
+            _commandEventHelper.CompleteFailedCommandActivity(exception);
+        }
+
+        public void EnsureCommandActivityCompleted()
+        {
+            _commandEventHelper.EnsureCommandActivityCompleted();
+        }
+
         // private methods
         private void AddBackpressureErrorLabelsIfRequired(MongoConnectionException exception)
         {
-            // TODO: Backpressure-related error labeling is intentionally disabled. Uncomment the code below during implementation of CSHARP-5838
-            // if (exception == null)
-            // {
-            //     return;
-            // }
-            //
-            // if (exception.ContainsTimeoutException || exception.InnerException is IOException)
-            // {
-            //     exception.AddErrorLabel("SystemOverloadedError");
-            //     exception.AddErrorLabel("RetryableError");
-            // }
+            if (exception == null)
+            {
+                return;
+            }
+
+            if (exception.InnerException is MongoProxyConnectionException)
+            {
+                return;
+            }
+
+            if (exception.InnerException is IOException || exception.ContainsTimeoutException)
+            {
+                exception.AddErrorLabel("SystemOverloadedError");
+                exception.AddErrorLabel("RetryableError");
+            }
         }
 
         private bool ShouldBeCompressed(RequestMessage message)

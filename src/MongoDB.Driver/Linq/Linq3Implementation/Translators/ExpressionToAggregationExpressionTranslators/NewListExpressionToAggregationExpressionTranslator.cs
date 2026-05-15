@@ -34,7 +34,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 var argument = arguments[0];
                 var argumentType = argument.Type;
-                if (argumentType.IsConstructedGenericType && argumentType.GetGenericTypeDefinition().Implements(typeof(IEnumerable<>)))
+                if (argumentType.IsConstructedGenericType && argumentType.GetGenericTypeDefinition().ImplementsInterface(typeof(IEnumerable<>)))
                 {
                     var enumerableInterface = argumentType.GetIEnumerableGenericInterface();
                     var argumentItemType = enumerableInterface.GetGenericArguments()[0];

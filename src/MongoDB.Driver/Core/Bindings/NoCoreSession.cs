@@ -173,6 +173,11 @@ namespace Etherna.MongoDB.Driver.Core.Bindings
             throw new NotSupportedException("NoCoreSession does not support StartTransaction.");
         }
 
+        void ICoreSessionInternal.StartTransaction(TransactionOptions transactionOptions, bool isTracingEnabled)
+        {
+            throw new NotSupportedException("NoCoreSession does not support StartTransaction.");
+        }
+
         /// <inheritdoc />
         public void SetSnapshotTimeIfNeeded(BsonTimestamp snapshotTime)
         {

@@ -13,13 +13,11 @@
 * limitations under the License.
 */
 
-using System;
-using System.Collections.Generic;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
 {
@@ -49,16 +47,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 }
 
                 var ast = AstExpression.ComputedArray(items);
-                var tupleSerializer = CreateTupleSerializer(tupleType, itemSerializers);
+                var tupleSerializer = TupleOrValueTupleSerializer.Create(tupleType, itemSerializers);
                 return new TranslatedExpression(expression, ast, tupleSerializer);
             }
 
             throw new ExpressionNotSupportedException(expression);
-        }
-
-        private static IBsonSerializer CreateTupleSerializer(Type tupleType, IEnumerable<IBsonSerializer> itemSerializers)
-        {
-            return tupleType.IsTuple() ? TupleSerializer.Create(itemSerializers) : ValueTupleSerializer.Create(itemSerializers);
         }
     }
 }

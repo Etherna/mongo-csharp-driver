@@ -14,6 +14,7 @@
 */
 
 using System.Collections.Generic;
+using System.Linq;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
@@ -39,6 +40,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             {
                 BypassDocumentValidation = BypassDocumentValidation,
                 Comment = Comment,
+                IsOperationRetryable = batch.Requests.Items.All(r => r.IsRetryable()),
                 IsOrdered = IsOrdered,
                 MaxBatchCount = MaxBatchCount,
                 RetryRequested = RetryRequested,

@@ -55,15 +55,14 @@ namespace Etherna.MongoDB.Driver
         // methods
         private IClusterInternal CreateCluster(ClusterKey clusterKey)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
             var builder = new ClusterBuilder()
                 .ConfigureCluster(settings => ConfigureCluster(settings, clusterKey))
                 .ConfigureServer(settings => ConfigureServer(settings, clusterKey))
                 .ConfigureConnectionPool(settings => ConfigureConnectionPool(settings, clusterKey))
                 .ConfigureConnection(settings => ConfigureConnection(settings, clusterKey))
                 .ConfigureTcp(settings => ConfigureTcp(settings, clusterKey))
-                .ConfigureLoggingSettings(_ => clusterKey.LoggingSettings);
-#pragma warning restore CS0618 // Type or member is obsolete
+                .ConfigureLoggingSettings(_ => clusterKey.LoggingSettings)
+                .ConfigureTracingOptions(_ => clusterKey.TracingOptions);
 
             if (clusterKey.UseTls)
             {

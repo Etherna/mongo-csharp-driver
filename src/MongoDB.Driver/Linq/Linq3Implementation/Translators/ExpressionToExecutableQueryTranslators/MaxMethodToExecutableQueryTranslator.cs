@@ -14,7 +14,6 @@
 */
 
 using System.Linq.Expressions;
-using System.Reflection;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
@@ -32,25 +31,23 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     {
         // private static fields
         private static readonly IExecutableQueryFinalizer<TOutput, TOutput> __finalizer = new SingleFinalizer<TOutput>();
-        private static readonly MethodInfo[] __maxMethods;
-        private static readonly MethodInfo[] __maxWithSelectorMethods;
+        private static readonly IReadOnlyMethodInfoSet __maxOverloads;
+        private static readonly IReadOnlyMethodInfoSet __maxWithSelectorOverloads;
 
         // static constructor
         static MaxMethodToExecutableQueryTranslator()
         {
-            __maxMethods = new[]
-            {
-                QueryableMethod.Max,
-                QueryableMethod.MaxWithSelector,
-                MongoQueryableMethod.MaxAsync,
-                MongoQueryableMethod.MaxWithSelectorAsync,
-            };
+            __maxOverloads = MethodInfoSet.Create(
+            [
+                QueryableMethod.MaxOverloads,
+                MongoQueryableMethod.MaxOverloads,
+            ]);
 
-            __maxWithSelectorMethods = new[]
-            {
+            __maxWithSelectorOverloads = MethodInfoSet.Create(
+            [
                 QueryableMethod.MaxWithSelector,
                 MongoQueryableMethod.MaxWithSelectorAsync,
-            };
+            ]);
         }
 
         // public static methods
@@ -59,7 +56,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             var method = expression.Method;
             var arguments = expression.Arguments;
 
-            if (method.IsOneOf(__maxMethods))
+            if (method.IsOneOf(__maxOverloads))
             {
                 var sourceExpression = arguments[0];
                 var pipeline = ExpressionToPipelineTranslator.Translate(context, sourceExpression);
@@ -68,7 +65,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var sourceSerializer = pipeline.OutputSerializer;
                 AstExpression valueAst;
                 IBsonSerializer valueSerializer;
-                if (method.IsOneOf(__maxWithSelectorMethods))
+                if (method.IsOneOf(__maxWithSelectorOverloads))
                 {
                     var selectorLambda = ExpressionHelper.UnquoteLambda(arguments[1]);
                     var selectorTranslation = ExpressionToAggregationExpressionTranslator.TranslateLambdaBody(context, selectorLambda, sourceSerializer, asRoot: true);

@@ -55,12 +55,14 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             get { return _collectionNamespace; }
         }
 
+        public override string OperationName => null;
+
         public BatchableSource<DeleteRequest> Deletes
         {
             get { return _deletes; }
         }
 
-        protected override BsonDocument CreateCommand(OperationContext operationContext, ICoreSessionHandle session, int attempt, long? transactionNumber)
+        protected override BsonDocument CreateCommand(OperationContext operationContext, ICoreSessionHandle session, long? transactionNumber)
         {
             if (WriteConcern != null && !WriteConcern.IsAcknowledged)
             {

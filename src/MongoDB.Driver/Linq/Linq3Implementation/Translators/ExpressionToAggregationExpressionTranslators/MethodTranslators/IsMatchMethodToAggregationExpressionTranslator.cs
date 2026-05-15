@@ -15,7 +15,6 @@
 
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
-using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
@@ -27,18 +26,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         // public static methods
         public static TranslatedExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
-            if (RegexMethod.IsMatchMethod(expression, out var inputExpression, out var regex))
+            if (RegexMethod.IsIsMatchMethod(expression, out var inputExpression, out var regex))
             {
-                var inputTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, inputExpression);
+                var inputAst = ExpressionToAggregationExpressionTranslator.TranslateAndEnsureRepresentation(context, inputExpression, BsonType.String);
                 var regularExpression = new BsonRegularExpression(regex);
-
-                if (inputTranslation.Serializer is IRepresentationConfigurable representationConfigurable &&
-                    representationConfigurable.Representation != BsonType.String)
-                {
-                    throw new ExpressionNotSupportedException(inputExpression, expression, because: "input expression is not represented as a string");
-                }
-
-                var ast = AstExpression.RegexMatch(inputTranslation.Ast, regularExpression.Pattern, regularExpression.Options);
+                var ast = AstExpression.RegexMatch(inputAst, regularExpression.Pattern, regularExpression.Options);
                 return new TranslatedExpression(expression, ast, BooleanSerializer.Instance);
             }
 

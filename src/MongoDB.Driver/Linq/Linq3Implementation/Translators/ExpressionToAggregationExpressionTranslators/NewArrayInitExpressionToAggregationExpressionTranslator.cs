@@ -19,6 +19,8 @@ using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
 {
@@ -27,28 +29,14 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         public static TranslatedExpression Translate(TranslationContext context, NewArrayExpression expression)
         {
             var items = new List<AstExpression>();
-            IBsonSerializer itemSerializer = null;
             foreach (var itemExpression in expression.Expressions)
             {
                 var itemTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, itemExpression);
                 items.Add(itemTranslation.Ast);
-                itemSerializer ??= itemTranslation.Serializer;
-
-                // make sure all items are serialized using the same serializer
-                if (!itemTranslation.Serializer.Equals(itemSerializer))
-                {
-                    throw new ExpressionNotSupportedException(expression, because: "all items in the array must be serialized using the same serializer");
-                }
             }
-
             var ast = AstExpression.ComputedArray(items);
 
-            var arrayType = expression.Type;
-            var itemType = arrayType.GetElementType();
-            itemSerializer ??= BsonSerializer.LookupSerializer(itemType); // if the array is empty itemSerializer will be null
-            var arraySerializerType = typeof(ArraySerializer<>).MakeGenericType(itemType);
-            var arraySerializer = (IBsonSerializer)Activator.CreateInstance(arraySerializerType, itemSerializer);
-
+            var arraySerializer = context.GetSerializer(expression);
             return new TranslatedExpression(expression, ast, arraySerializer);
         }
     }

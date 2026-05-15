@@ -14,8 +14,11 @@
 */
 
 using System.Linq.Expressions;
+using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Serializers;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToAggregationExpressionTranslators
 {
@@ -30,7 +33,8 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 var indexExpression = expression.Right;
                 var indexTranslation = ExpressionToAggregationExpressionTranslator.Translate(context, indexExpression);
                 var ast = AstExpression.ArrayElemAt(arrayTranslation.Ast, indexTranslation.Ast);
-                var itemSerializer = ArraySerializerHelper.GetItemSerializer(arrayTranslation.Serializer);
+                var arraySerializer = arrayTranslation.Serializer;
+                var itemSerializer = arraySerializer.GetItemSerializer(indexExpression, arrayExpression);
                 return new TranslatedExpression(expression, ast, itemSerializer);
             }
 

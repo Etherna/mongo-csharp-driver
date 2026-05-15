@@ -68,8 +68,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
         StrLenBytes,
         StrLenCP,
         Sum,
+        Subtype,
         Tan,
         Tanh,
+        ToArray,
         ToBool,
         ToDate,
         ToDecimal,
@@ -77,6 +79,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
         ToInt,
         ToLong,
         ToLower,
+        ToObject,
         ToObjectId,
         ToString,
         ToUpper,
@@ -108,12 +111,14 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
         public static bool IsConvertOperator(this AstUnaryOperator @operator)
             => @operator switch
             {
+                AstUnaryOperator.ToArray or
                 AstUnaryOperator.ToBool or
                 AstUnaryOperator.ToDate or
                 AstUnaryOperator.ToDecimal or
                 AstUnaryOperator.ToDouble or
                 AstUnaryOperator.ToInt or
                 AstUnaryOperator.ToLong or
+                AstUnaryOperator.ToObject or
                 AstUnaryOperator.ToObjectId or
                 AstUnaryOperator.ToString => true,
                 _ => false
@@ -172,8 +177,10 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
                 AstUnaryOperator.StrLenBytes => "$strLenBytes",
                 AstUnaryOperator.StrLenCP => "$strLenCP",
                 AstUnaryOperator.Sum => "$sum",
+                AstUnaryOperator.Subtype => "$subtype",
                 AstUnaryOperator.Tan => "$tan",
                 AstUnaryOperator.Tanh => "$tanh",
+                AstUnaryOperator.ToArray => "$toArray",
                 AstUnaryOperator.ToBool => "$toBool",
                 AstUnaryOperator.ToDate => "$toDate",
                 AstUnaryOperator.ToDecimal => "$toDecimal",
@@ -181,6 +188,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions
                 AstUnaryOperator.ToInt => "$toInt",
                 AstUnaryOperator.ToLong => "$toLong",
                 AstUnaryOperator.ToLower => "$toLower",
+                AstUnaryOperator.ToObject => "$toObject",
                 AstUnaryOperator.ToObjectId => "$toObjectId",
                 AstUnaryOperator.ToString => "$toString",
                 AstUnaryOperator.ToUpper => "$toUpper",

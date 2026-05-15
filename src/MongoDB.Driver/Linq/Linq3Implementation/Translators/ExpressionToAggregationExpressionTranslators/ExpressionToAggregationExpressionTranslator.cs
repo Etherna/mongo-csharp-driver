@@ -35,11 +35,19 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             return UnwrapIfWrapped(expression, translatedExpression);
         }
 
+        public static AstExpression TranslateAndEnsureRepresentation(TranslationContext context, Expression expression, BsonType representation)
+        {
+            var translation = Translate(context, expression);
+            SerializationHelper.EnsureSerializerRepresentation(expression, translation.Serializer, representation);
+            return translation.Ast;
+        }
+
         public static TranslatedExpression TranslateWithoutUnwrapping(TranslationContext context, Expression expression)
         {
             switch (expression.NodeType)
             {
                 case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
                 case ExpressionType.TypeAs:
                     return ConvertExpressionToAggregationExpressionTranslator.Translate(context, (UnaryExpression)expression);
 
@@ -75,7 +83,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case ExpressionType.Conditional:
                     return ConditionalExpressionToAggregationExpressionTranslator.Translate(context, (ConditionalExpression)expression);
                 case ExpressionType.Constant:
-                    return ConstantExpressionToAggregationExpressionTranslator.Translate((ConstantExpression)expression);
+                    return ConstantExpressionToAggregationExpressionTranslator.Translate(context, (ConstantExpression)expression);
                 case ExpressionType.Index:
                     return IndexExpressionToAggregationExpressionTranslator.Translate(context, (IndexExpression)expression);
                 case ExpressionType.ListInit:
@@ -151,9 +159,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         public static TranslatedExpression TranslateLambdaBody(
             TranslationContext context,
             LambdaExpression lambdaExpression,
-            Symbol parameterSymbol)
+            params Symbol[] parameterSymbols)
         {
-            var lambdaContext = context.WithSymbol(parameterSymbol);
+            var lambdaContext = context.WithSymbols(parameterSymbols);
             var translatedBody = Translate(lambdaContext, lambdaExpression.Body);
 
             var lambdaReturnType = lambdaExpression.ReturnType;

@@ -53,9 +53,12 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             Comment = options?.Comment;
             IsOrdered = (options?.IsOrdered).GetValueOrDefault(true);
             WriteConcern = options?.WriteConcern;
+            IsOperationRetryable = true;
         }
 
-        protected override BsonDocument CreateCommand(OperationContext operationContext, ICoreSessionHandle session, int attempt, long? transactionNumber)
+        public override string OperationName => "bulkWrite";
+
+        protected override BsonDocument CreateCommand(OperationContext operationContext, ICoreSessionHandle session, long? transactionNumber)
         {
             var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(operationContext, session, WriteConcern);
             return new BsonDocument
@@ -94,7 +97,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             var bulkWriteResults = new BulkWriteRawResult();
             while (true)
             {
-                using var context = RetryableWriteContext.Create(operationContext, binding, GetEffectiveRetryRequested());
+                using var context = new RetryableWriteContext(binding, GetEffectiveRetryRequested(), MaxAdaptiveRetries, EnableOverloadRetargeting);
                 BsonDocument serverResponse = null;
                 try
                 {
@@ -110,7 +113,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                     bulkWriteResults.TopLevelException = commandException;
                     serverResponse = commandException.Result;
                 }
-                catch (Exception exception)
+                catch (Exception exception) when (context.Channel is not null)
                 {
                     bulkWriteResults.TopLevelException = exception;
                 }
@@ -152,7 +155,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             var bulkWriteResults = new BulkWriteRawResult();
             while (true)
             {
-                using var context = RetryableWriteContext.Create(operationContext, binding, GetEffectiveRetryRequested());
+                using var context = new RetryableWriteContext(binding, GetEffectiveRetryRequested(), MaxAdaptiveRetries, EnableOverloadRetargeting);
                 BsonDocument serverResponse = null;
                 try
                 {
@@ -168,7 +171,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                     bulkWriteResults.TopLevelException = commandException;
                     serverResponse = commandException.Result;
                 }
-                catch (Exception exception)
+                catch (Exception exception) when (context.Channel is not null)
                 {
                     bulkWriteResults.TopLevelException = exception;
                 }
@@ -204,7 +207,7 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             }
         }
 
-        private IDisposable BeginOperation() => EventContext.BeginOperation(null, "bulkWrite");
+        private EventContext.OperationIdDisposer BeginOperation() => EventContext.BeginOperation(null, OperationName);
 
         private void EnsureCanProceedNextBatch(ConnectionId connectionId, BulkWriteRawResult bulkWriteResult)
         {
@@ -284,7 +287,11 @@ namespace Etherna.MongoDB.Driver.Core.Operations
                 0,
                 0,
                 BsonDocumentSerializer.Instance,
-                MessageEncoderSettings);
+                MessageEncoderSettings,
+                maxTime: null,
+                retryRequested: RetryRequested,
+                maxAdaptiveRetries: MaxAdaptiveRetries,
+                enableOverloadRetargeting: EnableOverloadRetargeting);
         }
 
         private void PopulateBulkWriteResponse(BsonDocument bulkWriteResponse, BulkWriteRawResult bulkWriteResult)

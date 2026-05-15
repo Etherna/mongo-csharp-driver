@@ -20,6 +20,7 @@ using System.Linq.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ToFilterFieldTranslators;
 
 namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.MethodTranslators
@@ -36,30 +37,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             var method = expression.Method;
             var arguments = expression.Arguments;
 
-            if (method.IsStatic &&
-                method.Name == "Contains" &&
-                method.ReturnType == typeof(bool) &&
-                arguments.Count == 2)
+            if (EnumerableMethod.IsContainsMethod(expression, out var fieldExpression, out var itemExpression))
             {
-                var fieldExpression = arguments[0];
                 var fieldType = fieldExpression.Type;
-                var itemExpression = arguments[1];
                 var itemType = itemExpression.Type;
-                if (TypeImplementsIEnumerable(fieldType, itemType))
-                {
-                    return Translate(context, expression, fieldExpression, itemExpression);
-                }
-            }
 
-            if (!method.IsStatic &&
-                method.Name == "Contains" &&
-                method.ReturnType == typeof(bool) &&
-                arguments.Count == 1)
-            {
-                var fieldExpression = expression.Object;
-                var fieldType = fieldExpression.Type;
-                var itemExpression = arguments[0];
-                var itemType = itemExpression.Type;
                 if (TypeImplementsIEnumerable(fieldType, itemType))
                 {
                     return Translate(context, expression, fieldExpression, itemExpression);

@@ -33,6 +33,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 case ExpressionType.Parameter: return ParameterExpressionToFilterFieldTranslator.Translate(context, (ParameterExpression)expression);
 
                 case ExpressionType.Convert:
+                case ExpressionType.ConvertChecked:
                 case ExpressionType.TypeAs:
                     return ConvertExpressionToFilterFieldTranslator.Translate(context, (UnaryExpression)expression);
             }
