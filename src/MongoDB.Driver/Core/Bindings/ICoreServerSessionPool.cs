@@ -13,11 +13,13 @@
 * limitations under the License.
 */
 
-namespace Etherna.MongoDB.Driver
+using Etherna.MongoDB.Driver.Core.Servers;
+
+namespace Etherna.MongoDB.Driver;
+
+internal interface ICoreServerSessionPool
 {
-    internal interface ICoreServerSessionPool
-    {
-        ICoreServerSession AcquireSession();
-        void ReleaseSession(ICoreServerSession serverSession);
-    }
+    ICoreServerSession AcquireSession();
+    void ReleaseSession(ICoreServerSession serverSession);
+    void CloseAndDispose(IServer server);
 }

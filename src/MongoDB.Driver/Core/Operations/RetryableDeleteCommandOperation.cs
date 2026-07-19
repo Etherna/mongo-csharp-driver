@@ -21,6 +21,7 @@ using Etherna.MongoDB.Bson.IO;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
 using Etherna.MongoDB.Driver.Core.Bindings;
+using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages;
 using Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders;
@@ -62,22 +63,16 @@ namespace Etherna.MongoDB.Driver.Core.Operations
             get { return _deletes; }
         }
 
-        protected override BsonDocument CreateCommand(OperationContext operationContext, ICoreSessionHandle session, long? transactionNumber)
+        protected override BsonDocument CreateCommand(OperationContext operationContext, ICoreSessionHandle session, ConnectionDescription connectionDescription, long? transactionNumber)
         {
-            if (WriteConcern != null && !WriteConcern.IsAcknowledged)
-            {
-                if (_deletes.Items.Skip(_deletes.Offset).Take(_deletes.Count).Any(u => u.Hint != null))
-                {
-                    throw new NotSupportedException("Hint is not supported for unacknowledged writes.");
-                }
-            }
-
             var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(operationContext, session, WriteConcern);
+            var readConcern = ReadConcernHelper.GetReadConcernForWriteCommand(session, connectionDescription);
             return new BsonDocument
             {
                 { "delete", _collectionNamespace.CollectionName },
                 { "ordered", IsOrdered },
                 { "comment", Comment, Comment != null },
+                { "readConcern", readConcern, readConcern != null },
                 { "writeConcern", writeConcern, writeConcern != null },
                 { "txnNumber", () => transactionNumber.Value, transactionNumber.HasValue },
                 { "let", _let, _let != null }

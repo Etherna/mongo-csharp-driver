@@ -33,6 +33,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
     {
         public static TranslatedExpression Translate(TranslationContext context, MethodCallExpression expression)
         {
+            if (WindowMethodToAggregationExpressionTranslator.CanTranslate(expression))
+            {
+                return WindowMethodToAggregationExpressionTranslator.Translate(context, expression);
+            }
+
             var method = expression.Method;
             var arguments = expression.Arguments.ToArray();
 
@@ -175,18 +180,18 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             }
         }
 
-        private static object GetSortByDefinition(Expression sortByExpression, Expression expression)
+        internal static object GetSortByDefinition(Expression sortByExpression, Expression expression)
         {
             if (sortByExpression.NodeType == ExpressionType.Constant)
             {
                 return sortByExpression.GetConstantValue<object>(sortByExpression);
             }
 
-            // we get here when the PartialEvaluator couldn't fully evalute the SortDefinition
+            // we get here when the PartialEvaluator couldn't fully evaluate the SortDefinition
             try
             {
                 LambdaExpression lambda = Expression.Lambda(sortByExpression);
-                Delegate @delegate = lambda.Compile();
+                Delegate @delegate = lambda.CompileForOneShotEvaluation();
                 return @delegate.DynamicInvoke(null);
             }
             catch (Exception ex)
@@ -211,7 +216,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 getFieldExpression.FieldName.IsStringConstant("_id");
         }
 
-        private static AstSortFields TranslateSortByDefinition(
+        internal static AstSortFields TranslateSortByDefinition(
             Expression expression,
             Expression sortByExpression,
             object sortByDefinition,

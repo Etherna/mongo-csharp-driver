@@ -19,6 +19,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Expressions;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
@@ -50,12 +51,14 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             WindowMethod.AverageWithNullableInt64,
             WindowMethod.AverageWithNullableSingle,
             WindowMethod.AverageWithSingle,
+            WindowMethod.ConcatArrays,
             WindowMethod.First,
             WindowMethod.Last,
             WindowMethod.Locf,
             WindowMethod.Max,
             WindowMethod.Min,
             WindowMethod.Push,
+            WindowMethod.SetUnion,
             WindowMethod.StandardDeviationPopulationWithDecimal,
             WindowMethod.StandardDeviationPopulationWithDouble,
             WindowMethod.StandardDeviationPopulationWithInt32,
@@ -282,6 +285,44 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     return new TranslatedExpression(expression, ast, serializer);
                 }
 
+                if (method.IsOneOf(WindowMethod.PickOverloads))
+                {
+                    ThrowIfSelectorTranslationIsNull(selectorTranslation);
+                    var @operator = GetPickAccumulatorOperator(method);
+
+                    AstSortFields sortBy = null;
+                    if (HasArgument<Expression>(parameters, "sortBy", arguments, out var sortByExpression))
+                    {
+                        var sortByDefinition = PickMethodToAggregationExpressionTranslator.GetSortByDefinition(sortByExpression, expression);
+                        sortBy = PickMethodToAggregationExpressionTranslator.TranslateSortByDefinition(expression, sortByExpression, sortByDefinition, inputSerializer, context.TranslationOptions);
+                    }
+
+                    AstExpression n = null;
+                    if (HasArgument<Expression>(parameters, "n", arguments, out var nExpression))
+                    {
+                        n = ExpressionToAggregationExpressionTranslator.Translate(context, nExpression).Ast;
+                    }
+
+                    var ast = AstExpression.PickWindowExpression(@operator, sortBy, selectorTranslation.Ast, n, window);
+                    var serializer = context.GetSerializer(expression);
+                    return new TranslatedExpression(expression, ast, serializer);
+                }
+
+                if (method.IsOneOf(WindowMethod.MinMaxScalerOverloads))
+                {
+                    ThrowIfSelectorTranslationIsNull(selectorTranslation);
+                    var min = GetArgument<Expression>(parameters, "min", arguments).GetConstantValue<double>(expression);
+                    var max = GetArgument<Expression>(parameters, "max", arguments).GetConstantValue<double>(expression);
+
+                    var ast = AstExpression.MinMaxScalerWindowExpression(
+                        selectorTranslation.Ast,
+                        AstExpression.Constant(min),
+                        AstExpression.Constant(max),
+                        window);
+                    var serializer = context.GetSerializer(expression);
+                    return new TranslatedExpression(expression, ast, serializer);
+                }
+
                 if (method.IsOneOf(__shiftOverloads))
                 {
                     ThrowIfSelectorTranslationIsNull(selectorTranslation);
@@ -336,6 +377,22 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             };
         }
 
+        public static AstPickAccumulatorOperator GetPickAccumulatorOperator(MethodInfo method)
+        {
+            return method.Name switch
+            {
+                "Bottom" => AstPickAccumulatorOperator.Bottom,
+                "BottomN" => AstPickAccumulatorOperator.BottomN,
+                "FirstN" => AstPickAccumulatorOperator.FirstN,
+                "LastN" => AstPickAccumulatorOperator.LastN,
+                "MaxN" => AstPickAccumulatorOperator.MaxN,
+                "MinN" => AstPickAccumulatorOperator.MinN,
+                "Top" => AstPickAccumulatorOperator.Top,
+                "TopN" => AstPickAccumulatorOperator.TopN,
+                _ => throw new InvalidOperationException($"Invalid method name: {method.Name}.")
+            };
+        }
+
         public static AstNullaryWindowOperator GetNullaryWindowOperator(MethodInfo method)
         {
             return method.Name switch
@@ -354,12 +411,14 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
             {
                 "AddToSet" => AstUnaryWindowOperator.AddToSet,
                 "Average" => AstUnaryWindowOperator.Average,
+                "ConcatArrays" => AstUnaryWindowOperator.ConcatArrays,
                 "First" => AstUnaryWindowOperator.First,
                 "Last" => AstUnaryWindowOperator.Last,
                 "Locf" => AstUnaryWindowOperator.Locf,
                 "Max" => AstUnaryWindowOperator.Max,
                 "Min" => AstUnaryWindowOperator.Min,
                 "Push" => AstUnaryWindowOperator.Push,
+                "SetUnion" => AstUnaryWindowOperator.SetUnion,
                 "StandardDeviationPopulation" => AstUnaryWindowOperator.StandardDeviationPopulation,
                 "StandardDeviationSample" => AstUnaryWindowOperator.StandardDeviationSample,
                 "Sum" => AstUnaryWindowOperator.Sum,

@@ -21,6 +21,7 @@ using System.Net;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Servers;
@@ -44,8 +45,9 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             IClusterableServerFactory serverFactory,
             IEventSubscriber eventSubscriber,
             ILoggerFactory loggerFactory,
+            ClientMetadata clientMetadata,
             IDnsMonitorFactory dnsMonitorFactory = null)
-            : base(settings, serverFactory, eventSubscriber, loggerFactory)
+            : base(settings, serverFactory, eventSubscriber, loggerFactory, clientMetadata)
         {
             Ensure.IsGreaterThanZero(settings.EndPoints.Count, nameof(settings.EndPoints.Count));
             Ensure.That(!settings.DirectConnection, $"DirectConnection is not supported for a {nameof(MultiServerCluster)}.");
@@ -71,6 +73,9 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
                     _monitorServersCancellationTokenSource.Cancel();
                     _monitorServersCancellationTokenSource.Dispose();
                     var clusterDescription = Description;
+
+                    ReleaseServerSessionPool();
+
                     lock (_serversLock)
                     {
                         foreach (var server in _servers.ToList())
@@ -155,7 +160,7 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
                 case ClusterType.Unknown:
                     if (serverType == ServerType.Standalone)
                     {
-                        return _servers.Count == 1 || Settings.Scheme == ConnectionStringScheme.MongoDBPlusSrv; // Standalone is only valid in MultiServerCluster when using Etherna.MongoDBPlusSrv scheme
+                        return _servers.Count == 1 || Settings.Scheme == ConnectionStringScheme.MongoDBPlusSrv; // Standalone is only valid in MultiServerCluster when using MongoDBPlusSrv scheme
                     }
                     return serverType.IsReplicaSetMember() || serverType == ServerType.ShardRouter;
                 default:

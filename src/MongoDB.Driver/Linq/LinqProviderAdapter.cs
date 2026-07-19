@@ -18,7 +18,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
-using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Optimizers;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Stages;
@@ -199,17 +198,8 @@ namespace Etherna.MongoDB.Driver.Linq
                 AstProjectStage projectStage;
                 IBsonSerializer projectionSerializer;
 
-                var wireVersion = context.TranslationOptions.CompatibilityLevel.ToWireVersion();
-                if (forFind && !Feature.FindProjectionExpressions.IsSupported(wireVersion))
-                {
-                    projectStage = null;
-                    projectionSerializer = ClientSideProjectionDeserializer.Create(inputSerializer, expression);
-                }
-                else
-                {
-                    (projectStage, projectionSerializer) = ClientSideProjectionTranslator.CreateProjectSnippetsStage(context, expression, inputSerializer);
-                    projectStage = simplifier.VisitAndConvert(projectStage);
-                }
+                (projectStage, projectionSerializer) = ClientSideProjectionTranslator.CreateProjectSnippetsStage(context, expression, inputSerializer);
+                projectStage = simplifier.VisitAndConvert(projectStage);
 
                 var renderedProjection = projectStage?.Render()["$project"].AsBsonDocument;
                 return new RenderedProjectionDefinition<TOutput>(renderedProjection, (IBsonSerializer<TOutput>)projectionSerializer);

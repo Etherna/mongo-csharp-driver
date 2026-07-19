@@ -24,6 +24,7 @@ using Microsoft.Extensions.Logging;
 using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors;
 using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Logging;
 using Etherna.MongoDB.Driver.Core.Misc;
@@ -43,6 +44,7 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
         #endregion
 
         private readonly TimeSpan _minHeartbeatInterval = __minHeartbeatIntervalDefault;
+        private readonly ClientMetadata _clientMetadata;
         private readonly IClusterClock _clusterClock = new ClusterClock();
         private readonly ClusterId _clusterId;
         private ExpirableClusterDescription _expirableClusterDescription;
@@ -56,10 +58,11 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
         private readonly InterlockedInt32 _state;
 
         // constructors
-        protected Cluster(ClusterSettings settings, IClusterableServerFactory serverFactory, IEventSubscriber eventSubscriber, ILoggerFactory loggerFactory)
+        protected Cluster(ClusterSettings settings, IClusterableServerFactory serverFactory, IEventSubscriber eventSubscriber, ILoggerFactory loggerFactory, ClientMetadata clientMetadata)
         {
             _settings = Ensure.IsNotNull(settings, nameof(settings));
             Ensure.That(!_settings.LoadBalanced, "LoadBalanced mode is not supported.");
+            _clientMetadata = Ensure.IsNotNull(clientMetadata, nameof(clientMetadata));
             _serverFactory = Ensure.IsNotNull(serverFactory, nameof(serverFactory));
             Ensure.IsNotNull(eventSubscriber, nameof(eventSubscriber));
             _state = new InterlockedInt32(State.Initial);
@@ -67,7 +70,7 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             _expirableClusterDescription = new (this, ClusterDescription.CreateInitial(_clusterId, _settings.DirectConnection));
             _latencyLimitingServerSelector = new LatencyLimitingServerSelector(settings.LocalThreshold);
             _serverSelectionWaitQueue = new ServerSelectionWaitQueue(this);
-            _serverSessionPool = new CoreServerSessionPool(this);
+            _serverSessionPool = new CoreServerSessionPool(this, loggerFactory?.CreateLogger<LogCategories.Client>());
             _clusterEventLogger = loggerFactory.CreateEventLogger<LogCategories.SDAM>(eventSubscriber);
             _serverSelectionEventLogger = loggerFactory.CreateEventLogger<LogCategories.ServerSelection>(eventSubscriber);
         }
@@ -88,6 +91,11 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
         public ICoreServerSession AcquireServerSession()
         {
             return _serverSessionPool.AcquireSession();
+        }
+
+        public void AppendClientMetadata(LibraryInfo libraryInfo)
+        {
+            _clientMetadata.Append(libraryInfo);
         }
 
         protected IClusterableServer CreateServer(EndPoint endPoint)
@@ -128,6 +136,21 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             if (_state.TryChange(State.Initial, State.Open))
             {
                 _clusterEventLogger.Logger?.LogTrace(_clusterId, "Cluster initialized");
+            }
+        }
+
+        protected void ReleaseServerSessionPool()
+        {
+            // Do the sessionPool cleanup only if we have a server available immediately, do not have to wait here.
+            var server = Servers.FirstOrDefault(x => x.Description.State == ServerState.Connected && x.Description.Type == ServerType.ReplicaSetPrimary);
+            if (server == null)
+            {
+                server = Servers.FirstOrDefault(x => x.Description.State == ServerState.Connected);
+            }
+
+            if (server != null)
+            {
+                _serverSessionPool.CloseAndDispose(server);
             }
         }
 

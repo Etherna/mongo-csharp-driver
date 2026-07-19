@@ -322,6 +322,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors
             return node.Update(VisitAndConvert(node.Filter));
         }
 
+        public virtual AstNode VisitEncStrExpression(AstEncStrExpression node)
+        {
+            return node.Update(VisitAndConvert(node.Input), VisitAndConvert(node.Value));
+        }
+
         public virtual AstNode VisitExistsFilterOperation(AstExistsFilterOperation node)
         {
             return node;
@@ -537,6 +542,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors
             return node.Update(VisitAndConvert(node.Input), node.Window);
         }
 
+        public virtual AstNode VisitMinMaxScalerWindowExpression(AstMinMaxScalerWindowExpression node)
+        {
+            return node.Update(VisitAndConvert(node.Input), VisitAndConvert(node.MinValue), VisitAndConvert(node.MaxValue), node.Window);
+        }
+
         public virtual AstNode VisitMergeStage(AstMergeStage node)
         {
             return node.Update(VisitAndConvert(node.Let));
@@ -615,6 +625,11 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Visitors
         public virtual AstNode VisitPickExpression(AstPickExpression node)
         {
             return node.Update(node.Operator, VisitAndConvert(node.Source), VisitAndConvert(node.As), node.SortBy, VisitAndConvert(node.Selector), VisitAndConvert(node.N));
+        }
+
+        public virtual AstNode VisitPickWindowExpression(AstPickWindowExpression node)
+        {
+            return node.Update(node.Operator, node.SortBy, VisitAndConvert(node.Selector), VisitAndConvert(node.N), node.Window);
         }
 
         public virtual AstNode VisitPipeline(AstPipeline node)

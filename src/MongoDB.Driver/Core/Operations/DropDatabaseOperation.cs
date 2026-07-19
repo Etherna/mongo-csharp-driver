@@ -13,7 +13,6 @@
 * limitations under the License.
 */
 
-using System;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
@@ -83,9 +82,11 @@ namespace Etherna.MongoDB.Driver.Core.Operations
         public BsonDocument CreateCommand(OperationContext operationContext, ICoreSessionHandle session, ConnectionDescription connectionDescription, long? transactionNumber)
         {
             var writeConcern = WriteConcernHelper.GetEffectiveWriteConcern(operationContext, session, _writeConcern);
+            var readConcern = ReadConcernHelper.GetReadConcernForWriteCommand(session, connectionDescription);
             return new BsonDocument
             {
                 { "dropDatabase", 1 },
+                { "readConcern", readConcern, readConcern != null },
                 { "writeConcern", writeConcern, writeConcern != null }
             };
         }

@@ -24,6 +24,7 @@ using Microsoft.Extensions.Logging;
 using Etherna.MongoDB.Driver.Core.Bindings;
 using Etherna.MongoDB.Driver.Core.Clusters.ServerSelectors;
 using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Logging;
 using Etherna.MongoDB.Driver.Core.Misc;
@@ -33,6 +34,7 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
 {
     internal sealed class LoadBalancedCluster : IClusterInternal, IDnsMonitoringCluster
     {
+        private readonly ClientMetadata _clientMetadata;
         private readonly IClusterClock _clusterClock;
         private readonly ClusterId _clusterId;
         private readonly ClusterType _clusterType = ClusterType.LoadBalanced;
@@ -53,13 +55,15 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             ClusterSettings settings,
             IClusterableServerFactory serverFactory,
             IEventSubscriber eventSubscriber,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            ClientMetadata clientMetadata)
             : this(
                   settings,
                   serverFactory,
                   eventSubscriber,
                   loggerFactory,
-                  dnsMonitorFactory: new DnsMonitorFactory(new EventAggregator(), loggerFactory))  // should not trigger any events
+                  dnsMonitorFactory: new DnsMonitorFactory(new EventAggregator(), loggerFactory),  // should not trigger any events
+                  clientMetadata: clientMetadata)
         {
         }
 
@@ -68,7 +72,8 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             IClusterableServerFactory serverFactory,
             IEventSubscriber eventSubscriber,
             ILoggerFactory loggerFactory,
-            IDnsMonitorFactory dnsMonitorFactory)
+            IDnsMonitorFactory dnsMonitorFactory,
+            ClientMetadata clientMetadata)
         {
             Ensure.That(!settings.DirectConnection, $"DirectConnection mode is not supported for {nameof(LoadBalancedCluster)}.");
             Ensure.That(settings.LoadBalanced, $"Only Load balanced mode is supported for a {nameof(LoadBalancedCluster)}.");
@@ -76,6 +81,7 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             Ensure.IsNull(settings.ReplicaSetName, nameof(settings.ReplicaSetName));
             Ensure.That(settings.SrvMaxHosts == 0, "srvMaxHosts cannot be used with load balanced mode.");
 
+            _clientMetadata = Ensure.IsNotNull(clientMetadata, nameof(clientMetadata));
             _clusterClock = new ClusterClock();
             _clusterId = new ClusterId();
 
@@ -86,7 +92,7 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             _serverFactory = Ensure.IsNotNull(serverFactory, nameof(serverFactory));
             _serverReadyTaskCompletionSource = new TaskCompletionSource<bool>();
 
-            _serverSessionPool = new CoreServerSessionPool(this);
+            _serverSessionPool = new CoreServerSessionPool(this, loggerFactory?.CreateLogger<LogCategories.Client>());
 
             _state = new InterlockedInt32(State.Initial);
 
@@ -111,6 +117,11 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
             return _serverSessionPool.AcquireSession();
         }
 
+        public void AppendClientMetadata(LibraryInfo libraryInfo)
+        {
+            _clientMetadata.Append(libraryInfo);
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -131,6 +142,8 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
                     var stopwatch = Stopwatch.StartNew();
                     if (_server != null)
                     {
+                        _serverSessionPool.CloseAndDispose(_server);
+
                         _server.DescriptionChanged -= ServerDescriptionChangedHandler;
                         _server.Dispose();
                     }

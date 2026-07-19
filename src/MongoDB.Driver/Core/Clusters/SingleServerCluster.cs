@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.Net;
 using Microsoft.Extensions.Logging;
 using Etherna.MongoDB.Driver.Core.Configuration;
+using Etherna.MongoDB.Driver.Core.Connections;
 using Etherna.MongoDB.Driver.Core.Events;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Driver.Core.Servers;
@@ -30,8 +31,8 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
         private readonly InterlockedInt32 _state;
         private readonly string _replicaSetName;
 
-        public SingleServerCluster(ClusterSettings settings, IClusterableServerFactory serverFactory, IEventSubscriber eventSubscriber, ILoggerFactory loggerFactory)
-            : base(settings, serverFactory, eventSubscriber, loggerFactory)
+        public SingleServerCluster(ClusterSettings settings, IClusterableServerFactory serverFactory, IEventSubscriber eventSubscriber, ILoggerFactory loggerFactory, ClientMetadata clientMetadata)
+            : base(settings, serverFactory, eventSubscriber, loggerFactory, clientMetadata)
         {
             Ensure.That(settings.DirectConnection, $"DirectConnection mode is not supported for {nameof(SingleServerCluster)}.");
             Ensure.That(settings.SrvMaxHosts == 0, "srvMaxHosts cannot be used with a single server cluster.");
@@ -54,6 +55,8 @@ namespace Etherna.MongoDB.Driver.Core.Clusters
 
                     if (_server != null)
                     {
+                        ReleaseServerSessionPool();
+
                         _clusterEventLogger.LogAndPublish(new ClusterRemovingServerEvent(_server.ServerId, "Removing server."));
 
                         _server.DescriptionChanged -= ServerDescriptionChanged;
