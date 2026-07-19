@@ -7,7 +7,7 @@ The fork exists primarily to support **scoped, per-context BSON serialization**:
 
 ## Fork model
 - Branch `etherna` is the fork's main line. Remote `origin` is `Etherna/mongo-csharp-driver`; remote `mongodb` is the official repository.
-- Official release tags are merged into `etherna` periodically (3.2.1 → 3.3.0 → 3.4.0 → 3.5.0 → 3.6.0 → **3.8.1**, the current upstream baseline).
+- Official release tags are merged into `etherna` periodically (3.2.1 → 3.3.0 → 3.4.0 → 3.5.0 → 3.6.0 → 3.8.1 → **3.10.0**, the current upstream baseline).
 - Fork releases are tagged `eth-v<major>.<minor>.<patch>`. Versions are computed by GitVersion (`GitVersion.yml` + `GitVersion.MsBuild`); pushing an `eth-v*` tag triggers `.github/workflows/nuget-stable-deploy.yml`, which builds, packs, and pushes to NuGet.
 
 ## Tech Stack
@@ -28,7 +28,7 @@ Only `src/` is tracked. The upstream test suites, spec corpora, and CI are **not
 Directories such as `tests/`, `benchmarks/`, or `specifications/` may exist on disk as ignored leftovers of upstream merges: they are untracked, not referenced by the solution, and reference the old upstream project names. Do not edit or build them.
 
 ## Differences vs the official driver
-Baseline for this section: upstream tag `v3.8.1`. Beyond the mechanical namespace rename (~1900 files), the semantic delta is small and deliberate.
+Baseline for this section: upstream tag `v3.10.0`. Beyond the mechanical namespace rename (~1900 files), the semantic delta is small and deliberate.
 
 ### Packaging & naming
 - Namespaces and project/package IDs renamed `MongoDB.*` → `Etherna.MongoDB.*`; `Authors` is `Etherna SA` and package descriptions state "Fork by Etherna of...".
