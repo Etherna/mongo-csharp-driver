@@ -377,7 +377,7 @@ namespace Etherna.MongoDB.Bson.Serialization
             }
 
             var actualType = value.GetType();
-            if (actualType == typeof(TClass))
+            if (actualType == typeof(TClass) || args.SerializeAsNominalType)
             {
                 SerializeClass(context, args, value);
                 return;

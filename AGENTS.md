@@ -46,6 +46,9 @@ Baseline for this section: upstream tag `v3.10.0`. Beyond the mechanical namespa
 ### Discriminator convention default (behavioral)
 `BsonSerializer.LookupDiscriminatorConvention` is rewritten: for a class whose base is `object` with no convention registered for `object`, the fork defaults to `StandardDiscriminatorConvention.Hierarchical` where upstream defaults to `Scalar`. Documents containing discriminators (`_t`) can therefore serialize **differently from the official driver** (hierarchy array vs. single name). Conventions are also registered per-type on lookup rather than walking/registering the whole ancestor chain upstream-style.
 
+### Serialize-as-nominal-type honored by class maps (behavioral)
+`BsonClassMapSerializer<TClass>.Serialize` honors `BsonSerializationArgs.SerializeAsNominalType`: when the flag is set, the value serializes through the class map of `TClass` even when its runtime type differs, instead of delegating to the actual type's serializer. This matches the behavior `ClassSerializerBase` and `EnumerableSerializerBase` already have upstream (where the flag is otherwise ignored by class maps, making `SerializeAsNominalTypeSerializer` unusable with class-mapped types), and lets a caller serialize a runtime-generated subclass — e.g. a MongODM proxy model — through its base class map. Upstream support is requested by CSHARP-3153. MongODM relies on this behavior for proxy model serialization since MODM-189.
+
 ### Secondary API changes
 - `FieldValueSerializerHelper` is `public` (internal upstream).
 - MONGODB-AWS error messages reworded ("MongoDB-AWS ..."); otherwise cosmetic whitespace/EOL differences only.
