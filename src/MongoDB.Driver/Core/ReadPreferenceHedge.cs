@@ -15,6 +15,7 @@
 
 using System;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -91,7 +92,7 @@ namespace Etherna.MongoDB.Driver
         /// <inheritdoc/>
         public override string ToString()
         {
-            return ToBsonDocument().ToJson();
+            return ToBsonDocument().ToJson(args: new BsonSerializationArgs { ForceStaticSerializerRegistry = true });
         }
     }
 }

@@ -66,7 +66,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         {
             var bsonWriter = context.Writer;
             bsonWriter.WriteJavaScriptWithScope(value.Code);
-            BsonDocumentSerializer.Instance.Serialize(context, value.Scope);
+            BsonDocumentSerializer.Instance.Serialize(context, value.Scope, args.ForceStaticSerializerRegistry);
         }
     }
 }

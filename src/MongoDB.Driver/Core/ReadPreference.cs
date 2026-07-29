@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Misc;
 using Etherna.MongoDB.Shared;
 
@@ -304,7 +305,7 @@ namespace Etherna.MongoDB.Driver
             if (_hedge != null)
             {
                 sb.Append(", Hedge : ");
-                sb.Append(_hedge.ToBsonDocument().ToJson());
+                sb.Append(_hedge.ToBsonDocument().ToJson(args: new BsonSerializationArgs { ForceStaticSerializerRegistry = true }));
             }
             sb.Append(" }");
             return sb.ToString();

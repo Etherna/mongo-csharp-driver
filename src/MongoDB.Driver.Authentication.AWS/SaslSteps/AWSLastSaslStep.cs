@@ -77,12 +77,12 @@ namespace Etherna.MongoDB.Driver.Authentication.AWS.SaslSteps
                 { "t", credentials.SessionToken, credentials.SessionToken != null }
             };
 
-            return document.ToBson();
+            return document.ToBson(args: new BsonSerializationArgs { ForceStaticSerializerRegistry = true });
         }
 
         private void ParseServerResponse(SaslConversation conversation, byte[] bytesReceivedFromServer, out byte[] serverNonce, out string host)
         {
-            var serverFirstMessageDocument = BsonSerializer.Deserialize<BsonDocument>(bytesReceivedFromServer);
+            var serverFirstMessageDocument = BsonSerializer.Deserialize<BsonDocument>(bytesReceivedFromServer, forceStaticSerializerRegistry: true);
             if (serverFirstMessageDocument.Names.Any(n => !__serverResponseExpectedNames.Contains(n)))
             {
                 var unexpectedNames = serverFirstMessageDocument.Names.Except(__serverResponseExpectedNames);

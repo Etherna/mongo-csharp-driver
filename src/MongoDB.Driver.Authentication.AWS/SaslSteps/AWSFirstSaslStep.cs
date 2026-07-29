@@ -16,6 +16,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Authentication.AWS.CredentialsSources;
 
 namespace Etherna.MongoDB.Driver.Authentication.AWS.SaslSteps
@@ -45,7 +46,7 @@ namespace Etherna.MongoDB.Driver.Authentication.AWS.SaslSteps
                 { "p", (int)'n' }
             };
 
-            return (document.ToBson(), new AWSLastSaslStep(nonce, _credentialsSource, _clock));
+            return (document.ToBson(args: new BsonSerializationArgs { ForceStaticSerializerRegistry = true }), new AWSLastSaslStep(nonce, _credentialsSource, _clock));
         }
 
         public Task<(byte[] BytesToSendToServer, ISaslStep NextStep)> ExecuteAsync(

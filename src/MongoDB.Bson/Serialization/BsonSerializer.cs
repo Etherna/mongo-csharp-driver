@@ -88,12 +88,13 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <typeparam name="TNominalType">The nominal type of the object.</typeparam>
         /// <param name="document">The BsonDocument.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static TNominalType Deserialize<TNominalType>(BsonDocument document, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static TNominalType Deserialize<TNominalType>(BsonDocument document, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var bsonReader = new BsonDocumentReader(document))
             {
-                return Deserialize<TNominalType>(bsonReader, configurator);
+                return Deserialize<TNominalType>(bsonReader, configurator, forceStaticSerializerRegistry);
             }
         }
 
@@ -103,11 +104,12 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <typeparam name="TNominalType">The nominal type of the object.</typeparam>
         /// <param name="bsonReader">The BsonReader.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static TNominalType Deserialize<TNominalType>(IBsonReader bsonReader, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static TNominalType Deserialize<TNominalType>(IBsonReader bsonReader, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
-            var serializer = LookupSerializer<TNominalType>();
-            var context = BsonDeserializationContext.CreateRoot(bsonReader, configurator);
+            var serializer = LookupSerializer<TNominalType>(forceStaticSerializerRegistry);
+            var context = BsonDeserializationContext.CreateRoot(bsonReader, configurator, forceStaticSerializerRegistry);
             return serializer.Deserialize(context);
         }
 
@@ -117,13 +119,14 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <typeparam name="TNominalType">The nominal type of the object.</typeparam>
         /// <param name="bytes">The BSON byte array.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static TNominalType Deserialize<TNominalType>(byte[] bytes, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static TNominalType Deserialize<TNominalType>(byte[] bytes, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var buffer = new ByteArrayBuffer(bytes, isReadOnly: true))
             using (var stream = new ByteBufferStream(buffer))
             {
-                return Deserialize<TNominalType>(stream, configurator);
+                return Deserialize<TNominalType>(stream, configurator, forceStaticSerializerRegistry);
             }
         }
 
@@ -133,12 +136,13 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <typeparam name="TNominalType">The nominal type of the object.</typeparam>
         /// <param name="stream">The BSON Stream.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static TNominalType Deserialize<TNominalType>(Stream stream, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static TNominalType Deserialize<TNominalType>(Stream stream, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var bsonReader = new BsonBinaryReader(stream))
             {
-                return Deserialize<TNominalType>(bsonReader, configurator);
+                return Deserialize<TNominalType>(bsonReader, configurator, forceStaticSerializerRegistry);
             }
         }
 
@@ -148,12 +152,13 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <typeparam name="TNominalType">The nominal type of the object.</typeparam>
         /// <param name="json">The JSON string.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static TNominalType Deserialize<TNominalType>(string json, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static TNominalType Deserialize<TNominalType>(string json, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var bsonReader = new JsonReader(json))
             {
-                return Deserialize<TNominalType>(bsonReader, configurator);
+                return Deserialize<TNominalType>(bsonReader, configurator, forceStaticSerializerRegistry);
             }
         }
 
@@ -163,12 +168,13 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <typeparam name="TNominalType">The nominal type of the object.</typeparam>
         /// <param name="textReader">The JSON TextReader.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static TNominalType Deserialize<TNominalType>(TextReader textReader, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static TNominalType Deserialize<TNominalType>(TextReader textReader, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var bsonReader = new JsonReader(textReader))
             {
-                return Deserialize<TNominalType>(bsonReader, configurator);
+                return Deserialize<TNominalType>(bsonReader, configurator, forceStaticSerializerRegistry);
             }
         }
 
@@ -178,12 +184,13 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <param name="document">The BsonDocument.</param>
         /// <param name="nominalType">The nominal type of the object.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static object Deserialize(BsonDocument document, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static object Deserialize(BsonDocument document, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var bsonReader = new BsonDocumentReader(document))
             {
-                return Deserialize(bsonReader, nominalType, configurator);
+                return Deserialize(bsonReader, nominalType, configurator, forceStaticSerializerRegistry);
             }
         }
 
@@ -193,11 +200,12 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <param name="bsonReader">The BsonReader.</param>
         /// <param name="nominalType">The nominal type of the object.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static object Deserialize(IBsonReader bsonReader, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static object Deserialize(IBsonReader bsonReader, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
-            var serializer = LookupSerializer(nominalType);
-            var context = BsonDeserializationContext.CreateRoot(bsonReader, configurator);
+            var serializer = LookupSerializer(nominalType, forceStaticSerializerRegistry);
+            var context = BsonDeserializationContext.CreateRoot(bsonReader, configurator, forceStaticSerializerRegistry);
             return serializer.Deserialize(context);
         }
 
@@ -207,13 +215,14 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <param name="bytes">The BSON byte array.</param>
         /// <param name="nominalType">The nominal type of the object.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static object Deserialize(byte[] bytes, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static object Deserialize(byte[] bytes, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var buffer = new ByteArrayBuffer(bytes, isReadOnly: true))
             using (var stream = new ByteBufferStream(buffer))
             {
-                return Deserialize(stream, nominalType, configurator);
+                return Deserialize(stream, nominalType, configurator, forceStaticSerializerRegistry);
             }
         }
 
@@ -223,12 +232,13 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <param name="stream">The BSON Stream.</param>
         /// <param name="nominalType">The nominal type of the object.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static object Deserialize(Stream stream, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static object Deserialize(Stream stream, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var bsonReader = new BsonBinaryReader(stream))
             {
-                return Deserialize(bsonReader, nominalType, configurator);
+                return Deserialize(bsonReader, nominalType, configurator, forceStaticSerializerRegistry);
             }
         }
 
@@ -238,12 +248,13 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <param name="json">The JSON string.</param>
         /// <param name="nominalType">The nominal type of the object.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static object Deserialize(string json, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static object Deserialize(string json, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var bsonReader = new JsonReader(json))
             {
-                return Deserialize(bsonReader, nominalType, configurator);
+                return Deserialize(bsonReader, nominalType, configurator, forceStaticSerializerRegistry);
             }
         }
 
@@ -253,12 +264,13 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// <param name="textReader">The JSON TextReader.</param>
         /// <param name="nominalType">The nominal type of the object.</param>
         /// <param name="configurator">The configurator.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static object Deserialize(TextReader textReader, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null)
+        public static object Deserialize(TextReader textReader, Type nominalType, Action<BsonDeserializationContext.Builder> configurator = null, bool forceStaticSerializerRegistry = false)
         {
             using (var bsonReader = new JsonReader(textReader))
             {
-                return Deserialize(bsonReader, nominalType, configurator);
+                return Deserialize(bsonReader, nominalType, configurator, forceStaticSerializerRegistry);
             }
         }
 

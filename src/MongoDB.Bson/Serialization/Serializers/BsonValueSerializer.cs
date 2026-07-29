@@ -125,17 +125,17 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
         {
             switch (value.BsonType)
             {
-                case BsonType.Array: BsonArraySerializer.Instance.Serialize(context, (BsonArray)value); break;
+                case BsonType.Array: BsonArraySerializer.Instance.Serialize(context, (BsonArray)value, args.ForceStaticSerializerRegistry); break;
                 case BsonType.Binary: BsonBinaryDataSerializer.Instance.Serialize(context, (BsonBinaryData)value); break;
                 case BsonType.Boolean: BsonBooleanSerializer.Instance.Serialize(context, (BsonBoolean)value); break;
                 case BsonType.DateTime: BsonDateTimeSerializer.Instance.Serialize(context, (BsonDateTime)value); break;
                 case BsonType.Decimal128: BsonDecimal128Serializer.Instance.Serialize(context, (BsonDecimal128)value); break;
-                case BsonType.Document: BsonDocumentSerializer.Instance.Serialize(context, (BsonDocument)value); break;
+                case BsonType.Document: BsonDocumentSerializer.Instance.Serialize(context, (BsonDocument)value, args.ForceStaticSerializerRegistry); break;
                 case BsonType.Double: BsonDoubleSerializer.Instance.Serialize(context, (BsonDouble)value); break;
                 case BsonType.Int32: BsonInt32Serializer.Instance.Serialize(context, (BsonInt32)value); break;
                 case BsonType.Int64: BsonInt64Serializer.Instance.Serialize(context, (BsonInt64)value); break;
                 case BsonType.JavaScript: BsonJavaScriptSerializer.Instance.Serialize(context, (BsonJavaScript)value); break;
-                case BsonType.JavaScriptWithScope: BsonJavaScriptWithScopeSerializer.Instance.Serialize(context, (BsonJavaScriptWithScope)value); break;
+                case BsonType.JavaScriptWithScope: BsonJavaScriptWithScopeSerializer.Instance.Serialize(context, (BsonJavaScriptWithScope)value, args.ForceStaticSerializerRegistry); break;
                 case BsonType.MaxKey: BsonMaxKeySerializer.Instance.Serialize(context, (BsonMaxKey)value); break;
                 case BsonType.MinKey: BsonMinKeySerializer.Instance.Serialize(context, (BsonMinKey)value); break;
                 case BsonType.Null: BsonNullSerializer.Instance.Serialize(context, (BsonNull)value); break;

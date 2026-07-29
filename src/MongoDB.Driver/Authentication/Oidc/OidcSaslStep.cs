@@ -15,6 +15,7 @@
 
 using System;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 
 namespace Etherna.MongoDB.Driver.Authentication.Oidc
 {
@@ -30,7 +31,7 @@ namespace Etherna.MongoDB.Driver.Authentication.Oidc
             }
 
             UsedCredentials = oidcCredentials;
-            var payload = new BsonDocument("jwt", oidcCredentials.AccessToken).ToBson();
+            var payload = new BsonDocument("jwt", oidcCredentials.AccessToken).ToBson(args: new BsonSerializationArgs { ForceStaticSerializerRegistry = true });
             return (payload, null);
         }
     }

@@ -145,7 +145,7 @@ namespace Etherna.MongoDB.Bson.Serialization.Serializers
                 if (idIndex != -1)
                 {
                     bsonWriter.WriteName("_id");
-                    BsonValueSerializer.Instance.Serialize(context, value[idIndex]);
+                    BsonValueSerializer.Instance.Serialize(context, value[idIndex], args.ForceStaticSerializerRegistry);
                     alreadySerializedIndex = idIndex;
                 }
             }

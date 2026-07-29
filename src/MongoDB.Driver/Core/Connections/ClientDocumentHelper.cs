@@ -19,6 +19,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Etherna.MongoDB.Bson;
+using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Misc;
 
@@ -406,7 +407,7 @@ namespace Etherna.MongoDB.Driver.Core.Connections
 
         internal static BsonDocument RemoveOptionalFieldsUntilDocumentIsLessThan512Bytes(BsonDocument clientDocument)
         {
-            while (clientDocument != null && clientDocument.ToBson().Length > 512)
+            while (clientDocument != null && clientDocument.ToBson(args: new BsonSerializationArgs { ForceStaticSerializerRegistry = true }).Length > 512)
             {
                 clientDocument = RemoveOneOptionalField(clientDocument);
             }
