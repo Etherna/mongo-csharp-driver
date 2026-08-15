@@ -612,7 +612,7 @@ namespace Etherna.MongoDB.Bson
             bool forceStaticSerializerRegistry = false)
         {
             EnsureIsMaterialized();
-            return base.TryGetValue(name, out value);
+            return base.TryGetValue(name, out value, forceStaticSerializerRegistry);
         }
 
         // protected methods

@@ -29,30 +29,33 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         }
 
         // public methods
-        public CommandResponseMessage ReadMessage()
+        public CommandResponseMessage ReadMessage(
+            bool forceStaticSerializerRegistry = false)
         {
-            var wrappedMessage = (CommandMessage)_wrappedEncoder.ReadMessage();
+            var wrappedMessage = (CommandMessage)_wrappedEncoder.ReadMessage(forceStaticSerializerRegistry);
             return new CommandResponseMessage(wrappedMessage);
         }
 
-        public void WriteMessage(CommandResponseMessage message)
+        public void WriteMessage(
+            CommandResponseMessage message,
+            bool forceStaticSerializerRegistry = false)
         {
             var wrappedMessage = message.WrappedMessage;
-            _wrappedEncoder.WriteMessage(wrappedMessage);
+            _wrappedEncoder.WriteMessage(wrappedMessage, forceStaticSerializerRegistry);
         }
 
         // explicit interface implementations
         MongoDBMessage IMessageEncoder.ReadMessage(
             bool forceStaticSerializerRegistry)
         {
-            return ReadMessage();
+            return ReadMessage(forceStaticSerializerRegistry);
         }
 
         void IMessageEncoder.WriteMessage(
             MongoDBMessage message,
             bool forceStaticSerializerRegistry)
         {
-            WriteMessage((CommandResponseMessage)message);
+            WriteMessage((CommandResponseMessage)message, forceStaticSerializerRegistry);
         }
     }
 }

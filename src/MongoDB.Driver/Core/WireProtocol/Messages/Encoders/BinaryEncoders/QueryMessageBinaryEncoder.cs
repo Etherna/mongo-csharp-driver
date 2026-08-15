@@ -139,7 +139,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             stream.WriteInt32(message.Skip);
             stream.WriteInt32(message.BatchSize);
             WriteQuery(binaryWriter, message.Query, message.QueryValidator, forceStaticSerializerRegistry);
-            WriteOptionalFields(binaryWriter, message.Fields);
+            WriteOptionalFields(binaryWriter, message.Fields, forceStaticSerializerRegistry);
             stream.BackpatchSize(messageStartPosition);
 
             message.PostWriteAction?.Invoke(new PostProcessor(message, stream, messageStartPosition));
@@ -154,12 +154,15 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             }
         }
 
-        private void WriteOptionalFields(BsonBinaryWriter binaryWriter, BsonDocument fields)
+        private void WriteOptionalFields(
+            BsonBinaryWriter binaryWriter,
+            BsonDocument fields,
+            bool forceStaticSerializerRegistry = false)
         {
             if (fields != null)
             {
                 var context = BsonSerializationContext.CreateRoot(binaryWriter);
-                BsonDocumentSerializer.Instance.Serialize(context, fields);
+                BsonDocumentSerializer.Instance.Serialize(context, fields, forceStaticSerializerRegistry);
             }
         }
 

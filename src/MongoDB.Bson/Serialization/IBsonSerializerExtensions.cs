@@ -30,10 +30,18 @@ namespace Etherna.MongoDB.Bson.Serialization
         /// </summary>
         /// <param name="serializer">The serializer.</param>
         /// <param name="context">The deserialization context.</param>
+        /// <param name="forceStaticSerializerRegistry">Force to use static serializer registry</param>
         /// <returns>A deserialized value.</returns>
-        public static object Deserialize(this IBsonSerializer serializer, BsonDeserializationContext context)
+        public static object Deserialize(
+            this IBsonSerializer serializer,
+            BsonDeserializationContext context,
+            bool forceStaticSerializerRegistry = false)
         {
-            var args = new BsonDeserializationArgs { NominalType = serializer.ValueType };
+            var args = new BsonDeserializationArgs
+            {
+                ForceStaticSerializerRegistry = forceStaticSerializerRegistry,
+                NominalType = serializer.ValueType
+            };
             return serializer.Deserialize(context, args);
         }
 

@@ -66,15 +66,15 @@ namespace Etherna.MongoDB.Driver.Authentication.AWS
             }
             if (password != null && username == null)
             {
-                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a password is provided via settings then a username must be provided also.");
+                throw new InvalidOperationException("When using MONGODB-AWS authentication if a password is provided via settings then a username must be provided also.");
             }
             if (username != null && password == null)
             {
-                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a username is provided via settings then a password must be provided also.");
+                throw new InvalidOperationException("When using MONGODB-AWS authentication if a username is provided via settings then a password must be provided also.");
             }
             if (sessionToken != null && (username == null || password == null))
             {
-                throw new InvalidOperationException("When using Etherna.MongoDB-AWS authentication if a session token is provided via settings then a username and password must be provided also.");
+                throw new InvalidOperationException("When using MONGODB-AWS authentication if a session token is provided via settings then a username and password must be provided also.");
             }
 
             return new AWSCredentials(accessKeyId: username, secretAccessKey: password, sessionToken);

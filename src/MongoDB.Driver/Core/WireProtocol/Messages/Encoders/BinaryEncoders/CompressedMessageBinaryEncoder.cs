@@ -40,7 +40,8 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
             _originalEncoderSelector = originalEncoderSelector;
         }
 
-        public CompressedMessage ReadMessage()
+        public CompressedMessage ReadMessage(
+            bool forceStaticSerializerRegistry = false)
         {
             var reader = CreateBinaryReader();
             var stream = reader.BsonStream;
@@ -70,7 +71,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
 
                 var originalMessageEncoderFactory = new BinaryMessageEncoderFactory(uncompressedStream, _encoderSettings, _compressorSource);
                 var originalMessageEncoder = _originalEncoderSelector.GetEncoder(originalMessageEncoderFactory);
-                var originalMessage = originalMessageEncoder.ReadMessage();
+                var originalMessage = originalMessageEncoder.ReadMessage(forceStaticSerializerRegistry);
 
                 return new CompressedMessage(originalMessage, null, compressorType);
             }
@@ -107,7 +108,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         MongoDBMessage IMessageEncoder.ReadMessage(
             bool forceStaticSerializerRegistry)
         {
-            return ReadMessage();
+            return ReadMessage(forceStaticSerializerRegistry);
         }
 
         void IMessageEncoder.WriteMessage(

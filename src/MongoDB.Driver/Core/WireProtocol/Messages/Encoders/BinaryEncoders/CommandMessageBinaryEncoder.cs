@@ -91,14 +91,14 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
         MongoDBMessage IMessageEncoder.ReadMessage(
             bool forceStaticSerializerRegistry)
         {
-            return ReadMessage();
+            return ReadMessage(forceStaticSerializerRegistry);
         }
 
         void IMessageEncoder.WriteMessage(
             MongoDBMessage message,
             bool forceStaticSerializerRegistry)
         {
-            WriteMessage((CommandMessage)message);
+            WriteMessage((CommandMessage)message, forceStaticSerializerRegistry);
         }
 
         // private methods

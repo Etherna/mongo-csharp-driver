@@ -110,7 +110,7 @@ namespace Etherna.MongoDB.Bson.Serialization
         {
             var serializer = LookupSerializer<TNominalType>(forceStaticSerializerRegistry);
             var context = BsonDeserializationContext.CreateRoot(bsonReader, configurator, forceStaticSerializerRegistry);
-            return serializer.Deserialize(context);
+            return serializer.Deserialize(context, forceStaticSerializerRegistry);
         }
 
         /// <summary>
@@ -206,7 +206,7 @@ namespace Etherna.MongoDB.Bson.Serialization
         {
             var serializer = LookupSerializer(nominalType, forceStaticSerializerRegistry);
             var context = BsonDeserializationContext.CreateRoot(bsonReader, configurator, forceStaticSerializerRegistry);
-            return serializer.Deserialize(context);
+            return serializer.Deserialize(context, forceStaticSerializerRegistry);
         }
 
         /// <summary>

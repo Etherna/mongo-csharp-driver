@@ -16,7 +16,7 @@ The fork exists primarily to support **scoped, per-context BSON serialization**:
 - C# LangVersion 12
 
 ## Project Structure
-Only `src/` is tracked. The upstream test suites, spec corpora, and CI are **not part of the fork** (see below); the solution contains only the four library projects.
+Only `src/` and `test/` are tracked. The upstream test suites, spec corpora, and CI are **not part of the fork** (see below).
 
 | Directory | Project file | NuGet package |
 |---|---|---|
@@ -24,8 +24,9 @@ Only `src/` is tracked. The upstream test suites, spec corpora, and CI are **not
 | `src/MongoDB.Driver/` | `Etherna.MongoDB.Driver.csproj` | `Etherna.MongoDB.Driver` |
 | `src/MongoDB.Driver.Encryption/` | `Etherna.MongoDB.Driver.Encryption.csproj` | `Etherna.MongoDB.Driver.Encryption` |
 | `src/MongoDB.Driver.Authentication.AWS/` | `Etherna.MongoDB.Driver.Authentication.AWS.csproj` | `Etherna.MongoDB.Driver.Authentication.AWS` |
+| `test/Etherna.MongoDB.Fork.Tests/` | `Etherna.MongoDB.Fork.Tests.csproj` | *(not packable)* |
 
-Directories such as `tests/`, `benchmarks/`, or `specifications/` may exist on disk as ignored leftovers of upstream merges: they are untracked, not referenced by the solution, and reference the old upstream project names. Do not edit or build them.
+Note the singular `test/` — the plural `tests/`, along with `benchmarks/` and `specifications/`, may exist on disk as ignored leftovers of upstream merges: they are untracked, not referenced by the solution, and reference the old upstream project names. Do not edit or build them.
 
 ## Differences vs the official driver
 Baseline for this section: upstream tag `v3.10.0`. Beyond the mechanical namespace rename (~1900 files), the semantic delta is small and deliberate.
@@ -51,10 +52,20 @@ Baseline for this section: upstream tag `v3.10.0`. Beyond the mechanical namespa
 
 ### Secondary API changes
 - `FieldValueSerializerHelper` is `public` (internal upstream).
-- MONGODB-AWS error messages reworded ("MongoDB-AWS ..."); otherwise cosmetic whitespace/EOL differences only.
+- Otherwise cosmetic whitespace/EOL differences only. (The MONGODB-AWS error messages had been mangled to "Etherna.MongoDB-AWS" by the blanket namespace rename — a mechanism name that does not exist — and were restored to match upstream.)
+
+### Threading the flag: known non-forwarding sites
+The flag is only forced on paths that actually reach a serializer. These deliberately ignore it, and an audit that flags "declared but unused" should not treat them as defects:
+- `WriteEndDocument(bool)` on `BsonWriter`/`BsonBinaryWriter`/`BsonDocumentWriter`/`JsonWriter` — nothing is serialized at end-of-document; the parameter exists only so `ElementAppendingBsonWriter`, which does append elements there, can honor it.
+- `CompressedMessageBinaryEncoder.WriteMessage` — the original message arrives already encoded, so compression never consults a registry (the *read* side does, and forwards).
+- The JSON encoders (`QueryMessageJsonEncoder`, `ReplyMessageJsonEncoder`, `CompressedMessageJsonEncoder`) drop the flag. Nothing in the fork constructs a `JsonMessageEncoderFactory` — they are off every wire path — so they were left alone rather than widening the delta.
+
+To re-run the audit after an upstream merge, compare the count of `bool forceStaticSerializerRegistry` declarations against total occurrences per file; a file where they are equal never uses the parameter it declares.
 
 ### Removed from the repository
-Upstream `tests/`, `specifications/` (spec-test corpora), `benchmarks/`, `evergreen/` (upstream CI), `Release/` tooling, and `apidocs/` are deleted. CI is a single GitHub Actions pipeline (`.github/workflows/nuget-stable-deploy.yml`); the fork carries **no test suite of its own** — correctness of merged code relies on upstream's testing of the merged release tag, so keep fork-specific changes minimal and reviewable.
+Upstream `tests/`, `specifications/` (spec-test corpora), `benchmarks/`, `evergreen/` (upstream CI), `Release/` tooling, and `apidocs/` are deleted. CI is a single GitHub Actions pipeline (`.github/workflows/nuget-stable-deploy.yml`).
+
+Correctness of the **merged upstream surface** relies on upstream's own testing of the merged release tag, so keep fork-specific changes minimal and reviewable. The fork's own suite (`test/Etherna.MongoDB.Fork.Tests`) covers **only the fork delta documented above** — it deliberately does not re-test upstream behavior. See "Fork test suite" below.
 
 ## Compatibility notes
 - The fork is a **source-compatible sibling**, not a drop-in binary replacement: namespaces differ, assemblies are not strong-named, and some upstream public signatures changed (e.g. `BsonSerializer.SerializerRegistry`, `IBsonWriter.WriteEndDocument`, `BsonDefaults` accessors).
@@ -69,18 +80,28 @@ Upstream `tests/`, `specifications/` (spec-test corpora), `benchmarks/`, `evergr
 - **`ConfigureAwait(false)`** on all library `await`s.
 - **Cancellation / CSOT propagation.** Pass `CancellationToken` and `OperationContext` through unchanged; substituting a fresh context mid-stack drops the caller's deadline.
 
+## Fork test suite
+`test/Etherna.MongoDB.Fork.Tests` (xunit, `net8.0`, `IsPackable=false`) exists to pin **the fork delta and nothing else**. Every test must correspond to an entry under "Differences vs the official driver"; if a behavior is identical in upstream v3.10.0, it does not belong here. Two behaviors that look fork-specific but are not, and were deliberately left out: the `_t` array emitted inside a `[BsonDiscriminator(RootClass = true)]` hierarchy (upstream's `BsonClassMap` registers the hierarchical convention itself), and the scalar `_t` of an ordinary base/derived pair.
+
+Constraints that shape the suite:
+- **Public API only.** The `InternalsVisibleTo` entries in `src/*/Properties/AssemblyInfo.cs` still name upstream assemblies *with MongoDB's public key*, and fork assemblies are unsigned, so no fork test project can satisfy them. The wire-protocol encoders, `BinaryConnection` and `StructuredLogTemplateProviders` are therefore unreachable; their force-static rule is covered one level down through the public `ToString(bool)` overloads on `ClusterDescription`/`ServerDescription`/`TopologyVersion` and through `ReadPreference`/`ReadPreferenceHedge`.
+- **Serial execution.** `BsonSerializer`'s registries, the serialization-context accessor, the discriminator conventions and the class map registry are all process-global, so `AssemblyInfo.cs` disables test parallelization.
+- **Irreversible global state.** Class maps, discriminator conventions and serializer registrations can never be unregistered — every test uses its own throwaway types. `BsonDefaults.SetDynamicArraySerializer`/`SetDynamicDocumentSerializer` latch a flag no API can clear, so the suite exercises only the getters.
+- **Order-sensitive observations** are captured in a `[ModuleInitializer]` (`Support/PristineDiscriminatorState.cs`) because the fork's hierarchical discriminator default only holds while `typeof(object)` has no registered convention — and constructing an `ObjectSerializer` anywhere registers one permanently.
+
 ## Upstream merge checklist
 When merging a new official release tag into `etherna`:
 1. Merge the upstream tag (e.g. `git merge mongodb/vX.Y.Z` or the `vX.Y.Z` tag from the `mongodb` remote).
-2. Delete re-added upstream infrastructure (`tests/`, `specifications/`, `benchmarks/`, `evergreen/`, `Release/`, `apidocs/`, upstream workflows) and keep the solution limited to the four `src/` projects.
+2. Delete re-added upstream infrastructure (`tests/`, `specifications/`, `benchmarks/`, `evergreen/`, `Release/`, `apidocs/`, upstream workflows) and keep the solution limited to the four `src/` projects plus `test/Etherna.MongoDB.Fork.Tests`.
 3. Re-apply the namespace rename `MongoDB.*` → `Etherna.MongoDB.*` on new/changed files, and keep the `Etherna.*.csproj` file names.
 4. Re-thread `forceStaticSerializerRegistry` through any new serialization entry point; new wire-protocol read/write paths and log formatters must force the static registry.
 5. Build all target frameworks: `dotnet build CSharpDriver.sln -c Release`.
+6. Run the fork suite: `dotnet test CSharpDriver.sln -c Release`. It is the regression net for the delta in step 4.
 
 ## Commands
 - Build: `dotnet build CSharpDriver.sln`
+- Test: `dotnet test CSharpDriver.sln` (fork-delta tests only — see "Fork test suite")
 - Pack (what CI publishes): `dotnet pack --configuration Release -o nupkg`
-- There is no runnable test suite in this fork (see "Removed from the repository").
 
 ## Commit and PR Conventions
 - Fork work uses plain descriptive commit messages (e.g. `fix static serializer registry with binary connection`, `merge 3.8.1`); reference an Etherna Jira key (e.g. `MODM-xxx`) when one exists.

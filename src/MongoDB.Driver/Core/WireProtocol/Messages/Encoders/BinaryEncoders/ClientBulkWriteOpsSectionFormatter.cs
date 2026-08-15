@@ -66,7 +66,7 @@ namespace Etherna.MongoDB.Driver.Core.WireProtocol.Messages.Encoders.BinaryEncod
                 throw new ArgumentException("Writer must be an instance of BsonBinaryWriter.");
             }
 
-            _serializerRegistry = BsonSerializer.GetSerializerRegistry();
+            _serializerRegistry = BsonSerializer.GetSerializerRegistry(forceStaticSerializerRegistry);
             var serializationContext = BsonSerializationContext.CreateRoot(binaryWriter);
             _idsMap = section.IdsMap;
             var stream = binaryWriter.BsonStream;
