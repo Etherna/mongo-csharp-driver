@@ -30,9 +30,10 @@ namespace Etherna.MongoDB.Fork.Tests
     /// contextual registry to bypass.
     ///
     /// Deliberately not covered: the parameters the fork accepts but never reads —
-    /// <c>BsonDocument.GetValue/TryGetValue</c>, every <c>WriteEndDocument</c> implementation, and
-    /// <c>WrappingBsonWriter.WriteEndDocument</c>. Asserting on those would pin behavior the fork
-    /// does not actually implement.
+    /// <c>BsonDocument.GetValue/TryGetValue</c> as implemented on <c>BsonDocument</c> itself
+    /// (<see cref="RawBsonDocument"/>'s overrides do read them, and are covered here), every
+    /// <c>WriteEndDocument</c> implementation, and <c>WrappingBsonWriter.WriteEndDocument</c>.
+    /// Asserting on those would pin behavior the fork does not actually implement.
     /// </summary>
     public class ForceStaticSerializerRegistryTests
     {
@@ -110,6 +111,45 @@ namespace Etherna.MongoDB.Fork.Tests
         }
 
         [Fact]
+        public void TheForceFlag_ReachesEveryRecursiveStepOfTheBsonValueFamily()
+        {
+            // One string value per recursive step the fork threads the flag through: the id-first
+            // path of BsonDocumentSerializer (via SerializeIdFirst), the Document, Array and
+            // JavaScriptWithScope cases of the BsonValueSerializer dispatcher (plus the per-element
+            // forwarding of BsonDocumentSerializer/BsonArraySerializer), and the scope of
+            // BsonJavaScriptWithScopeSerializer. An upstream merge that reverts any one of those
+            // one-line forwards would resurface the contextual tag in the forced output.
+            var document = new BsonDocument
+            {
+                { "_id", "root-id" },
+                { "nested", new BsonDocument("inner", "nested-value") },
+                { "array", new BsonArray { "array-value" } },
+                { "code", new BsonJavaScriptWithScope("f()", new BsonDocument("scoped", "scope-value")) },
+            };
+            var contextual = new ContextualSerializerRegistry().Override(new TaggingBsonStringSerializer());
+
+            using (ContextualRegistryScope.Enter(contextual))
+            {
+                // Control: all four strings really are intercepted by the contextual registry, so
+                // the forced assertion below cannot pass vacuously.
+                Assert.Equal(4, CountTags(document.ToJson(args: new BsonSerializationArgs
+                {
+                    SerializeIdFirst = true
+                })));
+
+                Assert.Equal(0, CountTags(document.ToJson(args: new BsonSerializationArgs
+                {
+                    SerializeIdFirst = true,
+                    ForceStaticSerializerRegistry = true
+                })));
+            }
+
+            static int CountTags(string json) =>
+                (json.Length - json.Replace(TaggingBsonStringSerializer.Tag, "").Length)
+                    / TaggingBsonStringSerializer.Tag.Length;
+        }
+
+        [Fact]
         public void BsonDefaults_ResolvesTheDynamicSerializers_ThroughTheSelectedRegistry()
         {
             // BsonDefaults' upstream DynamicArraySerializer/DynamicDocumentSerializer properties were
@@ -152,8 +192,59 @@ namespace Etherna.MongoDB.Fork.Tests
             }
         }
 
+        [Fact]
+        public void RawBsonDocumentTryGetValue_NeverConsultsTheAccessor_WhenForced()
+        {
+            // TryGetValue(name, out value, forceStaticSerializerRegistry: true) is the exact call
+            // CommandUsingQueryMessageWireProtocol makes to pull $clusterTime/operationTime out of a
+            // server reply on a driver-owned thread. The wire protocol itself is internal and out of
+            // reach, so the rule is pinned here on the public overload it relies on. The observable
+            // effect is the dynamic-serializer lookup performed when the deserialization context is
+            // created: forced, it must resolve against the static registry without ever asking the
+            // accessor.
+            var bytes = new BsonDocument("x", 1).ToBson();
+
+            using (var rawDocument = new RawBsonDocument(bytes))
+            using (ContextualRegistryScope.Enter(new ContextualSerializerRegistry()))
+            {
+                AsyncLocalSerializationContextAccessor.ResetInvocationCount();
+
+                Assert.True(rawDocument.TryGetValue("x", out _, forceStaticSerializerRegistry: true));
+                // GetValue funnels into TryGetValue, forwarding the flag.
+                Assert.Equal(1, rawDocument.GetValue("x", defaultValue: null, forceStaticSerializerRegistry: true).AsInt32);
+                Assert.Equal(0, AsyncLocalSerializationContextAccessor.InvocationCount);
+
+                // Control: the unforced overload does consult the accessor.
+                rawDocument.TryGetValue("x", out _);
+                Assert.True(AsyncLocalSerializationContextAccessor.InvocationCount > 0);
+            }
+        }
+
+        [Fact]
+        public void RawBsonDocumentMaterialize_NeverConsultsTheAccessor_WhenForced()
+        {
+            // Same rule as above, for the overload CommandUsingQueryMessageWireProtocol uses to
+            // materialize $clusterTime and server error documents.
+            var bytes = new BsonDocument("x", 1).ToBson();
+
+            using (var rawDocument = new RawBsonDocument(bytes))
+            using (ContextualRegistryScope.Enter(new ContextualSerializerRegistry()))
+            {
+                AsyncLocalSerializationContextAccessor.ResetInvocationCount();
+
+                var materialized = rawDocument.Materialize(BsonBinaryReaderSettings.Defaults, forceStaticSerializerRegistry: true);
+
+                Assert.Equal(1, materialized["x"].AsInt32);
+                Assert.Equal(0, AsyncLocalSerializationContextAccessor.InvocationCount);
+
+                rawDocument.Materialize(BsonBinaryReaderSettings.Defaults);
+                Assert.True(AsyncLocalSerializationContextAccessor.InvocationCount > 0);
+            }
+        }
+
         public class GenericFlagProbe { }
         public class NonGenericFlagProbe { }
+        public class ByteArrayFlagProbe { }
 
         /// <summary>Records the args it is handed, so the flag's propagation can be asserted.</summary>
         private sealed class FlagRecordingSerializer<TValue> : SerializerBase<TValue> where TValue : new()
@@ -196,6 +287,23 @@ namespace Etherna.MongoDB.Fork.Tests
             Assert.True(recorder.LastForceStaticSerializerRegistry);
 
             BsonSerializer.Deserialize("{ }", typeof(NonGenericFlagProbe));
+            Assert.False(recorder.LastForceStaticSerializerRegistry);
+        }
+
+        [Fact]
+        public void Deserialize_PropagatesTheForceFlag_FromTheByteArrayOverload()
+        {
+            // The byte[] overload is the shape AWSLastSaslStep actually uses to parse the server's
+            // SASL payload; it funnels through the Stream and IBsonReader overloads, so this also
+            // pins that the flag survives that whole chain.
+            var recorder = new FlagRecordingSerializer<ByteArrayFlagProbe>();
+            BsonSerializer.RegisterSerializer(typeof(ByteArrayFlagProbe), recorder);
+            var bytes = new BsonDocument().ToBson();
+
+            BsonSerializer.Deserialize<ByteArrayFlagProbe>(bytes, forceStaticSerializerRegistry: true);
+            Assert.True(recorder.LastForceStaticSerializerRegistry);
+
+            BsonSerializer.Deserialize<ByteArrayFlagProbe>(bytes);
             Assert.False(recorder.LastForceStaticSerializerRegistry);
         }
 
