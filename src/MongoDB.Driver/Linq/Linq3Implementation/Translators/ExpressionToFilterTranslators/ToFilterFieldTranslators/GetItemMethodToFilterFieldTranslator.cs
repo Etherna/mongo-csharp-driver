@@ -20,6 +20,7 @@ using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Options;
 using Etherna.MongoDB.Bson.Serialization.Serializers;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Reflection;
@@ -72,6 +73,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
         {
             var fieldTranslation = ExpressionToFilterFieldTranslator.Translate(context, fieldExpression);
             var key = keyExpression.GetConstantValue<string>(containingExpression: expression);
+            FilterFieldNameValidator.EnsureSegmentIsSafe(expression, fieldTranslation, key);
             return fieldTranslation.SubField(key, BsonValueSerializer.Instance);
         }
 
@@ -103,6 +105,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 throw new ExpressionNotSupportedException(expression, because: "key did not serialize as a string");
             }
 
+            FilterFieldNameValidator.EnsureSegmentIsSafe(expression, fieldTranslation, serializedKey.AsString);
             return fieldTranslation.SubField(serializedKey.AsString, valueSerializer);
         }
     }

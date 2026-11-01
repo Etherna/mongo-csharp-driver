@@ -52,7 +52,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                     }
 
                     pipeline = pipeline.AddStage(
-                        AstStage.UnionWith(secondCollectionName, secondPipeline.Ast),
+                        AstStage.UnionWith(secondCollectionName, secondPipeline?.Ast),
                         pipeline.OutputSerializer);
 
                     return pipeline;

@@ -15,6 +15,7 @@
 
 using System.Linq.Expressions;
 using Etherna.MongoDB.Bson.Serialization;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.ExtensionMethods;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
@@ -36,6 +37,9 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
 
                 var documentField = ExpressionToFilterFieldTranslator.Translate(context, documentExpression);
                 var fieldName = fieldNameExpression.GetConstantValue<string>(expression);
+
+                FilterFieldNameValidator.EnsureSegmentIsSafe(expression, documentField, fieldName);
+
                 var fieldSerializer = context.GetSerializer(expression);
 
                 return documentField.SubField(fieldName, fieldSerializer);

@@ -18,6 +18,7 @@ using System.Reflection;
 using Etherna.MongoDB.Bson;
 using Etherna.MongoDB.Bson.Serialization;
 using Etherna.MongoDB.Bson.Serialization.Options;
+using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Ast.Filters;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Misc;
 using Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.ExpressionToFilterTranslators.ToFilterFieldTranslators;
@@ -44,6 +45,7 @@ namespace Etherna.MongoDB.Driver.Linq.Linq3Implementation.Translators.Expression
                 {
                     case DictionaryRepresentation.Document:
                         var key = GetKeyStringConstant(expression, keyExpression, dictionarySerializer.KeySerializer);
+                        FilterFieldNameValidator.EnsureSegmentIsSafe(expression, fieldTranslation, key);
                         var keyField = fieldTranslation.Ast.SubField(key);
                         return AstFilter.Exists(keyField);
 

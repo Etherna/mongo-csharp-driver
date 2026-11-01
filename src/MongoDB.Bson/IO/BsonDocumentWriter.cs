@@ -470,7 +470,7 @@ namespace Etherna.MongoDB.Bson.IO
                 ThrowInvalidState("WriteSymbol", BsonWriterState.Value);
             }
 
-            WriteValue(BsonSymbolTable.Lookup(value));
+            WriteValue(new BsonSymbol(value));
             State = GetNextState();
         }
 
