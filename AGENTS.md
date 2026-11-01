@@ -7,7 +7,7 @@ The fork exists primarily to support **scoped, per-context BSON serialization**:
 
 ## Fork model
 - Branch `etherna` is the fork's main line. Remote `origin` is `Etherna/mongo-csharp-driver`; remote `mongodb` is the official repository.
-- Official release tags are merged into `etherna` periodically (3.2.1 → 3.3.0 → 3.4.0 → 3.5.0 → 3.6.0 → 3.8.1 → 3.10.0 → 3.11.0 → **3.12.0**, the current upstream baseline).
+- Official release tags are merged into `etherna` periodically (3.2.1 → 3.3.0 → 3.4.0 → 3.5.0 → 3.6.0 → 3.8.1 → 3.10.0 → 3.11.0 → 3.12.0 → **3.13.0**, the current upstream baseline).
 - Fork releases are tagged `eth-v<major>.<minor>.<patch>`. Versions are computed by GitVersion (`GitVersion.yml` + `GitVersion.MsBuild`); pushing an `eth-v*` tag triggers `.github/workflows/nuget-stable-deploy.yml`, which builds, packs, and pushes to NuGet. The push carries no stored key: it authenticates with the trusted publishing of nuget.org, where the job asks GitHub for an OIDC token (`permissions: id-token: write`) and `NuGet/login` exchanges it, right before the push, for an API key that lives one hour. nuget.org issues it by matching the token against a policy of the `etherna` organization owning the packages, registered on the repository owner, the repository and the workflow **file name** — renaming `nuget-stable-deploy.yml`, or moving the push into another workflow, stops the publish until the policy is updated on nuget.org — with the `NUGET_USER` organization secret naming the account that created it. GitHub runs the workflow file as it is at the tagged commit, so a workflow change ships only with a tag that includes it.
 
 ## Tech Stack
@@ -29,7 +29,7 @@ Only `src/` and `test/` are tracked. The upstream test suites, spec corpora, and
 Note the singular `test/` — the plural `tests/`, along with `benchmarks/` and `specifications/`, may exist on disk as ignored leftovers of upstream merges: they are untracked, not referenced by the solution, and reference the old upstream project names. Do not edit or build them.
 
 ## Differences vs the official driver
-Baseline for this section: upstream tag `v3.12.0`. Beyond the mechanical namespace rename (~1900 files), the semantic delta is small and deliberate.
+Baseline for this section: upstream tag `v3.13.0`. Beyond the mechanical namespace rename (~1900 files), the semantic delta is small and deliberate.
 
 ### Packaging & naming
 - Namespaces and project/package IDs renamed `MongoDB.*` → `Etherna.MongoDB.*`; `Authors` is `Etherna SA` and package descriptions state "Fork by Etherna of...".
@@ -81,7 +81,7 @@ Correctness of the **merged upstream surface** relies on upstream's own testing 
 - **Cancellation / CSOT propagation.** Pass `CancellationToken` and `OperationContext` through unchanged; substituting a fresh context mid-stack drops the caller's deadline.
 
 ## Fork test suite
-`test/Etherna.MongoDB.Fork.Tests` (xunit, `net8.0`, `IsPackable=false`) exists to pin **the fork delta and nothing else**. Every test must correspond to an entry under "Differences vs the official driver"; if a behavior is identical in upstream v3.12.0, it does not belong here. Two behaviors that look fork-specific but are not, and were deliberately left out: the `_t` array emitted inside a `[BsonDiscriminator(RootClass = true)]` hierarchy (upstream's `BsonClassMap` registers the hierarchical convention itself), and the scalar `_t` of an ordinary base/derived pair.
+`test/Etherna.MongoDB.Fork.Tests` (xunit, `net8.0`, `IsPackable=false`) exists to pin **the fork delta and nothing else**. Every test must correspond to an entry under "Differences vs the official driver"; if a behavior is identical in upstream v3.13.0, it does not belong here. Two behaviors that look fork-specific but are not, and were deliberately left out: the `_t` array emitted inside a `[BsonDiscriminator(RootClass = true)]` hierarchy (upstream's `BsonClassMap` registers the hierarchical convention itself), and the scalar `_t` of an ordinary base/derived pair.
 
 Constraints that shape the suite:
 - **Public API only.** The `InternalsVisibleTo` entries in `src/*/Properties/AssemblyInfo.cs` still name upstream assemblies *with MongoDB's public key*, and fork assemblies are unsigned, so no fork test project can satisfy them. The wire-protocol encoders, `BinaryConnection` and `StructuredLogTemplateProviders` are therefore unreachable; their force-static rule is covered one level down through the public `ToString(bool)` overloads on `ClusterDescription`/`ServerDescription`/`TopologyVersion`, through `ReadPreference`/`ReadPreferenceHedge`, and through `RawBsonDocument`'s public `GetValue`/`TryGetValue`/`Materialize` overloads (the calls `CommandUsingQueryMessageWireProtocol` makes to materialize `$clusterTime`/`operationTime`/error documents).
