@@ -23,6 +23,7 @@ using Etherna.MongoDB.Driver.Authentication;
 using Etherna.MongoDB.Driver.Core.Clusters;
 using Etherna.MongoDB.Driver.Core.Configuration;
 using Etherna.MongoDB.Driver.Core.Misc;
+using Etherna.MongoDB.Driver.Support;
 
 namespace Etherna.MongoDB.Driver
 {
@@ -87,7 +88,7 @@ namespace Etherna.MongoDB.Driver
 
         private ClusterSettings ConfigureCluster(ClusterSettings settings, ClusterKey clusterKey)
         {
-            var endPoints = clusterKey.Servers.Select(s => EndPointHelper.Parse(s.ToString()));
+            var endPoints = clusterKey.Servers.Select(s => s.ToEndPoint());
             return settings.With(
                 directConnection: clusterKey.DirectConnection,
                 cryptClientSettings: clusterKey.CryptClientSettings,
